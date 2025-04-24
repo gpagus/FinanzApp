@@ -4,7 +4,10 @@ const cors = require('cors');
 require('dotenv').config();
 
 const corsOptions = {
-    origin: 'https://finanziapp.vercel.app/',
+    origin: [
+        'https://finanziapp.vercel.app',
+        process.env.FRONTEND_URL
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204,
@@ -28,7 +31,8 @@ app.use('/api/cuentas', cuentasRoutes);
 app.use('/api/categorias', categoriasRoutes);
 
 // Servidor
-const PORT = 3000;
-console.log("inicio del servidor!");
+const PORT = process.env.PORT || 3000;
+console.log(`Servidor iniciado en puerto ${PORT}!`);
 app.listen(PORT, () => {
+    console.log(`Servidor escuchando en puerto ${PORT}`);
 });
