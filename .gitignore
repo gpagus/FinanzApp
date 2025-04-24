@@ -1,0 +1,25 @@
+# Server
+/server/node_modules
+/server/.env
+/server/build
+/server/logs
+/server/npm-debug.log*
+/server/yarn-error.log*
+
+# Client 
+/client/node_modules
+/client/dist
+/client/.env
+/client/.local
+/client/.output
+/client/.temp
+/client/build
+
+# WebStorm IDE
+.idea/
+*.iml
+/uploads/
+
+# System files
+.DS_Store
+Thumbs.db

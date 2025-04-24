@@ -1,0 +1,40 @@
+@import "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap";
+@import "tailwindcss";
+
+@theme {
+
+    --color-dollar-300: rgba(102, 216, 139, 0.5);
+    --color-dollar-500: #66D88B;
+    --color-dollar-700: #4BBF6B;
+
+    --color-aguazul: #094F51;
+    --color-aguazul-100: #0E7B7F;
+
+
+    /* Neutros */
+    --color-neutral-100: #F2F2F2;
+    --color-neutral-300: #CCCCCC;
+    --color-neutral-600: #666666;
+    --color-neutral-900: #333333;
+    --color-neutral-1000: #1A1A1A;
+
+    /* Soporte */
+    --color-error: #F44336;
+    --color-error-100: #FFEBEE;
+
+    --color-warning: #FFC107;
+    --color-warning-100: #FFF8E1;
+
+    --color-success: #03BD0A;
+    --color-success-100: #E8F5E9;
+
+    --color-info: #2196F3;
+    --color-info-100: #E3F2FD;
+
+    /* Tipografía */
+    --font-display: "Montserrat", sans-serif;
+
+    /* Easing para transiciones */
+    --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
+    --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+}
