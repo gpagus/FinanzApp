@@ -1,9 +1,9 @@
-import React, {useState, useEffect, Suspense} from "react";
+import React, {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../context/AuthContext";
 import Footer from "../components/Footer";
 import Boton from "../components/ui/Boton";
-import LoginForm from "../components/LoginForm.jsx";
+import LoginForm from "../components/LoginForm";
 import {
     TrendingUp,
     ShoppingCart,
