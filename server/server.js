@@ -21,5 +21,4 @@ app.use('/api/categorias', categoriasRoutes);
 const PORT = 3000;
 console.log("inicio del servidor!");
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
