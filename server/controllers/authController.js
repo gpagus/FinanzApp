@@ -253,7 +253,7 @@ const restablecerContrasena = async (req, res) => {
         });
 
         if (error) {
-            if(error.message === "Email link is invalid or has expired") {
+            if (error.message === "Email link is invalid or has expired") {
                 return res.status(400).json({error: 'Token inválido o expirado.'});
             } else {
                 console.error("Error al verificar el token:", error);
@@ -267,13 +267,14 @@ const restablecerContrasena = async (req, res) => {
         });
 
         if (updateError) {
-            console.error("Error al actualizar la contraseña:", updateError);
-            return res.status(400).json({error: updateError.message});
+            if (updateError.message === "New password should be different from the old password.") {
+                return res.status(400).json({error: 'La contraseña debe ser diferente a la anterior.'});
+            } else return res.status(400).json({error: updateError.message});
         }
 
         // Si todo fue exitoso, enviar respuesta
         res.status(200).json({
-            message: 'Contraseña actualizada correctamente. Ahora puedes iniciar sesión.',
+            message: 'Contraseña actualizada correctamente, prueba ahora a iniciar sesión.',
         });
 
     } catch (error) {
