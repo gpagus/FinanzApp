@@ -12,7 +12,7 @@ const Boton = ({
   className = '',
   ...props
 }) => {
-  const baseStyle = 'rounded-lg font-display font-medium transition-all duration-300 focus:outline-none focus:ring-ocean-500';
+  const baseStyle = 'rounded-lg font-medium transition-all duration-300 focus:outline-none focus:ring-ocean-500';
 
   const tipoStyle = {
     primario: 'px-6 py-2 bg-dollar-500 text-aguazul text-center hover:bg-dollar-700 disabled:bg-dollar-300 disabled:text-neutral-600 focus:ring-2',

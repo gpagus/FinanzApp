@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Boton from '../components/ui/Boton';
 import FormField from "../components/ui/FormField";
 import { useAuth } from '../context/AuthContext';
-import { useToast } from "../context/ToastContext";
 import useForm from '../components/useForm';
 import { validarRestablecerContrasena } from "../utils/validaciones";
 
 function ResetPassword() {
-    const { addToast } = useToast();
     const { restablecerContrasena, loading } = useAuth();
     const navigate = useNavigate();
 
@@ -22,7 +20,6 @@ function ResetPassword() {
 
         if (!urlToken) {
             setTokenError(true);
-            addToast("Token no válido o expirado. Por favor, solicita un nuevo enlace de recuperación.", "error", 5000);
         } else {
             setToken(urlToken);
         }
@@ -33,8 +30,7 @@ function ResetPassword() {
             const result = await restablecerContrasena(token, values.password);
             if (result) {
                 setSuccess(true);
-                addToast("Contraseña restablecida con éxito", "success", 3000);
-                setTimeout(() => navigate('/'), 3000);
+                setTimeout(() => navigate('/'), 4000);
             }
         } catch (error) {
             console.error("Error al restablecer contraseña:", error);
@@ -49,7 +45,7 @@ function ResetPassword() {
 
     if (tokenError) {
         return (
-            <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-neutral-100 text-center font-display px-4">
+            <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-neutral-100 text-center px-4">
                 <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
                     <h1 className="text-2xl font-bold text-red-600 mb-4">Token inválido</h1>
                     <p className="mb-6 text-neutral-700">El enlace de recuperación ha expirado o es inválido. Por favor, solicita uno nuevo.</p>
@@ -72,7 +68,7 @@ function ResetPassword() {
     }
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] flex flex-col font-display items-center justify-center bg-neutral-100 px-4 text-center">
+        <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-neutral-100 px-4 text-center">
             <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
                 <h2 className="text-2xl font-semibold mb-6 text-neutral-900">Restablecer Contraseña</h2>
                 <form onSubmit={handleSubmit}>

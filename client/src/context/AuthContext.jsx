@@ -1,5 +1,5 @@
 import {createContext, useContext, useState, useEffect} from "react";
-import {useToast} from "./ToastContext.jsx";
+import toast from "react-hot-toast";
 
 const AuthContext = createContext({});
 
@@ -9,12 +9,17 @@ export const useAuth = () => useContext(AuthContext);
 
 // Proveedor
 export const AuthProvider = ({children}) => {
-    const {addToast} = useToast();
-
     const [user, setUser] = useState(null); // Info del usuario
     const [token, setToken] = useState(null); // JWT
     const [loading, setLoading] = useState(true); // Si está validando sesión
     const [error, setError] = useState(null); // Para mostrar errores
+
+    const handleError = (error) => {
+        const errorMessage = error.message || String(error);
+        setError(errorMessage);
+        toast.error(errorMessage);
+        return errorMessage;
+    }
 
     // Restaurar sesión al cargar la app
     useEffect(() => {
@@ -54,31 +59,18 @@ export const AuthProvider = ({children}) => {
                     body: JSON.stringify({email, password}),
                 }
             );
-
             const data = await res.json();
 
             if (!res.ok) {
-                let mensajePersonalizado = data.error || "Error al iniciar sesión";
-
-                if (data.error === "Invalid login credentials") {
-                    mensajePersonalizado = "Correo o contraseña incorrectos";
-                }
-
-                if (data.error?.includes("confirmar tu correo")) {
-                    mensajePersonalizado = data.error;
-                }
-
-                throw new Error(mensajePersonalizado);
+                throw new Error(data.error);
             }
-
 
             setToken(data.session.access_token);
             await fetchPerfil(data.session.access_token);
             localStorage.setItem("token", data.session.access_token);
+            toast.success("Sesión iniciada");
         } catch (err) {
-            setError(err.message);
-            addToast(err.message, "error", 3000);
-            throw err;
+            handleError(err)
         } finally {
             setLoading(false);
             setError(null);
@@ -108,16 +100,11 @@ export const AuthProvider = ({children}) => {
             );
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Error al registrarse");
+            if (!res.ok) throw new Error(data.error);
 
-            addToast(data.message || "Registro exitoso. Revisa tu correo.", "success", 4000);
-
-            // Opcional: podrías redirigir al login o limpiar el form desde el componente
-
+            toast.success(data.message);
         } catch (err) {
-            setError(err.message);
-            addToast(err.message, "error", 3000);
-            throw err;
+            handleError(err);
         } finally {
             setLoading(false);
             setError(null);
@@ -133,21 +120,12 @@ export const AuthProvider = ({children}) => {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({token: accessToken})
             });
-
-
             const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
 
-            if (!res.ok) {
-                throw new Error(data.error || "Error al confirmar el registro");
-            }
-
-            addToast(data.message || "Registro confirmado exitosamente", "success", 4000);
             await fetchPerfil(accessToken);
-
         } catch (err) {
-            setError(err.message);
-            addToast(err.message, "error", 3000);
-            throw err;
+            handleError(err)
         } finally {
             setLoading(false);
             setError(null);
@@ -163,19 +141,12 @@ export const AuthProvider = ({children}) => {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({email})
             });
-
             const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
 
-            if (!res.ok) {
-                throw new Error(data.error || "Error al enviar el correo");
-            }
-
-            addToast(data.message, "success", 4000);
-
+            toast.success(data.message, {duration: 6000});
         } catch (err) {
-            setError(err.message);
-            addToast(err.message, "error", 3000);
-            throw err;
+            handleError(err)
         } finally {
             setLoading(false);
             setError(null);
@@ -183,7 +154,6 @@ export const AuthProvider = ({children}) => {
     }
 
     const restablecerContrasena = async (token, newPassword) => {
-        debugger;
         setLoading(true);
         setError(null);
         try {
@@ -195,17 +165,11 @@ export const AuthProvider = ({children}) => {
 
             const data = await res.json();
 
-            if (!res.ok) {
-                throw new Error(data.error || "Error al restablecer la contraseña");
-            }
+            if (!res.ok) throw new Error(data.error);
 
-            addToast(data.message || "Contraseña actualizada correctamente", "success", 4000);
             return true;
-
         } catch (err) {
-            setError(err.message);
-            addToast(err.message, "error", 3000);
-            throw err;
+            handleError(err)
         } finally {
             setLoading(false);
             setError(null);
@@ -218,7 +182,7 @@ export const AuthProvider = ({children}) => {
         setToken(null);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        addToast("Sesión cerrada", "info", 3000);
+        toast.success("Sesión cerrada, ¡hasta pronto!👋");
     };
 
     const isAuthenticated = !!token;

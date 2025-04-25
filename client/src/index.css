@@ -34,7 +34,9 @@
     /* Tipografía */
     --font-display: "Montserrat", sans-serif;
 
-    /* Easing para transiciones */
-    --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
-    --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+}
+
+body {
+    font-family: var(--font-display), serif;
+    background-color: var(--color-neutral-100);
 }

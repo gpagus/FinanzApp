@@ -46,7 +46,7 @@ const Welcome = () => {
             <main className="flex-grow flex flex-col md:flex-row max-w-7xl mx-auto w-full p-4 sm:p-6">
                 {/* Columna izquierda - Texto */}
                 <div className="md:w-1/2 flex flex-col justify-center md:pr-8 lg:pr-12 md:mt-0">
-                    <h1 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl text-neutral-900 leading-tight">
+                    <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl text-neutral-900 leading-tight">
                         Simplifica tus finanzas, maximiza tu tranquilidad
                     </h1>
                     <p className="mt-4 sm:mt-6 text-base sm:text-lg text-aguazul leading-relaxed">
@@ -73,10 +73,10 @@ const Welcome = () => {
                         <div className="relative bg-white p-4 sm:p-8 rounded-xl shadow-lg">
                             <div className="flex justify-between items-center mb-6 sm:mb-8">
                                 <div>
-                                    <h2 className="font-display font-bold text-lg text-neutral-900">
+                                    <h2 className="font-bold text-lg text-neutral-900">
                                         Balance
                                     </h2>
-                                    <p className="font-display font-bold text-2xl sm:text-3xl text-dollar-500">
+                                    <p className="font-bold text-2xl sm:text-3xl text-dollar-500">
                                         $4,250.00
                                     </p>
                                 </div>
@@ -132,7 +132,7 @@ const Welcome = () => {
             {/* Características */}
             <section className="bg-white py-12 sm:py-16 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <h2 className="font-display font-bold text-2xl sm:text-3xl text-center text-neutral-900 mb-8 sm:mb-12">
+                    <h2 className="font-bold text-2xl sm:text-3xl text-center text-neutral-900 mb-8 sm:mb-12">
                         Todo lo que necesitas para gestionar tu dinero
                     </h2>
                     <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
@@ -140,7 +140,7 @@ const Welcome = () => {
                             <div className="bg-dollar-500 bg-opacity-10 p-4 inline-flex rounded-full mb-4">
                                 <BarChart2 className="h-8 w-8 text-white" />
                             </div>
-                            <h3 className="font-display font-bold text-xl text-neutral-900 mb-2">
+                            <h3 className="font-bold text-xl text-neutral-900 mb-2">
                                 Visualiza tus finanzas
                             </h3>
                             <p className="text-aguazul">
@@ -152,7 +152,7 @@ const Welcome = () => {
                             <div className="bg-dollar-500 bg-opacity-10 p-4 inline-flex rounded-full mb-4">
                                 <ClipboardList className="h-8 w-8 text-white" />
                             </div>
-                            <h3 className="font-display font-bold text-xl text-neutral-900 mb-2">
+                            <h3 className="font-bold text-xl text-neutral-900 mb-2">
                                 Organiza tus gastos
                             </h3>
                             <p className="text-aguazul">
@@ -164,7 +164,7 @@ const Welcome = () => {
                             <div className="bg-dollar-500 bg-opacity-10 p-4 inline-flex rounded-full mb-4">
                                 <Target className="h-8 w-8 text-white" />
                             </div>
-                            <h3 className="font-display font-bold text-xl text-neutral-900 mb-2">
+                            <h3 className="font-bold text-xl text-neutral-900 mb-2">
                                 Establece objetivos
                             </h3>
                             <p className="text-aguazul">

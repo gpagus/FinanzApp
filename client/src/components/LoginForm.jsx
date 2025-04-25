@@ -71,27 +71,13 @@ const LoginForm = ({onClose}) => {
                     </Boton>
                 </form>
 
-                <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center">
-                        <input
-                            id="remember"
-                            name="remember"
-                            type="checkbox"
-                            className="h-4 w-4 text-dollar-400 "
-                        />
-                        <label
-                            htmlFor="remember"
-                            className="ml-2 block text-sm text-[color:var(--color-neutral-600)]"
-                        >
-                            Recordarme
-                        </label>
-                    </div>
+                <div className="flex items-center justify-center pt-2">
                     <Boton
                         tipo="texto"
                         onClick={handleShowForgotPassword}
-                        className="text-sm text-center text-neutral-600 hover:text-ocean-500"
+                        className="text-sm text-center"
                     >
-                        Olvidó su contraseña?
+                        ¿Olvidó su contraseña?
                     </Boton>
                 </div>
 

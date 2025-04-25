@@ -7,7 +7,7 @@ export default function HeaderMinimal() {
             {/* Logo sin underline */}
             <Boton tipo="texto" to="/dashboard" className="bg-transparent flex items-center space-x-2">
                 <CircleDollarSign className="text-dollar-500"/>
-                <span className="font-display font-bold text-xl text-aguazul">
+                <span className="font-bold text-xl text-aguazul">
                     FinanzApp
                 </span>
             </Boton>

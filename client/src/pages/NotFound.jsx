@@ -25,11 +25,11 @@ const NotFound = () => {
                   d="M9.172 16.172a4 4 0 015.656 0M12 14a2 2 0 100-4 2 2 0 000 4M12 2a10 10 0 100 20 10 10 0 000-20z"
                 />
               </svg>
-              <h1 className="font-display font-bold text-6xl text-neutral-900 mb-2">
+              <h1 className="font-bold text-6xl text-neutral-900 mb-2">
                 404
               </h1>
               <div className="h-1 w-16 bg-[#00C853] rounded-full my-4"></div>
-              <p className="font-display text-xl text-neutral-600 mb-2">
+              <p className="text-xl text-neutral-600 mb-2">
                 Página no encontrada
               </p>
               <p className="text-neutral-600 mb-6">

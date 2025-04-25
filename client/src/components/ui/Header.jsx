@@ -26,7 +26,7 @@ const Header = () => {
                             <UserRound className="text-neutral-600"/>
                         </div>
                     )}
-                    <span className="font-display font-bold text-lg text-aguazul ml-2">
+                    <span className="font-bold text-lg text-aguazul ml-2">
                         {user?.nombre || "Usuario"}
                     </span>
 
@@ -40,7 +40,7 @@ const Header = () => {
                     <div className="flex items-center bg-white rounded-full p-1">
                         <CircleDollarSign className="text-dollar-500"/>
                     </div>
-                    <span className="font-display font-bold text-xl text-aguazul ml-2">
+                    <span className="font-bold text-xl text-aguazul ml-2">
         FinanzApp
     </span>
                 </div>

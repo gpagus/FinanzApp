@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 require('dotenv').config();
 
+/*
 const corsOptions = {
     origin: [
         'https://finanziapp.vercel.app',
@@ -12,6 +13,7 @@ const corsOptions = {
     credentials: true,
     optionsSuccessStatus: 204,
 }
+*/
 
 const authRoutes = require('./routes/authRoutes');
 const transaccionesRoutes = require('./routes/transaccionesRoutes');
@@ -19,7 +21,7 @@ const cuentasRoutes = require('./routes/cuentasRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
 
 const app = express();
-app.use(cors(corsOptions));
+app.use(cors(/*corsOptions*/));
 app.use(morgan('dev'));
 app.use(express.json());
 
@@ -31,7 +33,7 @@ app.use('/api/cuentas', cuentasRoutes);
 app.use('/api/categorias', categoriasRoutes);
 
 // Servidor
-const PORT = process.env.PORT || 3000;
+const PORT = /*process.env.PORT ||*/ 3000;
 console.log(`Servidor iniciado en puerto ${PORT}!`);
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en puerto ${PORT}`);
