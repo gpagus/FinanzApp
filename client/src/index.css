@@ -12,7 +12,8 @@
 
 
     /* Neutros */
-    --color-neutral-100: #F2F2F2;
+    --color-neutral-100: #F6F9F9;
+    --color-neutral-200: #E0EBEB;
     --color-neutral-300: #CCCCCC;
     --color-neutral-600: #666666;
     --color-neutral-900: #333333;
@@ -38,5 +39,8 @@
 
 body {
     font-family: var(--font-display), serif;
-    background-color: var(--color-neutral-100);
+}
+
+html {
+    scroll-behavior: smooth;
 }

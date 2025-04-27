@@ -15,6 +15,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         reverseOrder={false}
         />
     </>
-
-)
-;
+);

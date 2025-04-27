@@ -1,7 +1,7 @@
 import React from "react";
 import {useAuth} from "../../context/AuthContext";
 import Boton from "./Boton";
-import {CircleDollarSign, UserRound, Eye, EyeClosed, Settings, DoorOpen} from "lucide-react";
+import {CircleDollarSign, UserRound, Eye, EyeClosed, Headset, DoorOpen} from "lucide-react";
 
 const Header = () => {
     const {user, logout} = useAuth();
@@ -31,18 +31,25 @@ const Header = () => {
                     </span>
 
                     <span className="text-sm text-neutral-500">
-                        {user?.lastAccess ? `Último acceso: ${new Date(user.lastAccess).toLocaleString()}` : ""}
+                        {user?.lastAccess && (
+                            <>Último acceso:&nbsp;
+                                {new Intl.DateTimeFormat('es-ES', {
+                                    dateStyle: 'short',
+                                    timeStyle: 'short',
+                                    timeZone: 'Europe/Madrid',
+                                }).format(new Date(new Date(user.lastAccess).getTime() + 2 * 60 * 60 * 1000))}
+                            </>
+                        )}
                     </span>
                 </div>
-
                 {/* Center section - Logo */}
                 <div className="hidden md:flex items-center justify-center">
                     <div className="flex items-center bg-white rounded-full p-1">
                         <CircleDollarSign className="text-dollar-500"/>
                     </div>
                     <span className="font-bold text-xl text-aguazul ml-2">
-        FinanzApp
-    </span>
+                        FinanzApp
+                    </span>
                 </div>
 
                 {/* Right section - Action Buttons */}
@@ -53,7 +60,7 @@ const Header = () => {
                     </Boton>
 
                     <Boton tipo="icono" aria-label="Settings">
-                        <Settings className="text-neutral-600"/>
+                        <Headset className="text-neutral-600"/>
                     </Boton>
 
                     <Boton tipo="icono" aria-label="Logout" onClick={logout}>

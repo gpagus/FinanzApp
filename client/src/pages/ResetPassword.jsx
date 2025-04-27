@@ -45,7 +45,7 @@ function ResetPassword() {
 
     if (tokenError) {
         return (
-            <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-neutral-100 text-center px-4">
+            <div className="min-h-[calc(100vh-4rem-2.5rem)] flex flex-col items-center justify-center bg-neutral-100 text-center px-4">
                 <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
                     <h1 className="text-2xl font-bold text-red-600 mb-4">Token inválido</h1>
                     <p className="mb-6 text-neutral-700">El enlace de recuperación ha expirado o es inválido. Por favor, solicita uno nuevo.</p>
@@ -57,7 +57,7 @@ function ResetPassword() {
 
     if (success) {
         return (
-            <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-neutral-100 text-center px-4">
+            <div className="min-h-[calc(100vh-4rem-2.5rem)] flex flex-col items-center justify-center bg-neutral-100 text-center px-4">
                 <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
                     <h1 className="text-2xl font-bold text-aguazul mb-4">¡Contraseña actualizada!</h1>
                     <p className="text-neutral-700 mb-2">Tu contraseña ha sido restablecida correctamente.</p>
@@ -68,7 +68,7 @@ function ResetPassword() {
     }
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-neutral-100 px-4 text-center">
+        <div className="min-h-[calc(100vh-4rem-2.5rem)] flex flex-col items-center justify-center bg-neutral-100 px-4 text-center">
             <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
                 <h2 className="text-2xl font-semibold mb-6 text-neutral-900">Restablecer Contraseña</h2>
                 <form onSubmit={handleSubmit}>

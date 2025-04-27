@@ -5,6 +5,7 @@ import FormField from "../components/ui/FormField";
 import Boton from "../components/ui/Boton";
 import useForm from "../components/useForm";
 import {validarRegistroForm} from "../utils/validaciones";
+import {UserRoundPlus} from "lucide-react";
 
 const Register = () => {
     const {register, error} = useAuth();
@@ -41,9 +42,9 @@ const Register = () => {
     };
 
     return (
-        <div className="flex min-h-[calc(100vh-4rem)]">
+        <div className="flex flex-col min-h-[calc(100vh-4rem-2.5rem)] lg:flex-row bg-neutral-100">
             {/* Sección del formulario */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center bg-neutral-100 px-6">
+            <div className="lg:w-1/2 flex items-center justify-center bg-neutral-100 px-6 py-8">
                 <div className="w-full max-w-md">
                     <div className="mb-5 text-center">
                         <h1 className="text-3xl font-bold text-aguazul">Crear cuenta</h1>
@@ -138,37 +139,7 @@ const Register = () => {
                         <div className="mb-8">
                             <div
                                 className="w-24 h-24 mx-auto bg-dollar-500 bg-opacity-30 rounded-full flex items-center justify-center">
-                                <svg
-                                    className="w-12 h-12"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        d="M12 4V20"
-                                        stroke="white"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                    />
-                                    <path
-                                        d="M17 7H7"
-                                        stroke="white"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                    />
-                                    <path
-                                        d="M17 12H7"
-                                        stroke="white"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                    />
-                                    <path
-                                        d="M17 17H7"
-                                        stroke="white"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                    />
-                                </svg>
+                                <UserRoundPlus className="w-12 h-12 text-white" />
                             </div>
                         </div>
                         <h2 className="text-3xl font-bold mb-4">

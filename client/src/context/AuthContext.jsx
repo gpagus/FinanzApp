@@ -17,7 +17,7 @@ export const AuthProvider = ({children}) => {
     const handleError = (error) => {
         const errorMessage = error.message || String(error);
         setError(errorMessage);
-        toast.error(errorMessage);
+        toast.error(errorMessage, { duration: 3500 });
         return errorMessage;
     }
 

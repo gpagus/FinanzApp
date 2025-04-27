@@ -91,7 +91,7 @@ const login = async (req, res) => {
 
         if (error) {
             if (error.message.includes("Invalid login credentials")) {
-                return res.status(401).json({error: 'Credenciales inválidas. Intenta nuevamente.'});
+                return res.status(401).json({error: 'Credenciales inválidas. Inténtalo de nuevo.'});
             }
             if (error.message.includes("Email not confirmed")) {
                 return res.status(401).json({error: 'Debes confirmar tu correo antes de iniciar sesión.'});

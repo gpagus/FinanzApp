@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../context/AuthContext";
-import Footer from "../components/Footer";
 import Boton from "../components/ui/Boton";
 import LoginForm from "../components/LoginForm";
 import {
@@ -41,7 +40,7 @@ const Welcome = () => {
     }
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] flex flex-col bg-neutral-100 overflow-x-hidden">
+        <div className="flex flex-col bg-neutral-100 overflow-x-hidden">
             {/* Contenido principal */}
             <main className="flex-grow flex flex-col md:flex-row max-w-7xl mx-auto w-full p-4 sm:p-6">
                 {/* Columna izquierda - Texto */}
@@ -175,8 +174,6 @@ const Welcome = () => {
                     </div>
                 </div>
             </section>
-            <Footer/>
-
             {/* Modal de inicio de sesión */}
             {showLoginModal && (
                 <LoginForm onClose={handleCloseModal}/>

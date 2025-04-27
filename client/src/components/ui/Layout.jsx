@@ -1,20 +1,22 @@
-import { useLocation } from "react-router-dom";
-import Header from "./Header.jsx";
-import HeaderMinimal from "./HeaderMinimal.jsx";
+import {useLocation} from "react-router-dom";
+import Header from "./Header";
+import HeaderMinimal from "./HeaderMinimal";
+import Footer from "../Footer";
 
-const Layout = ({ children }) => {
-  const location = useLocation();
+export default function Layout({children}) {
+    const location = useLocation();
+    const rutasConHeader = ["/dashboard"];
+    const MostrarHeader = rutasConHeader.includes(location.pathname)
+        ? Header
+        : HeaderMinimal;
 
-  // Solo mostramos el header completo en estas rutas
-  const rutasConHeader = ["/dashboard"];
-  const mostrarHeaderCompleto = rutasConHeader.includes(location.pathname);
-
-  return (
-    <>
-      {mostrarHeaderCompleto ? <Header /> : <HeaderMinimal />}
-      <main className="pt-16">{children}</main>
-    </>
-  );
-};
-
-export default Layout;
+    return (
+        <>
+            <MostrarHeader/>
+            <main className="pt-16 pb-10">
+                    {children}
+            </main>
+            <Footer/>
+        </>
+    );
+}

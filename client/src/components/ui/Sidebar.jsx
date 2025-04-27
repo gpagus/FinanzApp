@@ -9,7 +9,7 @@ const Sidebar = () => {
     // Comprobar el tamaño de la pantalla
     useEffect(() => {
         const checkScreenSize = () => {
-            setIsMobile(window.innerWidth < 768); // 768px is typical md breakpoint
+            setIsMobile(window.innerWidth < 640);
         };
 
         // Comprobación inicial
@@ -37,7 +37,7 @@ const Sidebar = () => {
     // Barra de navegación móvil
     if (isMobile) {
         return (
-            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 px-1 shadow-lg z-10">
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 flex justify-around py-2 px-1 shadow-lg z-10">
                 {menuItems.map((item) => (
                     <Boton
                         key={item.name}
@@ -50,7 +50,7 @@ const Sidebar = () => {
                         }`}
                         onClick={() => handleItemClick(item.name)}
                     >
-                        <item.icon size={18} />
+                        <item.icon size={20} />
                         <span className="text-xs mt-1">{item.name}</span>
                     </Boton>
                 ))}
@@ -60,7 +60,7 @@ const Sidebar = () => {
 
     // Barra de navegación de escritorio
     return (
-        <nav className="bg-gray-100 h-full p-4 flex flex-col w-56">
+        <nav className="h-full p-4 flex flex-col w-56">
             <div className="flex items-center justify-center mb-8">
                 <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center">
                     <Home className="text-neutral-600" size={24} />

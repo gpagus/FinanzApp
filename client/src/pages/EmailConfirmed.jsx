@@ -22,7 +22,7 @@ const EmailConfirmed = () => {
 
     return (
         <div
-            className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-neutral-100 px-4 text-center">
+            className="flex flex-col min-h-[calc(100vh-4rem-2.5rem)] items-center justify-center bg-neutral-100 px-4 text-center">
             <BadgeCheck className="w-24 h-24 text-aguazul mb-4 animate-bounce"/>
             <h1 className="text-3xl font-bold text-neutral-800 mb-4">¡Correo confirmado!</h1>
             <p className="text-aguazul mb-6">
