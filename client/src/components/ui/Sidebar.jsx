@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import Boton from './Boton.jsx';
-import { Home, Wallet, TrendingUp, PiggyBank, BarChart2 } from 'lucide-react';
+import {useAuth} from "../../context/AuthContext";
+import {Home, Wallet, TrendingUp, PiggyBank, BarChart2, Users, MessageCircle} from 'lucide-react';
 
 const Sidebar = () => {
-    const [activeItem, setActiveItem] = useState('Inicio');
+    const {user} = useAuth();
+
     const [isMobile, setIsMobile] = useState(false);
 
     // Comprobar el tamaño de la pantalla
@@ -22,35 +24,38 @@ const Sidebar = () => {
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
-    const menuItems = [
-        { name: 'Inicio', icon: Home, path: '/' },
-        { name: 'Cuentas', icon: Wallet, path: '/cuentas' },
-        { name: 'Movimientos', icon: TrendingUp, path: '/movimientos' },
-        { name: 'Huchas', icon: PiggyBank, path: '/huchas' },
-        { name: 'Estadísticas', icon: BarChart2, path: '/estadisticas' },
-    ];
+    let menuItems;
+    if (user.rol !== 'admin') {
+        menuItems = [
+            {name: 'Inicio', icon: Home, path: '/dashboard'},
+            {name: 'Cuentas', icon: Wallet, path: '/cuentas'},
+            {name: 'Movimientos', icon: TrendingUp, path: '/movimientos'},
+            {name: 'Huchas', icon: PiggyBank, path: '/huchas'},
+            {name: 'Estadísticas', icon: BarChart2, path: '/estadisticas'},
+        ];
+    } else {
+        menuItems = [
+            {name: 'Inicio', icon: Home, path: '/dashboard'},
+            {name: 'Usuarios', icon: Users, path: '/admin-usuarios'},
+            {name: 'Estadísticas', icon: BarChart2, path: '/admin-estadisticas'},
+            {name: 'Reportes', icon: MessageCircle, path: '/admin-reportes'},
+        ];
+    }
 
-    const handleItemClick = (itemName) => {
-        setActiveItem(itemName);
-    };
 
     // Barra de navegación móvil
     if (isMobile) {
         return (
-            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 flex justify-around py-2 px-1 shadow-lg z-10">
+            <nav
+                className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 flex justify-around py-2 px-1 shadow-lg z-10">
                 {menuItems.map((item) => (
                     <Boton
                         key={item.name}
                         to={item.path}
                         tipo="texto"
-                        className={`flex flex-col items-center justify-center py-2 px-1 rounded-md transition-colors duration-200 ${
-                            activeItem === item.name
-                                ? 'text-aguazul font-medium'
-                                : 'text-neutral-600'
-                        }`}
-                        onClick={() => handleItemClick(item.name)}
+                        className={"flex flex-col items-center justify-center py-2 px-1 rounded-md transition-colors duration-20"}
                     >
-                        <item.icon size={20} />
+                        <item.icon size={20}/>
                         <span className="text-xs mt-1">{item.name}</span>
                     </Boton>
                 ))}
@@ -63,7 +68,7 @@ const Sidebar = () => {
         <nav className="h-full p-4 flex flex-col w-56">
             <div className="flex items-center justify-center mb-8">
                 <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center">
-                    <Home className="text-neutral-600" size={24} />
+                    <Home className="text-neutral-600" size={24}/>
                 </div>
             </div>
 
@@ -73,15 +78,10 @@ const Sidebar = () => {
                         key={item.name}
                         to={item.path}
                         tipo="texto"
-                        className={`flex items-center text-left py-3 px-4 rounded-lg transition-colors duration-200 ${
-                            activeItem === item.name
-                                ? 'bg-dollar-300 text-aguazul font-medium'
-                                : 'text-neutral-600 hover:bg-neutral-200'
-                        }`}
-                        onClick={() => handleItemClick(item.name)}
+                        className={"flex items-center text-left py-3 px-4 rounded-lg transition-colors duration-200"}
                     >
                         <div className="flex items-center">
-                            <item.icon size={20} className="mr-3" />
+                            <item.icon size={20} className="mr-3"/>
                             <span className="font-medium">{item.name}</span>
                         </div>
                     </Boton>

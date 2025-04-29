@@ -11,8 +11,8 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({children}) => {
     const [user, setUser] = useState(null); // Info del usuario
     const [token, setToken] = useState(null); // JWT
-    const [loading, setLoading] = useState(true); // Si está validando sesión
-    const [error, setError] = useState(null); // Para mostrar errores
+    const [loading, setLoading] = useState(true); // Estado de carga
+    const [error, setError] = useState(null);  // Mensaje de error
 
     const handleError = (error) => {
         const errorMessage = error.message || String(error);
@@ -192,6 +192,7 @@ export const AuthProvider = ({children}) => {
             value={{
                 user,
                 loading,
+                setLoading,
                 error,
                 login,
                 register,

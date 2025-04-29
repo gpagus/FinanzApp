@@ -7,9 +7,13 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ResetPassword from "./pages/ResetPassword";
 import Redireccionador from "./pages/Redireccionador";
-import PrivateRoute from "./components/PrivateRoute";
+import UserListAdmin from "./pages/admin/UserListAdmin";
+import {PrivateRoute, AdminRoute} from "./components/PrivateRoute";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
-import Layout from "./components/ui/Layout";
+
+import PublicLayout from "./components/ui/PublicLayout";
+import PrivateLayout from "./components/ui/PrivateLayout";
+
 
 export default function App() {
     const {loading} = useAuth();
@@ -17,22 +21,34 @@ export default function App() {
     return (<>
             {loading && <LoadingOverlay/>}
             <Router>
-                <Layout>
-                    <Routes>
+                <Routes>
+                    {/* Rutas públicas */}
+                    <Route element={<PublicLayout/>}>
                         <Route path="/" element={<Welcome/>}/>
                         <Route path="/confirmacion-email" element={<EmailConfirmed/>}/>
                         <Route path="/registro" element={<Register/>}/>
-                        <Route
-                            path="/dashboard"
-                            element={<PrivateRoute>
-                                <Dashboard/>
-                            </PrivateRoute>}
-                        />
                         <Route path="/restablecer-contrasena" element={<ResetPassword/>}/>
                         <Route path="/redireccionador" element={<Redireccionador/>}/>
                         <Route path="*" element={<NotFound/>}/>
-                    </Routes>
-                </Layout>
+                    </Route>
+
+                    {/* Rutas privadas para usuarios logueados */}
+                    <Route element={<PrivateRoute/>}>
+                        <Route element={<PrivateLayout/>}>
+                            <Route path="/dashboard" element={<Dashboard/>}/>
+
+                            {/* Rutas privadas solo para admin */}
+                            <Route element={<AdminRoute/>}>
+                                <Route path="/admin-usuarios" element={<UserListAdmin/>}/>
+                                <Route path="/admin-estadisticas" element={<h1>Estadísticas</h1>}/>
+                                <Route path="/admin-reportes" element={<h1>Reportes</h1>}/>
+                            </Route>
+
+                        </Route>
+                    </Route>
+                </Routes>
             </Router>
-        </>);
+
+        </>
+    );
 }
