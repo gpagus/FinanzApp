@@ -10,6 +10,5 @@ export async function getUsers() {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Error al obtener usuarios');
     }
-    debugger;
-    return await res.json();
+     return await res.json();
 }

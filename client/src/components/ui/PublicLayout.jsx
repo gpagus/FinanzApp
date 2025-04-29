@@ -10,7 +10,7 @@ export default function PublicLayout() {
             <main className="pt-16 pb-10 bg-neutral-100">
                 <Outlet/>
             </main>
-            <Footer/>
+            <Footer isOnPublic={true}/>
         </>
     );
 }

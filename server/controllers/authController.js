@@ -207,7 +207,7 @@ const confirmarRegistro = async (req, res) => {
 const obtenerPerfil = async (req, res) => {
     const userId = req.user.id;
 
-    const {data, error} = await supabaseAdmin
+    const {data, error} = await supabase
         .from('usuarios')
         .select('*')
         .eq('id', userId)

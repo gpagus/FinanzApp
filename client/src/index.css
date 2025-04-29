@@ -41,6 +41,36 @@ body {
     font-family: var(--font-display), serif;
 }
 
+.gridjs-wrapper {
+    overflow-x: auto !important;
+    width: 100%;
+}
+
+.gridjs-container {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Mejorar legibilidad y evitar que se corten las celdas en móvil */
+@media (max-width: 640px) {
+    .gridjs-container table {
+        font-size: 0.85rem;
+    }
+
+    .gridjs-container th,
+    .gridjs-container td {
+        white-space: nowrap;
+    }
+}
+
+.gridjs-td {
+    cursor: pointer;
+}
+
+
+
+
+
 html {
     scroll-behavior: smooth;
 }

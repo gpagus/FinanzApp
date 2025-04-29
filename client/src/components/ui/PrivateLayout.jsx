@@ -9,12 +9,12 @@ export default function PrivateLayout() {
             <Header/>
             <div className="pt-16 flex bg-neutral-100">
                 <Sidebar/>
-                <main className="flex-1 pb-10">
+                <main className="flex-1 pb-10 overflow-x-auto">
                     <Outlet/>
                 </main>
             </div>
 
-            <Footer/>
+            <Footer isOnPublic={false}/>
         </>
     );
 }
