@@ -4,7 +4,7 @@ const router = express.Router();
 
 // File uploads
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({dest: 'uploads/'});
 
 // Controllers
 const {
@@ -14,6 +14,7 @@ const {
     confirmarRegistro,
     recuperarContrasena,
     restablecerContrasena,
+    refreshToken,
 } = require('../controllers/authController');
 
 // Middlewares
@@ -24,13 +25,14 @@ const validate = require('../middlewares/validateMiddleware');
 const UsuarioSchema = require('../models/schemas/usuarioSchema');
 
 // 🧪 Auth routes
-router.post('/login', validate(UsuarioSchema.pick({ email: true, password: true })), login);
-router.post('/register', upload.single('avatar'), validate(UsuarioSchema.omit({ avatar: true })), register);
+router.post('/login', validate(UsuarioSchema.pick({email: true, password: true})), login);
+router.post('/register', upload.single('avatar'), validate(UsuarioSchema.omit({avatar: true})), register);
 router.get('/perfil', auth, obtenerPerfil);
+router.post('/auth/refresh-token', refreshToken);
 
 // 📧 Email-based
 router.post('/confirmar-registro', confirmarRegistro);
 router.post('/recuperar-contrasena', recuperarContrasena);
-router.post('/restablecer-contrasena', validate(UsuarioSchema.pick({ password: true })), restablecerContrasena);
+router.post('/restablecer-contrasena', validate(UsuarioSchema.pick({password: true})), restablecerContrasena);
 
 module.exports = router;

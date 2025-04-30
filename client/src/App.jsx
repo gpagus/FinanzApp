@@ -5,6 +5,7 @@ import EmailConfirmed from "./pages/EmailConfirmed.jsx";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import CuentasList from "./pages/user/CuentasList";
 import ResetPassword from "./pages/ResetPassword";
 import Redireccionador from "./pages/Redireccionador";
 import UserListAdmin from "./pages/admin/UserListAdmin";
@@ -36,6 +37,7 @@ export default function App() {
                     <Route element={<PrivateRoute/>}>
                         <Route element={<PrivateLayout/>}>
                             <Route path="/dashboard" element={<Dashboard/>}/>
+                            <Route path="/cuentas" element={<CuentasList/>}/>
 
                             {/* Rutas privadas solo para admin */}
                             <Route element={<AdminRoute/>}>

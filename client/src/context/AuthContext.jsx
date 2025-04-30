@@ -10,24 +10,24 @@ export const useAuth = () => useContext(AuthContext);
 // Proveedor
 export const AuthProvider = ({children}) => {
     const [user, setUser] = useState(null); // Info del usuario
-    const [token, setToken] = useState(null); // JWT
+    const [accessToken, setAccessToken] = useState(null); // Token de acceso
     const [loading, setLoading] = useState(true); // Estado de carga
     const [error, setError] = useState(null);  // Mensaje de error
 
     const handleError = (error) => {
         const errorMessage = error.message || String(error);
         setError(errorMessage);
-        toast.error(errorMessage, { duration: 3500 });
+        toast.error(errorMessage, {duration: 3500});
         return errorMessage;
     }
 
     // Restaurar sesión al cargar la app
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
+        const storedToken = localStorage.getItem("access_token");
         const storedUser = localStorage.getItem("user");
 
         if (storedToken && storedUser) {
-            setToken(storedToken);
+            setAccessToken(storedToken);
             setUser(JSON.parse(storedUser));
         }
         setLoading(false);
@@ -65,9 +65,10 @@ export const AuthProvider = ({children}) => {
                 throw new Error(data.error);
             }
 
-            setToken(data.session.access_token);
+            setAccessToken(data.session.access_token);
             await fetchPerfil(data.session.access_token);
-            localStorage.setItem("token", data.session.access_token);
+            localStorage.setItem("access_token", data.session.access_token);
+            localStorage.setItem("refresh_token", data.session.refresh_token);
             toast.success("Sesión iniciada");
         } catch (err) {
             handleError(err)
@@ -179,13 +180,16 @@ export const AuthProvider = ({children}) => {
 
     const logout = () => {
         setUser(null);
-        setToken(null);
-        localStorage.removeItem("token");
+        setAccessToken(null);
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
         localStorage.removeItem("user");
-        toast.success("Sesión cerrada, ¡hasta pronto!👋");
+        toast.success("Sesión cerrada, ¡hasta pronto!", {icon: "👋"});
     };
 
-    const isAuthenticated = !!token;
+
+
+    const isAuthenticated = !!accessToken;
 
     return (
         <AuthContext.Provider
@@ -201,7 +205,7 @@ export const AuthProvider = ({children}) => {
                 confirmarRegistro,
                 recuperarContrasena,
                 restablecerContrasena,
-                setToken,
+                setAccessToken,
                 isAuthenticated,
             }}
         >
