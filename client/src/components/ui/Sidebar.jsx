@@ -65,7 +65,7 @@ const Sidebar = () => {
 
     // Barra de navegación de escritorio
     return (
-        <nav className="h-full p-4 flex flex-col w-56">
+        <nav className="fixed top-16 left-0 h-screen p-4 w-56 flex flex-col bg-neutral-100 overflow-y-auto">
             <div className="flex items-center justify-center mb-8">
                 <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center">
                     <Home className="text-neutral-600" size={24}/>

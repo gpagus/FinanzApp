@@ -1,7 +1,5 @@
 const supabase = require('../config/supabaseClient');
-const Transaccion = require('../models/transaccion');
 
-const TransaccionSchema = require('../models/schemas/transaccionSchema');
 
 const obtenerTransacciones = async (req, res) => {
     const userId = req.user.id;

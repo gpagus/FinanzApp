@@ -1,7 +1,6 @@
 export const fetchWithAuth = async (url, options = {}) => {
     let accessToken = localStorage.getItem('access_token');
     let refreshToken = localStorage.getItem('refresh_token');
-
     let response = await fetch(url, {
         ...options,
         headers: {

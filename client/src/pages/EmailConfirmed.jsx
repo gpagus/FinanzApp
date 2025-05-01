@@ -7,7 +7,6 @@ const EmailConfirmed = () => {
     const {setToken, confirmarRegistro} = useAuth(); // Asegúrate de exponer `setToken`
 
     useEffect(() => {
-        debugger;
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
 
         const accessToken = hashParams.get("access_token");

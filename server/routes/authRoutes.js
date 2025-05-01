@@ -19,20 +19,16 @@ const {
 
 // Middlewares
 const auth = require('../middlewares/authMiddleware');
-const validate = require('../middlewares/validateMiddleware');
-
-// Schemas
-const UsuarioSchema = require('../models/schemas/usuarioSchema');
 
 // 🧪 Auth routes
-router.post('/login', validate(UsuarioSchema.pick({email: true, password: true})), login);
-router.post('/register', upload.single('avatar'), validate(UsuarioSchema.omit({avatar: true})), register);
+router.post('/login', login);
+router.post('/register', upload.single('avatar'), register);
 router.get('/perfil', auth, obtenerPerfil);
-router.post('/auth/refresh-token', refreshToken);
+router.post('/refresh-token', refreshToken);
 
 // 📧 Email-based
 router.post('/confirmar-registro', confirmarRegistro);
 router.post('/recuperar-contrasena', recuperarContrasena);
-router.post('/restablecer-contrasena', validate(UsuarioSchema.pick({password: true})), restablecerContrasena);
+router.post('/restablecer-contrasena', restablecerContrasena);
 
 module.exports = router;

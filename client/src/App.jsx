@@ -1,13 +1,13 @@
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import {useAuth} from "./context/AuthContext";
 import Welcome from "./pages/Welcome";
-import EmailConfirmed from "./pages/EmailConfirmed.jsx";
+import EmailConfirmed from "./pages/EmailConfirmed";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CuentasList from "./pages/user/CuentasList";
 import ResetPassword from "./pages/ResetPassword";
-import Redireccionador from "./pages/Redireccionador";
+import Redireccionador from "./components/Redireccionador";
 import UserListAdmin from "./pages/admin/UserListAdmin";
 import {PrivateRoute, AdminRoute} from "./components/PrivateRoute";
 import LoadingOverlay from "./components/ui/LoadingOverlay";

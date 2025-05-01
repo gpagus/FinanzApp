@@ -1,89 +1,48 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import {
     PlusCircle,
     CreditCard,
     Wallet,
     PiggyBank,
     TrendingUp,
-    EuroIcon,
+    Euro,
     Eye,
     EyeOff,
     Edit,
     Trash2,
-    BarChart2
+    BarChart2,
+    Loader
 } from 'lucide-react';
-import Boton from "../../components/ui/Boton";
+import Boton from '../../components/ui/Boton';
+import FormField from '../../components/ui/FormField';
+import ConfirmModal from '../../components/ui/ConfirmModal'; // Importa el nuevo componente
+import { useCuentas } from '../../hooks/useCuentas';
 
 const tiposCuenta = [
-    {id: 'corriente', nombre: 'Cuenta Corriente', icono: <CreditCard size={20}/>},
-    {id: 'ahorro', nombre: 'Cuenta de Ahorro', icono: <PiggyBank size={20}/>},
-    {id: 'credito', nombre: 'Tarjeta de Crédito', icono: <CreditCard size={20}/>},
-    {id: 'efectivo', nombre: 'Efectivo', icono: <Wallet size={20}/>},
-    {id: 'inversion', nombre: 'Inversión', icono: <TrendingUp size={20}/>}
-];
-
-// Datos de ejemplo para desarrollo
-const cuentasEjemplo = [
-    {
-        id: '1',
-        nombre: 'Nómina',
-        tipo: 'corriente',
-        balance: 1250.75,
-        ultima_actualizacion: '2025-04-29T10:00:00'
-    },
-    {
-        id: '2',
-        nombre: 'Ahorros Vacaciones',
-        tipo: 'ahorro',
-        balance: 3500.00,
-        ultima_actualizacion: '2025-04-28T14:30:00'
-    },
-    {
-        id: '3',
-        nombre: 'Tarjeta Visa',
-        tipo: 'credito',
-        balance: -450.25,
-        ultima_actualizacion: '2025-04-29T18:15:00'
-    },
-    {
-        id: '4',
-        nombre: 'Monedero',
-        tipo: 'efectivo',
-        balance: 75.50,
-        ultima_actualizacion: '2025-04-27T09:45:00'
-    },
-    {
-        id: '5',
-        nombre: 'Fondo Indexado',
-        tipo: 'inversion',
-        balance: 8750.33,
-        ultima_actualizacion: '2025-04-26T11:20:00'
-    },
-    {
-        id: '6',
-        nombre: 'Ahorros Emergencia',
-        tipo: 'ahorro',
-        balance: 1500.00,
-        ultima_actualizacion: '2025-04-25T16:10:00'
-    },
-    {
-        id: '7',
-        nombre: 'Tarjeta Mastercard',
-        tipo: 'credito',
-        balance: -1200.50,
-        ultima_actualizacion: '2025-04-24T12:05:00'
-    },
-    {
-        id: '8',
-        nombre: 'Cuenta de Inversión',
-        tipo: 'inversion',
-        balance: 5000.00,
-        ultima_actualizacion: '2025-04-23T08:30:00'
-    }
+    { id: 'corriente', nombre: 'Cuenta Corriente', icono: <CreditCard size={20} /> },
+    { id: 'ahorro', nombre: 'Cuenta de Ahorro', icono: <PiggyBank size={20} /> },
+    { id: 'credito', nombre: 'Tarjeta de Crédito', icono: <CreditCard size={20} /> },
+    { id: 'efectivo', nombre: 'Efectivo', icono: <Wallet size={20} /> },
+    { id: 'inversion', nombre: 'Inversión', icono: <TrendingUp size={20} /> }
 ];
 
 const CuentasList = () => {
-    const [cuentas, setCuentas] = useState(cuentasEjemplo);
+    const {
+        cuentas,
+        isLoading,
+        isError,
+        error,
+        balanceTotal,
+        balancePositivo,
+        balanceNegativo,
+        agregarCuenta,
+        actualizarCuenta,
+        eliminarCuenta,
+        isAdding,
+        isUpdating,
+        isDeleting
+    } = useCuentas();
+
     const [mostrarSaldos, setMostrarSaldos] = useState(true);
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
     const [cuentaSeleccionada, setCuentaSeleccionada] = useState(null);
@@ -92,15 +51,10 @@ const CuentasList = () => {
         tipo: 'corriente',
         balance: 0
     });
-
-    // Calcular balances totales
-    const balanceTotal = cuentas.reduce((total, cuenta) => total + cuenta.balance, 0);
-    const balancePositivo = cuentas
-        .filter(cuenta => cuenta.balance > 0)
-        .reduce((total, cuenta) => total + cuenta.balance, 0);
-    const balanceNegativo = cuentas
-        .filter(cuenta => cuenta.balance < 0)
-        .reduce((total, cuenta) => total + cuenta.balance, 0);
+    const [errores, setErrores] = useState({});
+    // Estado para el modal de confirmación
+    const [mostrarConfirmModal, setMostrarConfirmModal] = useState(false);
+    const [cuentaAEliminar, setCuentaAEliminar] = useState(null);
 
     // Manejadores de eventos
     const toggleMostrarSaldos = () => {
@@ -123,6 +77,7 @@ const CuentasList = () => {
                 balance: 0
             });
         }
+        setErrores({});
         setMostrarFormulario(true);
     };
 
@@ -132,49 +87,77 @@ const CuentasList = () => {
     };
 
     const handleInputChange = (e) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setNuevaCuenta({
             ...nuevaCuenta,
             [name]: name === 'balance' ? parseFloat(value) || 0 : value
         });
+        if (errores[name]) {
+            setErrores({
+                ...errores,
+                [name]: undefined
+            });
+        }
+    };
+
+    const validarFormulario = () => {
+        const nuevosErrores = {};
+
+        // Validación del nombre
+        if (!nuevaCuenta.nombre.trim()) {
+            nuevosErrores.nombre = "El nombre es obligatorio";
+        } else if (nuevaCuenta.nombre.length < 3) {
+            nuevosErrores.nombre = "El nombre debe tener al menos 3 caracteres";
+        } else if (nuevaCuenta.nombre.length > 28) {
+            nuevosErrores.nombre = "El nombre no puede exceder los 28 caracteres";
+        }
+
+        // Validación balance
+        if (nuevaCuenta.balance > 9999999999 || nuevaCuenta.balance < -9999999999) {
+            nuevosErrores.balance = "El saldo no puede ser mayor a 10 dígitos";
+        }
+        setErrores(nuevosErrores);
+        return Object.keys(nuevosErrores).length === 0;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        if (!validarFormulario()) {
+            return;
+        }
+
         if (cuentaSeleccionada) {
-            // Actualizar cuenta existente
-            setCuentas(cuentas.map(c =>
-                c.id === cuentaSeleccionada.id ?
-                    {...c, ...nuevaCuenta, ultima_actualizacion: new Date().toISOString()} :
-                    c
-            ));
+            actualizarCuenta(cuentaSeleccionada.id, nuevaCuenta);
         } else {
-            // Crear nueva cuenta
-            const nuevaCuentaCompleta = {
-                ...nuevaCuenta,
-                id: Date.now().toString(),
-                ultima_actualizacion: new Date().toISOString()
-            };
-            setCuentas([...cuentas, nuevaCuentaCompleta]);
+            agregarCuenta(nuevaCuenta);
         }
 
         cerrarFormulario();
     };
 
-    const eliminarCuenta = (id) => {
-        if (window.confirm('¿Estás seguro de que deseas eliminar esta cuenta?')) {
-            setCuentas(cuentas.filter(c => c.id !== id));
+    const abrirConfirmModal = (cuenta) => {
+        setCuentaAEliminar(cuenta);
+        setMostrarConfirmModal(true);
+    };
+
+    const cerrarConfirmModal = () => {
+        setMostrarConfirmModal(false);
+        setCuentaAEliminar(null);
+    };
+
+    const handleEliminarCuenta = () => {
+        if (cuentaAEliminar) {
+            eliminarCuenta(cuentaAEliminar.id);
+            cerrarConfirmModal();
         }
     };
 
-    // Obtener icono según tipo de cuenta
     const getIconoTipo = (tipo) => {
         const tipoEncontrado = tiposCuenta.find(t => t.id === tipo);
-        return tipoEncontrado ? tipoEncontrado.icono : <CreditCard size={20}/>;
+        return tipoEncontrado ? tipoEncontrado.icono : <CreditCard size={20} />;
     };
 
-    // Formatear cantidad como moneda
     const formatearMoneda = (cantidad) => {
         return new Intl.NumberFormat('es-ES', {
             style: 'currency',
@@ -182,7 +165,6 @@ const CuentasList = () => {
         }).format(cantidad);
     };
 
-    // Formatear fecha
     const formatearFecha = (fechaISO) => {
         return new Date(fechaISO).toLocaleDateString('es-ES', {
             day: '2-digit',
@@ -193,12 +175,44 @@ const CuentasList = () => {
         });
     };
 
+    const opcionesTiposCuenta = tiposCuenta.map(tipo => ({
+        value: tipo.id,
+        label: tipo.nombre
+    }));
+
+    if (isLoading) {
+        return (
+            <div className="flex min-h-[calc(100vh-4rem-2.5rem)] justify-center items-center">
+                <div className="flex flex-col items-center">
+                    <Loader size={48} className="text-aguazul animate-spin mb-4" />
+                    <p className="text-neutral-600">Cargando tus cuentas...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex min-h-[calc(100vh-4rem-2.5rem)] justify-center items-center">
+                <div className="text-center p-6 bg-error-100 rounded-lg max-w-md">
+                    <h2 className="text-xl font-bold text-error mb-2">Error al cargar las cuentas</h2>
+                    <p className="text-neutral-700 mb-4">{error?.message || 'Ha ocurrido un error inesperado.'}</p>
+                    <Boton
+                        tipo="primario"
+                        onClick={() => window.location.reload()}
+                    >
+                        Intentar de nuevo
+                    </Boton>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-6">
+        <div className="px-4 sm:px-6 lg:px-8 py-6 min-h-[calc(100vh-4rem-2.5rem)]">
             {/* Cabecera */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-aguazul">Mis Cuentas</h1>
-                <p className="text-neutral-600 mt-1">Gestiona todas tus cuentas financieras en un solo lugar</p>
             </div>
 
             {/* Panel de resumen */}
@@ -252,16 +266,30 @@ const CuentasList = () => {
                         tipo="primario"
                         onClick={() => abrirFormulario()}
                         className="flex items-center"
+                        disabled={isAdding}
                     >
-                        <PlusCircle size={18} className="mr-2"/>
-                        Añadir cuenta
+                        {isAdding ? (
+                            <>
+                                <Loader size={18} className="animate-spin mr-2" />
+                                Añadiendo...
+                            </>
+                        ) : (
+                            <>
+                                <PlusCircle size={18} className="mr-2" />
+                                Añadir cuenta
+                            </>
+                        )}
                     </Boton>
                 </div>
 
                 {cuentas.length === 0 ? (
                     <div className="p-8 text-center">
                         <p className="text-neutral-600 mb-4">No tienes cuentas configuradas</p>
-                        <Boton tipo="primario" onClick={() => abrirFormulario()}>
+                        <Boton
+                            tipo="primario"
+                            onClick={() => abrirFormulario()}
+                            disabled={isAdding}
+                        >
                             Añade tu primera cuenta
                         </Boton>
                     </div>
@@ -270,9 +298,11 @@ const CuentasList = () => {
                         {cuentas.map((cuenta) => {
                             const IconoTipo = () => getIconoTipo(cuenta.tipo);
                             const tipoInfo = tiposCuenta.find(t => t.id === cuenta.tipo);
+                            const estaActualizando = isUpdating && cuentaSeleccionada?.id === cuenta.id;
+                            const estaEliminando = isDeleting && cuentaAEliminar?.id === cuenta.id;
 
                             return (
-                                <li key={cuenta.id} className="hover:bg-neutral-100">
+                                <li key={cuenta.id} className={`hover:bg-neutral-100 ${(estaActualizando || estaEliminando) ? 'opacity-70' : ''}`}>
                                     <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between">
                                         <div className="flex items-center mb-2 sm:mb-0">
                                             <div
@@ -283,7 +313,7 @@ const CuentasList = () => {
                                                 <h3 className="font-medium text-neutral-900">{cuenta.nombre}</h3>
                                                 <p className="text-sm text-neutral-600">
                                                     {tipoInfo?.nombre} •
-                                                    Actualizado: {formatearFecha(cuenta.ultima_actualizacion)}
+                                                    Actualizado: {formatearFecha(cuenta.lastUpdate)}
                                                 </p>
                                             </div>
                                         </div>
@@ -297,15 +327,25 @@ const CuentasList = () => {
                                                     tipo="icono"
                                                     onClick={() => abrirFormulario(cuenta)}
                                                     aria-label="Editar cuenta"
+                                                    disabled={estaActualizando || estaEliminando}
                                                 >
-                                                    <Edit size={18} className="text-aguazul"/>
+                                                    {estaActualizando ? (
+                                                        <Loader size={18} className="animate-spin text-aguazul" />
+                                                    ) : (
+                                                        <Edit size={18} className="text-aguazul" />
+                                                    )}
                                                 </Boton>
                                                 <Boton
                                                     tipo="icono"
-                                                    onClick={() => eliminarCuenta(cuenta.id)}
+                                                    onClick={() => abrirConfirmModal(cuenta)}
                                                     aria-label="Eliminar cuenta"
+                                                    disabled={estaActualizando || estaEliminando}
                                                 >
-                                                    <Trash2 size={18} className="text-error"/>
+                                                    {estaEliminando ? (
+                                                        <Loader size={18} className="animate-spin text-error" />
+                                                    ) : (
+                                                        <Trash2 size={18} className="text-error" />
+                                                    )}
                                                 </Boton>
                                             </div>
                                         </div>
@@ -319,7 +359,7 @@ const CuentasList = () => {
 
             {/* Modal/Formulario para añadir/editar cuenta */}
             {mostrarFormulario && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
                         <div className="p-4 border-b border-neutral-200">
                             <h2 className="text-lg font-semibold text-aguazul">
@@ -328,85 +368,81 @@ const CuentasList = () => {
                         </div>
 
                         <form onSubmit={handleSubmit} className="p-6">
-                            <div className="mb-4">
-                                <label htmlFor="nombre" className="block text-sm font-medium text-neutral-600 mb-1">
-                                    Nombre de la cuenta
-                                </label>
-                                <input
-                                    type="text"
-                                    id="nombre"
-                                    name="nombre"
-                                    value={nuevaCuenta.nombre}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-1 focus:ring-dollar-500"
-                                    placeholder="Ej: Cuenta Nómina"
-                                    required
-                                />
-                            </div>
+                            <FormField
+                                label="Nombre de la cuenta"
+                                name="nombre"
+                                type="text"
+                                value={nuevaCuenta.nombre}
+                                onChange={handleInputChange}
+                                error={errores.nombre}
+                                placeholder="Ej: Cuenta Nómina"
+                                disabled={isAdding || isUpdating}
+                            />
 
-                            <div className="mb-4">
-                                <label htmlFor="tipo" className="block text-sm font-medium text-neutral-600 mb-1">
-                                    Tipo de cuenta
-                                </label>
-                                <select
-                                    id="tipo"
-                                    name="tipo"
-                                    value={nuevaCuenta.tipo}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-1 focus:ring-dollar-500"
-                                    required
-                                >
-                                    {tiposCuenta.map(tipo => (
-                                        <option key={tipo.id} value={tipo.id}>
-                                            {tipo.nombre}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            <FormField
+                                label="Tipo de cuenta"
+                                name="tipo"
+                                type="select"
+                                value={nuevaCuenta.tipo}
+                                onChange={handleInputChange}
+                                error={errores.tipo}
+                                options={opcionesTiposCuenta}
+                                disabled={isAdding || isUpdating}
+                            />
 
-                            <div className="mb-6">
-                                <label htmlFor="balance" className="block text-sm font-medium text-neutral-600 mb-1">
-                                    Saldo inicial
-                                </label>
-                                <div className="relative">
-                                    <div
-                                        className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <EuroIcon size={16} className="text-neutral-600"/>
-                                    </div>
-                                    <input
-                                        type="number"
-                                        id="balance"
-                                        name="balance"
-                                        value={nuevaCuenta.balance}
-                                        onChange={handleInputChange}
-                                        className="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-1 focus:ring-dollar-500"
-                                        step="0.01"
-                                        required
-                                    />
-                                </div>
-                                <p className="text-xs text-neutral-600 mt-1">
-                                    Use valores negativos para deudas o tarjetas de crédito
-                                </p>
-                            </div>
+                            <FormField
+                                label="Saldo inicial"
+                                name="balance"
+                                type="number"
+                                value={nuevaCuenta.balance}
+                                onChange={handleInputChange}
+                                error={errores.balance}
+                                placeholder="0.00"
+                                step="0.01"
+                                prefix={<Euro size={16} className="text-neutral-600" />}
+                                hint="Use valores negativos para deudas o tarjetas de crédito"
+                                disabled={isAdding || isUpdating}
+                            />
 
                             <div className="flex justify-end space-x-3">
                                 <Boton
                                     tipo="texto"
                                     onClick={cerrarFormulario}
+                                    disabled={isAdding || isUpdating}
                                 >
                                     Cancelar
                                 </Boton>
                                 <Boton
                                     tipo="primario"
-                                    onClick={handleSubmit}
+                                    type="submit"
+                                    disabled={isAdding || isUpdating}
                                 >
-                                    {cuentaSeleccionada ? 'Guardar cambios' : 'Añadir cuenta'}
+                                    {(isAdding || isUpdating) ? (
+                                        <>
+                                            <Loader size={16} className="animate-spin mr-2" />
+                                            {cuentaSeleccionada ? 'Guardando...' : 'Añadiendo...'}
+                                        </>
+                                    ) : (
+                                        cuentaSeleccionada ? 'Guardar cambios' : 'Añadir cuenta'
+                                    )}
                                 </Boton>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
+
+            {/* Modal de confirmación para eliminar cuenta */}
+            <ConfirmModal
+                isOpen={mostrarConfirmModal}
+                onClose={cerrarConfirmModal}
+                onConfirm={handleEliminarCuenta}
+                title="Confirmar eliminación"
+                message={`¿Estás seguro de que deseas eliminar la cuenta "${cuentaAEliminar?.nombre}"? Se borrarán en conjunto todas las transacciones relacionadas.`}
+                confirmLabel="Eliminar"
+                cancelLabel="Cancelar"
+                isLoading={isDeleting && cuentaAEliminar?.id === cuentaAEliminar?.id}
+            />
         </div>
     );
 }
