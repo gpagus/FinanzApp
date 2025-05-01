@@ -10,7 +10,7 @@ const Header = () => {
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm w-full h-16">
-            <div className="mx-auto grid md:grid-cols-3 grid-cols-2 h-full px-4 sm:px-6">
+            <div className="mx-auto grid lg:grid-cols-3 grid-cols-2 h-full px-4 sm:px-6">
 
                 {/* Left section - User Avatar */}
                 <div className="flex items-center justify-start space-x-2">
@@ -30,7 +30,7 @@ const Header = () => {
                         {user?.nombre || "Usuario"}
                     </span>
 
-                    <span className="text-sm text-neutral-500">
+                    <span className="text-sm text-neutral-500 hidden md:block">
                         {user?.lastAccess && (
                             <>Último acceso:&nbsp;
                                 {new Intl.DateTimeFormat('es-ES', {
@@ -43,7 +43,7 @@ const Header = () => {
                     </span>
                 </div>
                 {/* Center section - Logo */}
-                <div className="hidden md:flex items-center justify-center">
+                <div className="hidden lg:flex items-center justify-center">
                     <div className="flex items-center bg-white rounded-full p-1">
                         <CircleDollarSign className="text-dollar-500"/>
                     </div>

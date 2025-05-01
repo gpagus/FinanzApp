@@ -16,6 +16,8 @@ const corsOptions = {
 */
 
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
 const transaccionesRoutes = require('./routes/transaccionesRoutes');
 const cuentasRoutes = require('./routes/cuentasRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
@@ -28,6 +30,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/transacciones', transaccionesRoutes);
 app.use('/api/cuentas', cuentasRoutes);
 app.use('/api/categorias', categoriasRoutes);

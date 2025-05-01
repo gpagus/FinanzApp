@@ -207,7 +207,7 @@ const confirmarRegistro = async (req, res) => {
 const obtenerPerfil = async (req, res) => {
     const userId = req.user.id;
 
-    const {data, error} = await supabaseAdmin
+    const {data, error} = await supabase
         .from('usuarios')
         .select('*')
         .eq('id', userId)
@@ -283,6 +283,33 @@ const restablecerContrasena = async (req, res) => {
     }
 };
 
+const refreshToken = async (req, res) => {
+    const {refresh_token} = req.body;
+
+    if (!refresh_token) {
+        return res.status(400).json({error: 'No se proporcionó refresh token.'});
+    }
+
+    try {
+        const {data, error} = await supabase.auth.refreshSession({refresh_token});
+
+        if (error) {
+            return res.status(401).json({error: 'No se pudo renovar la sesión.'});
+        }
+
+        const {session, user} = data;
+
+        return res.status(200).json({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+            user,
+        });
+    } catch (err) {
+        console.error('Error al renovar la sesión:', err);
+        return res.status(500).json({error: 'Error interno del servidor.'});
+    }
+};
+
 module.exports = {
-    register, login, obtenerPerfil, confirmarRegistro, recuperarContrasena, restablecerContrasena
+    register, login, obtenerPerfil, confirmarRegistro, recuperarContrasena, restablecerContrasena, refreshToken
 };

@@ -1,6 +1,4 @@
 const supabase = require('../config/supabaseClient');
-const Categoria = require('../models/categoria');
-const CategoriaSchema = require('../models/schemas/categoriaSchema');
 
 const crearCategoria = async (req, res) => {
   try {
