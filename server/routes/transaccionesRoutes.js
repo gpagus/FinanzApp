@@ -8,7 +8,7 @@ const {
   eliminarTransaccion
 } = require('../controllers/transaccionesController');
 
-router.use(authMiddleware); // proteger las rutas con el middleware de autenticación
+router.use(authMiddleware);
 
 router.get('/', obtenerTransacciones);
 router.post('/', crearTransaccion);
