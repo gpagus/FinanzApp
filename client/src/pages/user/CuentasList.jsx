@@ -1,3 +1,4 @@
+
 import {useState} from 'react';
 import {
     PlusCircle,
@@ -51,7 +52,6 @@ const CuentasList = () => {
     });
     const [errores, setErrores] = useState({});
 
-
     const abrirFormulario = () => {
         setCuentaSeleccionada(null);
         setNuevaCuenta({
@@ -59,7 +59,6 @@ const CuentasList = () => {
             tipo: 'corriente',
             balance: 0
         });
-
         setErrores({});
         setMostrarFormulario(true);
     };
@@ -91,9 +90,7 @@ const CuentasList = () => {
             setErrores(nuevosErrores);
             return;
         }
-
         agregarCuenta(nuevaCuenta);
-
         cerrarFormulario();
     };
 
@@ -101,7 +98,6 @@ const CuentasList = () => {
         const tipoEncontrado = tiposCuenta.find(t => t.id === tipo);
         return tipoEncontrado ? tipoEncontrado.icono : <CreditCard size={20}/>;
     };
-
     if (isLoading) {
         return (
             <div className="flex min-h-[calc(100vh-4rem-2.5rem)] justify-center items-center">
@@ -208,7 +204,6 @@ const CuentasList = () => {
                         {cuentas.map((cuenta) => {
                             const IconoTipo = () => getIconoTipo(cuenta.tipo);
                             const tipoInfo = tiposCuenta.find(t => t.id === cuenta.tipo);
-
                             return (
                                 <li key={cuenta.id}>
                                     <Boton
@@ -256,7 +251,6 @@ const CuentasList = () => {
                 onSubmit={handleSubmit}
                 onClose={() => setMostrarFormulario(false)}
             />
-
         </div>
     );
 }

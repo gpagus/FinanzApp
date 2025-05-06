@@ -18,6 +18,7 @@ const queryClient = new QueryClient({
     }
 );
 
+
 ReactDOM.createRoot(document.getElementById('root')).render(
     <>
         <AuthProvider>
