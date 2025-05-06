@@ -1,4 +1,5 @@
-import {Link, NavLink} from 'react-router-dom';
+
+import {NavLink} from 'react-router-dom';
 import clsx from 'clsx';
 
 const Boton = ({
@@ -40,7 +41,7 @@ const Boton = ({
                 className={({isActive}) =>
                     clsx(
                         clases,
-                        isActive && 'bg-dollar-300 text-aguazul font-medium'  // 👉 clases cuando está activo
+                        isActive && 'bg-dollar-300 text-aguazul font-medium'
                     )
                 }
                 {...props}

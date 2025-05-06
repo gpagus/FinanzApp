@@ -89,3 +89,21 @@ export const validarRestablecerContrasena = ({password, confirmPassword}) => {
 
     return errores;
 };
+
+export const validarCuenta = (cuenta) => {
+    const errores = {};
+
+    if (!cuenta.nombre.trim()) {
+        errores.nombre = "El nombre es obligatorio";
+    } else if (cuenta.nombre.length < 3) {
+        errores.nombre = "El nombre debe tener al menos 3 caracteres";
+    } else if (cuenta.nombre.length > 28) {
+        errores.nombre = "El nombre no puede exceder los 28 caracteres";
+    }
+
+    if (cuenta.balance > 9999999999 || cuenta.balance < -9999999999) {
+        errores.balance = "El saldo no puede ser mayor a 10 dígitos";
+    }
+
+    return errores;
+};
