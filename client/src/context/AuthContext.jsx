@@ -125,13 +125,15 @@ export const AuthProvider = ({children}) => {
             if (!res.ok) throw new Error(data.error);
 
             await fetchPerfil(accessToken);
+            return true;
         } catch (err) {
-            handleError(err)
+            handleError(err);
+            return false;
         } finally {
             setLoading(false);
             setError(null);
         }
-    }
+    };
 
     const recuperarContrasena = async (email) => {
         setLoading(true);
@@ -186,7 +188,6 @@ export const AuthProvider = ({children}) => {
         localStorage.removeItem("user");
         toast.success("Sesión cerrada, ¡hasta pronto!", {icon: "👋"});
     };
-
 
 
     const isAuthenticated = !!accessToken;

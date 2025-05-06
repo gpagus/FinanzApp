@@ -26,15 +26,13 @@ function ResetPassword() {
     }, []);
 
     const handleResetPassword = async () => {
-        try {
             const result = await restablecerContrasena(token, values.password);
             if (result) {
                 setSuccess(true);
                 setTimeout(() => navigate('/'), 4000);
+            } else {
+                setTokenError(true);
             }
-        } catch (error) {
-            console.error("Error al restablecer contraseña:", error);
-        }
     };
 
     const { values, errors, handleChange, handleSubmit, handleBlur } = useForm(
