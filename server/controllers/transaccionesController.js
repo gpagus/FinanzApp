@@ -8,7 +8,7 @@ const obtenerTransacciones = async (req, res) => {
         .from('transacciones')
         .select('*')
         .eq('cuenta_id', cuenta_id)
-        .order('fecha', {ascending: false})
+        .order('created_at', {ascending: false})
         .range(Number(offset), Number(offset) + Number(limit) - 1);
 
     if (error) return res.status(500).json({error: error.message});

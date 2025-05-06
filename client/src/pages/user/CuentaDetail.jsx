@@ -57,7 +57,7 @@ const CuentaDetail = () => {
         filtroFecha,
         setFiltroFecha,
         cargarMasTransacciones,
-        agregarTransaccion,        // ← ya disponibles si luego añades un modal “Nueva operación”
+        agregarTransaccion,
         actualizarTransaccion,
         eliminarTransaccion,
     } = useTransacciones({ cuentaId: id });

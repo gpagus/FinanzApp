@@ -1,6 +1,7 @@
 import {useSaldos} from "../../context/SaldosContext";
 import {Loader} from 'lucide-react';
 import Boton from '../ui/Boton';
+import {formatearMoneda, formatearFecha} from "../../utils/formatters";
 
 const TransaccionesList = ({
                                transacciones,
@@ -13,25 +14,10 @@ const TransaccionesList = ({
 
     const {mostrarSaldos} = useSaldos();
 
-    const formatearMoneda = (cantidad) => {
-        return new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'EUR'
-        }).format(cantidad);
-    };
-
-    const formatearFecha = (fechaISO) => {
-        return new Date(fechaISO).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
-
     // Agrupar transacciones por fecha
     const transaccionesPorFecha = {};
     transacciones.forEach(transaccion => {
-        const fecha = formatearFecha(transaccion.fecha);
+        const fecha = formatearFecha(transaccion.created_at);
         if (!transaccionesPorFecha[fecha]) {
             transaccionesPorFecha[fecha] = [];
         }
@@ -70,10 +56,10 @@ const TransaccionesList = ({
                                                     {transaccion.icono}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium text-neutral-900">{transaccion.concepto}</p>
+                                                    <p className="font-medium text-neutral-900">{transaccion.descripcion}</p>
                                                     <div className="flex flex-col xs:flex-row xs:gap-2">
                                                         <p className="text-sm text-neutral-600">
-                                                            {new Date(transaccion.fecha).toLocaleTimeString('es-ES', {
+                                                            {new Date(new Date(transaccion.created_at).getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('es-ES', {
                                                                 hour: '2-digit',
                                                                 minute: '2-digit'
                                                             })}
@@ -86,8 +72,8 @@ const TransaccionesList = ({
                                                     </div>
                                                 </div>
                                             </div>
-                                            <p className={`font-semibold ${transaccion.cantidad >= 0 ? 'text-success' : 'text-error'}`}>
-                                                {mostrarSaldos ? formatearMoneda(transaccion.cantidad) : '••••••'}
+                                            <p className={`font-semibold ${transaccion.monto >= 0 ? 'text-success' : 'text-error'}`}>
+                                                {mostrarSaldos ? formatearMoneda(transaccion.monto) : '••••••'}
                                             </p>
                                         </div>
                                     </li>
