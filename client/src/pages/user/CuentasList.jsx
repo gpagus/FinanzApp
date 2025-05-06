@@ -181,11 +181,13 @@ const CuentasList = () => {
                         {isAdding ? (
                             <>
                                 <Loader size={18} className="animate-spin mr-2"/>
+
                                 Añadiendo...
                             </>
                         ) : (
                             <>
                                 <PlusCircle size={18} className="mr-2"/>
+
                                 Añadir cuenta
                             </>
                         )}
