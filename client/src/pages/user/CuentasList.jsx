@@ -2,14 +2,12 @@ import {useState} from 'react';
 import {
     PlusCircle,
     CreditCard,
-    Wallet,
     PiggyBank,
     TrendingUp,
     BarChart2,
     Loader
 } from 'lucide-react';
 import Boton from '../../components/ui/Boton';
-import {validarCuenta} from "../../utils/validaciones";
 import {useCuentas} from '../../hooks/useCuentas';
 import {useNavigate} from "react-router-dom";
 import {useSaldos} from "../../context/SaldosContext";
@@ -42,55 +40,16 @@ const CuentasList = () => {
     const {mostrarSaldos} = useSaldos();
 
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
-    const [cuentaSeleccionada, setCuentaSeleccionada] = useState(null);
-    const [nuevaCuenta, setNuevaCuenta] = useState({
-        nombre: '',
-        tipo: 'corriente',
-        balance: 0
-    });
-    const [errores, setErrores] = useState({});
 
-    const abrirFormulario = () => {
-        setCuentaSeleccionada(null);
-        setNuevaCuenta({
-            nombre: '',
-            tipo: 'corriente',
-            balance: 0
-        });
-        setErrores({});
-        setMostrarFormulario(true);
-    };
-
-    const cerrarFormulario = () => {
-        setMostrarFormulario(false);
-        setCuentaSeleccionada(null);
-    };
-
-    const handleInputChange = (e) => {
-        const {name, value} = e.target;
-        setNuevaCuenta({
-            ...nuevaCuenta,
-            [name]: name === 'balance' ? parseFloat(value) || 0 : value
-        });
-        if (errores[name]) {
-            setErrores({
-                ...errores,
-                [name]: undefined
-            });
+    const handleCreateCuenta = async (data) => {
+        try {
+            await agregarCuenta(data);
+            setMostrarFormulario(false);
+        } catch (error) {
+            console.error("Error al crear la cuenta:", error.message);
         }
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        const nuevosErrores = validarCuenta(nuevaCuenta);
-        if (Object.keys(nuevosErrores).length > 0) {
-            setErrores(nuevosErrores);
-            return;
-        }
-        agregarCuenta(nuevaCuenta);
-        cerrarFormulario();
-    };
 
     const getIconoTipo = (tipo) => {
         const tipoEncontrado = tiposCuenta.find(t => t.id === tipo);
@@ -168,7 +127,7 @@ const CuentasList = () => {
                     <h2 className="text-lg font-semibold text-aguazul">Mis cuentas</h2>
                     <Boton
                         tipo="primario"
-                        onClick={() => abrirFormulario()}
+                        onClick={() => setMostrarFormulario(true)}
                         className="flex items-center"
                         disabled={isAdding}
                     >
@@ -191,7 +150,7 @@ const CuentasList = () => {
                         <p className="text-neutral-600 mb-4">No tienes cuentas configuradas</p>
                         <Boton
                             tipo="primario"
-                            onClick={() => abrirFormulario()}
+                            onClick={() => setMostrarFormulario(true)}
                             disabled={isAdding}
                         >
                             Añade tu primera cuenta
@@ -241,13 +200,10 @@ const CuentasList = () => {
             {/* Formulario de edición de cuenta */}
             <CuentaForm
                 mostrar={mostrarFormulario}
-                cuentaSeleccionada={cuentaSeleccionada}
-                nuevaCuenta={nuevaCuenta}
-                errores={errores}
-                opcionesTiposCuenta={TIPOS_CUENTA}
-                onInputChange={handleInputChange}
-                onSubmit={handleSubmit}
+                cuentaSeleccionada={null}
+                onSubmitCuenta={handleCreateCuenta}
                 onClose={() => setMostrarFormulario(false)}
+                opcionesTiposCuenta={TIPOS_CUENTA}
             />
         </div>
     );

@@ -1,18 +1,30 @@
 import { Euro, Loader } from 'lucide-react';
-import Boton from '../Boton.jsx';
-import FormField from '../FormField.jsx';
+import { z } from 'zod';
+import useCustomForm from '../../../hooks/useCustomForm';
+import Boton from '../Boton';
+import FormField from '../FormField';
+
+const cuentaSchema = z.object({
+    nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+    tipo: z.string().min(1, 'Seleccione un tipo de cuenta'),
+    balance: z.coerce.number({
+        errorMap: () => ({ message: 'Saldo inválido' }),
+    }).default(0),
+});
 
 const CuentaForm = ({
-                        mostrar,
-                        cuentaSeleccionada,
-                        nuevaCuenta,
-                        errores,
-                        isSubmitting,
-                        opcionesTiposCuenta,
-                        onInputChange,
-                        onSubmit,
-                        onClose,
-                    }) => {
+    mostrar,
+    cuentaSeleccionada,
+    onSubmitCuenta,
+    onClose,
+    opcionesTiposCuenta,
+}) => {
+    const { register, handleSubmit, errors, isSubmitting } = useCustomForm({
+        schema: cuentaSchema,
+        onSubmit: onSubmitCuenta,
+        defaultValues: cuentaSeleccionada || {}
+    });
+
     if (!mostrar) return null;
 
     return (
@@ -24,14 +36,12 @@ const CuentaForm = ({
                     </h2>
                 </div>
 
-                <form onSubmit={onSubmit} className="p-6">
+                <form onSubmit={handleSubmit} className="p-6">
                     <FormField
                         label="Nombre de la cuenta"
                         name="nombre"
-                        type="text"
-                        value={nuevaCuenta.nombre}
-                        onChange={onInputChange}
-                        error={errores.nombre}
+                        register={register}
+                        error={errors.nombre?.message}
                         placeholder="Ej: Cuenta Nómina"
                         disabled={isSubmitting}
                     />
@@ -42,10 +52,12 @@ const CuentaForm = ({
                                 label="Tipo de cuenta"
                                 name="tipo"
                                 type="select"
-                                value={nuevaCuenta.tipo}
-                                onChange={onInputChange}
-                                error={errores.tipo}
-                                options={opcionesTiposCuenta}
+                                register={register}
+                                error={errors.tipo?.message}
+                                options={opcionesTiposCuenta.map((tipo) => ({
+                                    value: tipo.value,
+                                    label: tipo.label,
+                                }))}
                                 disabled={isSubmitting}
                             />
 
@@ -53,13 +65,11 @@ const CuentaForm = ({
                                 label="Saldo inicial"
                                 name="balance"
                                 type="number"
-                                value={nuevaCuenta.balance}
-                                onChange={onInputChange}
-                                error={errores.balance}
-                                placeholder="0.00"
                                 step="0.01"
                                 prefix={<Euro size={16} className="text-neutral-600" />}
                                 hint="Use valores negativos para deudas o tarjetas de crédito"
+                                register={register}
+                                error={errors.balance?.message}
                                 disabled={isSubmitting}
                             />
                         </>
@@ -75,9 +85,7 @@ const CuentaForm = ({
                                     <Loader size={16} className="animate-spin mr-2" />
                                     {cuentaSeleccionada ? 'Guardando...' : 'Añadiendo...'}
                                 </>
-                            ) : (
-                                cuentaSeleccionada ? 'Guardar cambios' : 'Añadir cuenta'
-                            )}
+                            ) : cuentaSeleccionada ? 'Guardar cambios' : 'Añadir cuenta'}
                         </Boton>
                     </div>
                 </form>

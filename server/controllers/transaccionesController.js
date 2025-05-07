@@ -8,7 +8,7 @@ const obtenerTransacciones = async (req, res) => {
         .from('transacciones')
         .select('*')
         .eq('cuenta_id', cuenta_id)
-        .order('created_at', {ascending: false})
+        .order('fecha', {ascending: false})
         .range(Number(offset), Number(offset) + Number(limit) - 1);
 
     if (error) return res.status(500).json({error: error.message});
@@ -25,7 +25,7 @@ const crearTransaccion = async (req, res) => {
         };
 
         const {data, error} = await supabase
-            .from('cuentas')
+            .from('transacciones')
             .insert([nuevaTransaccion])
             .select();
 

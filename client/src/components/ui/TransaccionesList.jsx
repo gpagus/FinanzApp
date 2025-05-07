@@ -17,7 +17,7 @@ const TransaccionesList = ({
     // Agrupar transacciones por fecha
     const transaccionesPorFecha = {};
     transacciones.forEach(transaccion => {
-        const fecha = formatearFecha(transaccion.created_at);
+        const fecha = formatearFecha(transaccion.fecha);
         if (!transaccionesPorFecha[fecha]) {
             transaccionesPorFecha[fecha] = [];
         }
@@ -59,7 +59,7 @@ const TransaccionesList = ({
                                                     <p className="font-medium text-neutral-900">{transaccion.descripcion}</p>
                                                     <div className="flex flex-col xs:flex-row xs:gap-2">
                                                         <p className="text-sm text-neutral-600">
-                                                            {new Date(new Date(transaccion.created_at).getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('es-ES', {
+                                                            {new Date(new Date(transaccion.fecha).getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('es-ES', {
                                                                 hour: '2-digit',
                                                                 minute: '2-digit'
                                                             })}

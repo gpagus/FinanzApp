@@ -1,8 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-/* --------- Hook reutilizable para formularios --------- */
-export default function useCustomForm(schema, onSubmit, defaultValues = {}) {
+export default function useCustomForm({ schema, onSubmit, defaultValues = {} }) {
     const {
         register,
         handleSubmit,

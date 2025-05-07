@@ -2,13 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCuentas, addCuenta, updateCuenta, deleteCuenta } from '../api/cuentasApi';
 import toast from 'react-hot-toast';
 
-// Clave para identificar la query de cuentas en react-query
-const CUENTAS_QUERY_KEY = 'cuentas';
-
-export function useCuentas() {
+export const useCuentas = () => {
     const queryClient = useQueryClient();
 
-    // Query para obtener todas las cuentas
+    // Query para obtener cuentas
     const {
         data: cuentas = [],
         isLoading,
@@ -16,89 +13,75 @@ export function useCuentas() {
         error,
         refetch
     } = useQuery({
-        queryKey: [CUENTAS_QUERY_KEY],
+        queryKey: ['cuentas'],
         queryFn: getCuentas,
-        staleTime: 5 * 60 * 1000, // Los datos se consideran actuales durante 5 minutos
-        gcTime: 10 * 60 * 1000, // Los datos se mantienen en caché por 10 minutos (antes cacheTime)
-        retry: 2, // Reintenta la petición hasta 2 veces en caso de error
-        onError: (err) => {
-            toast.error(`Error al cargar las cuentas: ${err.message}`);
-        }
+        staleTime: 5 * 60 * 1000, // 5 minutos
+        onError: (e) => toast.error(`Error al cargar las cuentas: ${e.message}`)
     });
 
-    // Mutación para añadir una nueva cuenta
+    // Mutación para agregar cuenta
     const addMutation = useMutation({
-        mutationFn: addCuenta,
-        onSuccess: (nuevaCuenta) => {
-            // Actualiza la caché de react-query añadiendo la nueva cuenta a los datos existentes
-            queryClient.setQueryData([CUENTAS_QUERY_KEY], (old) => [...(old || []), nuevaCuenta]);
-            toast.success('Cuenta añadida correctamente');
+        mutationFn: (nuevaCuenta) => {
+            console.log("Enviando cuenta al backend:", nuevaCuenta); // Debug
+            return addCuenta(nuevaCuenta);
         },
-        onError: (err) => {
-            toast.error(`Error al añadir la cuenta: ${err.message}`);
+        onSuccess: (nuevaCuenta) => {
+            queryClient.setQueryData(['cuentas'], (old = []) => [...old, nuevaCuenta]);
+            toast.success('Cuenta creada correctamente');
+        },
+        onError: (error) => {
+            console.error("Error al crear cuenta:", error);
+            toast.error(`Error al crear cuenta: ${error.message}`);
         }
     });
 
-    // Mutación para actualizar una cuenta existente
+    // Mutación para actualizar cuenta
     const updateMutation = useMutation({
         mutationFn: ({ id, datos }) => updateCuenta(id, datos),
         onSuccess: (cuentaActualizada) => {
-            // Actualiza la caché reemplazando la cuenta actualizada
-            queryClient.setQueryData([CUENTAS_QUERY_KEY], (old) =>
-                old?.map(cuenta =>
-                    cuenta.id === cuentaActualizada.id ? cuentaActualizada : cuenta
-                )
+            queryClient.setQueryData(['cuentas'], (old = []) =>
+                old.map(cuenta => cuenta.id === cuentaActualizada.id ? cuentaActualizada : cuenta)
             );
             toast.success('Cuenta actualizada correctamente');
         },
-        onError: (err) => {
-            toast.error(`Error al actualizar la cuenta: ${err.message}`);
-        }
+        onError: (error) => toast.error(`Error al actualizar cuenta: ${error.message}`)
     });
 
-    // Mutación para eliminar una cuenta
+    // Mutación para eliminar cuenta
     const deleteMutation = useMutation({
-        mutationFn: deleteCuenta,
-        onSuccess: (_, variables) => {
-            // Actualiza la caché eliminando la cuenta
-            queryClient.setQueryData([CUENTAS_QUERY_KEY], (old) =>
-                old?.filter(cuenta => cuenta.id !== variables)
+        mutationFn: (id) => deleteCuenta(id),
+        onSuccess: (_, id) => {
+            queryClient.setQueryData(['cuentas'], (old = []) =>
+                old.filter(cuenta => cuenta.id !== id)
             );
             toast.success('Cuenta eliminada correctamente');
         },
-        onError: (err) => {
-            toast.error(`Error al eliminar la cuenta: ${err.message}`);
-        }
+        onError: (error) => toast.error(`Error al eliminar cuenta: ${error.message}`)
     });
 
-    // Calcular balances totales
-    const balanceTotal = cuentas?.reduce((total, cuenta) => total + cuenta.balance, 0) || 0;
+    // Cálculos de balance
+    const balanceTotal = cuentas.reduce((sum, cuenta) => sum + cuenta.balance, 0);
     const balancePositivo = cuentas
-        ?.filter(cuenta => cuenta.balance > 0)
-        .reduce((total, cuenta) => total + cuenta.balance, 0) || 0;
+        .filter(cuenta => cuenta.balance > 0)
+        .reduce((sum, cuenta) => sum + cuenta.balance, 0);
     const balanceNegativo = cuentas
-        ?.filter(cuenta => cuenta.balance < 0)
-        .reduce((total, cuenta) => total + cuenta.balance, 0) || 0;
+        .filter(cuenta => cuenta.balance < 0)
+        .reduce((sum, cuenta) => sum + cuenta.balance, 0);
 
     return {
-        // Datos y estado
         cuentas,
         isLoading,
         isError,
         error,
+        refetch,
         balanceTotal,
         balancePositivo,
         balanceNegativo,
-
-        // Acciones
-        refetch,
-        agregarCuenta: (nuevaCuenta) => addMutation.mutate(nuevaCuenta),
-        actualizarCuenta: (id, datos) => updateMutation.mutate({ id, datos }),
-        eliminarCuenta: (id) => deleteMutation.mutate(id),
-
-        // Estado de las mutaciones
+        agregarCuenta: addMutation.mutate,
+        actualizarCuenta: updateMutation.mutate,
+        eliminarCuenta: deleteMutation.mutate,
         isAdding: addMutation.isPending,
         isUpdating: updateMutation.isPending,
         isDeleting: deleteMutation.isPending
     };
-}
+};
