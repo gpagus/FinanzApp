@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-dialog": "^1.1.13",
     "@tailwindcss/vite": "^4.0.17",
     "@tanstack/react-query": "^5.75.0",
     "clsx": "^2.1.1",
@@ -18,11 +20,13 @@
     "lucide-react": "^0.488.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.2",
     "react-hot-toast": "^2.5.2",
     "react-router": "^7.4.1",
     "react-router-dom": "^7.4.1",
     "react-select": "^5.10.1",
-    "tailwindcss": "^4.0.17"
+    "tailwindcss": "^4.0.17",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

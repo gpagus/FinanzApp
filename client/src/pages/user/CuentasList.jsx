@@ -1,4 +1,3 @@
-
 import {useState} from 'react';
 import {
     PlusCircle,
@@ -15,7 +14,7 @@ import {useCuentas} from '../../hooks/useCuentas';
 import {useNavigate} from "react-router-dom";
 import {useSaldos} from "../../context/SaldosContext";
 import {formatearMoneda, formatearFecha} from "../../utils/formatters";
-import CuentaForm from "../../components/ui/CuentaForm";
+import CuentaForm from "../../components/ui/forms/CuentaForm.jsx";
 import {TIPOS_CUENTA} from "../../utils/constants";
 
 
@@ -23,7 +22,6 @@ const tiposCuenta = [
     {id: 'corriente', nombre: 'Cuenta Corriente', icono: <CreditCard size={20}/>},
     {id: 'ahorro', nombre: 'Cuenta de Ahorro', icono: <PiggyBank size={20}/>},
     {id: 'credito', nombre: 'Tarjeta de Crédito', icono: <CreditCard size={20}/>},
-    {id: 'efectivo', nombre: 'Efectivo', icono: <Wallet size={20}/>},
     {id: 'inversion', nombre: 'Inversión', icono: <TrendingUp size={20}/>}
 ];
 

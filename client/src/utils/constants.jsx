@@ -23,13 +23,6 @@ export const TIPOS_CUENTA = [
         label: 'Tarjeta de Crédito',
     },
     {
-        id: 'efectivo',
-        nombre: 'Efectivo',
-        Icono: Wallet,
-        value: 'efectivo',
-        label: 'Efectivo',
-    },
-    {
         id: 'inversion',
         nombre: 'Inversión',
         Icono: TrendingUp,

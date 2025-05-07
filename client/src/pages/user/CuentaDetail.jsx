@@ -20,7 +20,8 @@ import TransaccionesList from '../../components/ui/TransaccionesList';
 import TransaccionesFilters from '../../components/ui/TransaccionesFilters';
 import DropdownMenu from '../../components/ui/DropdownMenu';
 import ConfirmModal from '../../components/ui/ConfirmModal';
-import CuentaForm from '../../components/ui/CuentaForm';
+import CuentaForm from '../../components/ui/forms/CuentaForm';
+import NewOperationModal from "../../components/ui/NewOperationModal";
 
 const CuentaDetail = () => {
     const {id} = useParams();
@@ -44,6 +45,7 @@ const CuentaDetail = () => {
         tipo: '',
         balance: 0,
     });
+    const [openOperacion, setOpenOperacion] = useState(false);
 
     const {mostrarSaldos} = useSaldos();
 
@@ -60,7 +62,7 @@ const CuentaDetail = () => {
         agregarTransaccion,
         actualizarTransaccion,
         eliminarTransaccion,
-    } = useTransacciones({ cuentaId: id });
+    } = useTransacciones({cuentaId: id});
 
 
     /* ---------------------- localizar cuenta ---------------------- */
@@ -242,7 +244,8 @@ const CuentaDetail = () => {
                         </div>
 
                         <div className="mt-4 sm:mt-0">
-                            <Boton tipo="primario" className="flex items-center" disabled={isUpdating}>
+                            <Boton tipo="primario" className="flex items-center" onClick={() => setOpenOperacion(true)}
+                                   disabled={isUpdating}>
                                 {isUpdating ? (
                                     <>
                                         <Loader size={18} className="animate-spin mr-2"/>
@@ -312,6 +315,12 @@ const CuentaDetail = () => {
                 onInputChange={handleInputChange}
                 onSubmit={handleEditar}
                 onClose={() => setMostrarFormulario(false)}
+            />
+
+            <NewOperationModal
+                open={openOperacion}
+                onOpenChange={setOpenOperacion}
+                cuentaId={cuenta.id}
             />
 
         </div>

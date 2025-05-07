@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../context/AuthContext";
 import Boton from "../components/ui/Boton";
-import LoginForm from "../components/LoginForm";
+import LoginForm from "../components/ui/forms/LoginForm.jsx";
 import {
     TrendingUp,
     ShoppingCart,

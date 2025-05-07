@@ -1,10 +1,10 @@
 import React, {useState} from "react";
-import {useAuth} from "../context/AuthContext";
-import Boton from "./ui/Boton";
-import FormField from "./ui/FormField";
-import useForm from "./useForm";
-import {validarLoginForm} from "../utils/validaciones";
-import ForgotPasswordForm from "./ForgotPasswordForm";
+import {useAuth} from "../../../context/AuthContext.jsx";
+import Boton from "../Boton.jsx";
+import FormField from "../FormField.jsx";
+import useForm from "../../useForm.jsx";
+import {validarLoginForm} from "../../../utils/validaciones.js";
+import ForgotPasswordForm from "./ForgotPasswordForm.jsx";
 import {X} from "lucide-react";
 
 const LoginForm = ({onClose}) => {

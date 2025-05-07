@@ -1,4 +1,3 @@
-// useTransacciones.jsx
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTransacciones, addTransaccion, updateTransaccion, deleteTransaccion } from '../api/transaccionesApi';
 import toast from 'react-hot-toast';

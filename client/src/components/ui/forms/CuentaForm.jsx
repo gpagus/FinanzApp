@@ -1,18 +1,18 @@
 import { Euro, Loader } from 'lucide-react';
-import Boton from './Boton';
-import FormField from './FormField';
+import Boton from '../Boton.jsx';
+import FormField from '../FormField.jsx';
 
 const CuentaForm = ({
-                              mostrar,
-                              cuentaSeleccionada,
-                              nuevaCuenta,
-                              errores,
-                              isSubmitting,
-                              opcionesTiposCuenta,
-                              onInputChange,
-                              onSubmit,
-                              onClose,
-                          }) => {
+                        mostrar,
+                        cuentaSeleccionada,
+                        nuevaCuenta,
+                        errores,
+                        isSubmitting,
+                        opcionesTiposCuenta,
+                        onInputChange,
+                        onSubmit,
+                        onClose,
+                    }) => {
     if (!mostrar) return null;
 
     return (
@@ -36,30 +36,34 @@ const CuentaForm = ({
                         disabled={isSubmitting}
                     />
 
-                    <FormField
-                        label="Tipo de cuenta"
-                        name="tipo"
-                        type="select"
-                        value={nuevaCuenta.tipo}
-                        onChange={onInputChange}
-                        error={errores.tipo}
-                        options={opcionesTiposCuenta}
-                        disabled={isSubmitting}
-                    />
+                    {!cuentaSeleccionada && (
+                        <>
+                            <FormField
+                                label="Tipo de cuenta"
+                                name="tipo"
+                                type="select"
+                                value={nuevaCuenta.tipo}
+                                onChange={onInputChange}
+                                error={errores.tipo}
+                                options={opcionesTiposCuenta}
+                                disabled={isSubmitting}
+                            />
 
-                    <FormField
-                        label="Saldo inicial"
-                        name="balance"
-                        type="number"
-                        value={nuevaCuenta.balance}
-                        onChange={onInputChange}
-                        error={errores.balance}
-                        placeholder="0.00"
-                        step="0.01"
-                        prefix={<Euro size={16} className="text-neutral-600" />}
-                        hint="Use valores negativos para deudas o tarjetas de crédito"
-                        disabled={isSubmitting}
-                    />
+                            <FormField
+                                label="Saldo inicial"
+                                name="balance"
+                                type="number"
+                                value={nuevaCuenta.balance}
+                                onChange={onInputChange}
+                                error={errores.balance}
+                                placeholder="0.00"
+                                step="0.01"
+                                prefix={<Euro size={16} className="text-neutral-600" />}
+                                hint="Use valores negativos para deudas o tarjetas de crédito"
+                                disabled={isSubmitting}
+                            />
+                        </>
+                    )}
 
                     <div className="flex justify-end space-x-3">
                         <Boton tipo="texto" onClick={onClose} disabled={isSubmitting}>

@@ -1,5 +1,6 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import {useEffect} from "react";
+import {useNavigate} from "react-router-dom";
+import {toast} from "react-hot-toast";
 
 export default function Redireccionador() {
     const navigate = useNavigate();
@@ -13,7 +14,8 @@ export default function Redireccionador() {
         } else if (type === "recovery") {
             navigate("/restablecer-contrasena" + window.location.hash);
         } else {
-            navigate("/");
+            navigate("/dashboard");
+            toast.error("Token inválido o no proporcionado. Por favor, verifica el enlace que has recibido.", {duration: 5000});
         }
     }, []);
 

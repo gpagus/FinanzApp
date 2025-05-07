@@ -1,9 +1,9 @@
 import React from "react";
-import {useAuth} from "../context/AuthContext";
-import Boton from "./ui/Boton";
-import FormField from "./ui/FormField";
-import useForm from "./useForm";
-import {validarRecuperarContrasena} from "../utils/validaciones";
+import {useAuth} from "../../../context/AuthContext.jsx";
+import Boton from "../Boton.jsx";
+import FormField from "../FormField.jsx";
+import useForm from "../../useForm.jsx";
+import {validarRecuperarContrasena} from "../../../utils/validaciones.js";
 import {X} from "lucide-react";
 
 const ForgotPasswordForm = ({onClose}) => {
