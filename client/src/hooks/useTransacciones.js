@@ -1,8 +1,8 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getTransacciones, addTransaccion, updateTransaccion, deleteTransaccion } from '../api/transaccionesApi';
+import {useInfiniteQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import {getTransacciones, addTransaccion, updateTransaccion, deleteTransaccion} from '../api/transaccionesApi';
 import toast from 'react-hot-toast';
 
-export default function useTransacciones({ cuentaId, filtroFecha = 'todo', limit = 15 }) {
+export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit = 15}) {
     const qc = useQueryClient();
 
     /* ---------- lectura (scroll infinito) ---------- */
@@ -16,8 +16,8 @@ export default function useTransacciones({ cuentaId, filtroFecha = 'todo', limit
         refetch,
     } = useInfiniteQuery({
         queryKey: ['transacciones', cuentaId, filtroFecha],
-        queryFn: ({ pageParam = 0 }) =>
-            getTransacciones({ cuentaId, limit, offset: pageParam }),
+        queryFn: ({pageParam = 0}) =>
+            getTransacciones({cuentaId, limit, offset: pageParam}),
         getNextPageParam: (lastPage, allPages) =>
             lastPage.length === limit ? allPages.length * limit : undefined,
         enabled: !!cuentaId,
@@ -34,23 +34,23 @@ export default function useTransacciones({ cuentaId, filtroFecha = 'todo', limit
         mutationFn: addTransaccion,
         onSuccess: (nueva) => {
             qc.setQueryData(['transacciones', cuentaId, filtroFecha], (old) => {
-                if (!old) return { pages: [[nueva]], pageParams: [0] };
+                if (!old) return {pages: [[nueva]], pageParams: [0]};
                 const firstPage = old.pages[0] ?? [];
                 return {
                     ...old,
                     pages: [[nueva, ...firstPage], ...old.pages.slice(1)],
                 };
             });
-            actualizarSaldoCuenta(cuentaId, nueva.monto);
-            toast.success('Transacción creada');
+            actualizarSaldoCuenta(cuentaId, nueva.monto, nueva.tipo);
+            toast.success('Movimiento registrado');
         },
     });
 
     // 2. actualizar
     const updateMutation = useMutation({
-        mutationFn: ({ id, datos }) => updateTransaccion(id, datos),
+        mutationFn: ({id, datos}) => updateTransaccion(id, datos),
         onSuccess: (act, variables) => {
-            const { id, datos, montoAnterior } = variables;
+            const {id, datos, montoAnterior} = variables;
             qc.setQueryData(['transacciones', cuentaId, filtroFecha], (old) => {
                 if (!old) return old;
                 return {
@@ -67,8 +67,8 @@ export default function useTransacciones({ cuentaId, filtroFecha = 'todo', limit
 
     // 3. eliminar
     const deleteMutation = useMutation({
-        mutationFn: ({ id }) => deleteTransaccion(id),
-        onSuccess: (_, { id, montoEliminado }) => {
+        mutationFn: ({id}) => deleteTransaccion(id),
+        onSuccess: (_, {id, montoEliminado}) => {
             qc.setQueryData(['transacciones', cuentaId, filtroFecha], (old) => {
                 if (!old) return old;
                 return {
@@ -82,12 +82,19 @@ export default function useTransacciones({ cuentaId, filtroFecha = 'todo', limit
     });
 
     /* ---------- helpers ---------- */
-    const actualizarSaldoCuenta = (cuentaId, diff) => {
-        qc.setQueryData(['cuentas'], (cuentas = []) =>
-            cuentas.map((c) =>
-                c.id === cuentaId ? { ...c, balance: c.balance + diff } : c
-            )
-        );
+    const actualizarSaldoCuenta = (cuentaId, diff, tipo) => {
+        qc.setQueryData(['cuentas'], (cuentas = []) => {
+
+            const cuentasActualizadas = cuentas.map((c) => {
+                if (c.id === cuentaId) {
+                    const nuevoBalance = c.balance + (tipo === 'gasto' ? -diff : diff);
+                    return {...c, balance: nuevoBalance};
+                }
+                return c;
+            });
+
+            return cuentasActualizadas;
+        });
     };
 
     return {

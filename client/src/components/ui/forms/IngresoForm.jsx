@@ -8,10 +8,10 @@ import FormField from "../FormField";
 /* --- esquema de validación --- */
 const ingresoSchema = z.object({
     monto: z.coerce.number().positive('Debe ser mayor que 0'),
-    categoria_id: z.coerce.number().min(1, 'Categoría no válida').max(42, 'Categoría no válida'),
+    categoria_id: z.coerce.number().min(1, 'Categoría no válida').max(9, 'Categoría no válida'),
     descripcion: z.string().min(1, 'Introduzca una descripción').max(50, 'Máximo 50 caracteres'),
     fecha: z.coerce.date({
-        errorMap: () => ({ message: 'Introduzca una fecha' })
+        errorMap: () => ({message: 'Introduzca una fecha'})
     }).refine((date) => date <= new Date(), {
         message: 'La fecha no puede ser futura',
     })
@@ -20,9 +20,9 @@ const ingresoSchema = z.object({
 export default function IngresoForm({cuentaId, onSuccess, onBack}) {
     const {agregarTransaccion, isAddingTransaccion} = useTransacciones({cuentaId});
 
-    const {register, handleSubmit, errors, isSubmitting} = useCustomForm(
-        ingresoSchema,
-        (data) => {
+    const {register, handleSubmit, errors, isSubmitting} = useCustomForm({
+        schema: ingresoSchema,
+        onSubmit: (data) => {
             agregarTransaccion(
                 {
                     ...data,
@@ -31,8 +31,9 @@ export default function IngresoForm({cuentaId, onSuccess, onBack}) {
                 },
                 {onSuccess}
             );
-        }
-    );
+        },
+    });
+
 
     return (
         <>
@@ -74,7 +75,7 @@ export default function IngresoForm({cuentaId, onSuccess, onBack}) {
                 <FormField
                     label="Fecha"
                     name="fecha"
-                    type="date"
+                    type="datetime-local"
                     register={register}
                     error={errors.fecha?.message}
                 />

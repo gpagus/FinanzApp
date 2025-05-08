@@ -271,8 +271,8 @@ const CuentaDetail = () => {
                             <p className="font-medium text-neutral-900">{user.nombre} {user.apellidos}</p>
                         </div>
                         <div className="p-3 bg-neutral-100 rounded-lg">
-                            <p className="text-neutral-600 text-sm mb-1">Última actualización</p>
-                            <p className="font-medium text-neutral-900">{formatearFecha(cuenta.lastUpdate)}</p>
+                            <p className="text-neutral-600 text-sm mb-1">Fecha de creación</p>
+                            <p className="font-medium text-neutral-900">{formatearFecha(cuenta.created_at)}</p>
                         </div>
                     </div>
                 </div>

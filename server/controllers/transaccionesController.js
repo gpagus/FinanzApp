@@ -24,18 +24,22 @@ const crearTransaccion = async (req, res) => {
             user_id: userId
         };
 
-        const {data, error} = await supabase
+        // Insertar la nueva transacción
+        const { data, error } = await supabase
             .from('transacciones')
             .insert([nuevaTransaccion])
             .select();
 
-        if (error) return res.status(500).json({error: error.message});
+        if (error) return res.status(500).json({ error: error.message });
+
         res.status(201).json(data[0]);
 
     } catch (err) {
-        return res.status(400).json({error: err.errors?.[0]?.message || 'Datos inválidos'});
+        console.error("Error en crearTransaccion:", err.message);
+        return res.status(400).json({ error: err.message || 'Datos inválidos' });
     }
 };
+
 
 const actualizarTransaccion = async (req, res) => {
     const userId = req.user.id;

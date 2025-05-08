@@ -35,13 +35,13 @@ export const CATEGORIAS = [
     /* --- INGRESOS --- */
     { value: 4, label: 'Ahorro e inversión', tipo: 'ingreso', icono: '📈' },
     { value: 7, label: 'Efectivo', tipo: 'ingreso', icono: '💵' },
-    { value: 8, label: 'Ingresos profesionales', tipo: 'ingreso', icono: '🧑‍💼' },
+    { value: 8, label: 'Ingresos profesionales', tipo: 'ingreso', icono: '‍💼' },
     { value: 9, label: 'Ingreso alquiler', tipo: 'ingreso', icono: '🏡' },
     { value: 1, label: 'Nómina o pensión', tipo: 'ingreso', icono: '💵' },
     { value: 3, label: 'Otros ingresos', tipo: 'ingreso', icono: '💰' },
     { value: 2, label: 'Subvenciones', tipo: 'ingreso', icono: '🏦' },
     { value: 5, label: 'Traspasos', tipo: 'ingreso', icono: '🔄' },
-    { value: 6, label: 'Transferencias y bizums recibidas', tipo: 'ingreso', icono: '💸' },
+    { value: 6, label: 'Transferencias', tipo: 'ingreso', icono: '💸' },
 
     /* --- GASTOS --- */
     { value: 17, label: 'Agua', tipo: 'gasto', icono: '💧' },
@@ -52,7 +52,7 @@ export const CATEGORIAS = [
     { value: 26, label: 'Educación', tipo: 'gasto', icono: '📚' },
     { value: 15, label: 'Electricidad', tipo: 'gasto', icono: '⚡' },
     { value: 25, label: 'Electrónica', tipo: 'gasto', icono: '💻' },
-    { value: 38, label: 'Gastos profesionales', tipo: 'gasto', icono: '🧑‍💼' },
+    { value: 38, label: 'Gastos profesionales', tipo: 'gasto', icono: '‍💼' },
     { value: 41, label: 'Gastos financieros', tipo: 'gasto', icono: '💱' },
     { value: 34, label: 'Grandes superficies', tipo: 'gasto', icono: '🏬' },
     { value: 13, label: 'Hipoteca', tipo: 'gasto', icono: '🏠' },

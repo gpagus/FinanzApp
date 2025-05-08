@@ -2,6 +2,7 @@ import {useSaldos} from "../../context/SaldosContext";
 import {Loader} from 'lucide-react';
 import Boton from '../ui/Boton';
 import {formatearMoneda, formatearFecha} from "../../utils/formatters";
+import {CATEGORIAS} from "../../utils/constants";
 
 const TransaccionesList = ({
                                transacciones,
@@ -33,56 +34,56 @@ const TransaccionesList = ({
             ) : transacciones.length === 0 ? (
                 <div className="p-8 text-center">
                     <p className="text-neutral-600 mb-2">No hay transacciones para mostrar</p>
-                    <p className="text-sm text-neutral-600">Prueba a cambiar los filtros o a añadir nuevas
-                        operaciones</p>
+                    <p className="text-sm text-neutral-600">Prueba a cambiar los filtros o a añadir nuevas operaciones</p>
                 </div>
             ) : (
                 <>
-                    
                     {Object.entries(transaccionesPorFecha).map(([fecha, transaccionesDia]) => (
                         <div key={fecha} className="border-b border-neutral-200 last:border-0">
                             <div className="px-4 py-2 bg-neutral-100">
                                 <p className="font-medium text-sm text-neutral-600">{fecha}</p>
                             </div>
                             <ul>
-                                {transaccionesDia.map((transaccion) => (
-                                    <li
-                                        key={transaccion.id}
-                                        className="border-b border-neutral-200 last:border-0 hover:bg-neutral-100 cursor-pointer transition-colors"
-                                    >
-                                        <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between">
-                                            <div className="flex items-center mb-2 sm:mb-0">
-                                                <div className="mr-3 text-xl" aria-hidden="true">
-                                                    {transaccion.icono}
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-neutral-900">{transaccion.descripcion}</p>
-                                                    <div className="flex flex-col xs:flex-row xs:gap-2">
-                                                        <p className="text-sm text-neutral-600">
-                                                            {new Date(new Date(transaccion.fecha).getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('es-ES', {
-                                                                hour: '2-digit',
-                                                                minute: '2-digit'
-                                                            })}
-                                                        </p>
-                                                        {mostrarCuenta && transaccion.cuenta && (
-                                                            <p className="text-sm text-aguazul">
-                                                                {transaccion.cuenta.nombre}
+                                {transaccionesDia.map((transaccion) => {
+                                    const categoria = CATEGORIAS.find(cat => cat.value === transaccion.categoria_id);
+                                    return (
+                                        <li
+                                            key={transaccion.id}
+                                            className="border-b border-neutral-200 last:border-0 hover:bg-neutral-100 cursor-pointer transition-colors"
+                                        >
+                                            <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between">
+                                                <div className="flex items-center mb-2 sm:mb-0">
+                                                    <div className="mr-3 text-xl" aria-hidden="true">
+                                                        {categoria?.icono || '❓'}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-neutral-900">{transaccion.descripcion}</p>
+                                                        <div className="flex flex-col xs:flex-row xs:gap-2">
+                                                            <p className="text-sm text-neutral-600">
+                                                                {new Date(new Date(transaccion.fecha).getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('es-ES', {
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })}
                                                             </p>
-                                                        )}
+                                                            {mostrarCuenta && transaccion.cuenta && (
+                                                                <p className="text-sm text-aguazul">
+                                                                    {transaccion.cuenta.nombre}
+                                                                </p>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <p className={`font-semibold ${transaccion.tipo === 'gasto' ? 'text-error' : 'text-success'}`}>
+                                                    {mostrarSaldos ? formatearMoneda(transaccion.tipo === 'gasto' ? -transaccion.monto : transaccion.monto) : '••••••'}
+                                                </p>
                                             </div>
-                                            <p className={`font-semibold ${transaccion.monto >= 0 ? 'text-success' : 'text-error'}`}>
-                                                {mostrarSaldos ? formatearMoneda(transaccion.monto) : '••••••'}
-                                            </p>
-                                        </div>
-                                    </li>
-                                ))}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     ))}
 
-                    {/* Botón "Ver más movimientos" */}
                     {hayMasTransacciones && (
                         <div className="p-2">
                             <Boton
