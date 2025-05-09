@@ -5,6 +5,7 @@ import useCustomForm from '../../../hooks/useCustomForm';
 import useTransacciones from '../../../hooks/useTransacciones';
 import Boton from '../Boton';
 import FormField from '../FormField';
+import {Euro} from "lucide-react";
 
 /* --- esquema de validación para GASTOS --- */
 const gastoSchema = z.object({
@@ -57,6 +58,7 @@ export default function GastoForm({ cuentaId, onSuccess, onBack }) {
                     type="number"
                     placeholder="0.00"
                     step="0.01"
+                    prefix={<Euro size={16} className="text-neutral-600" />}
                     max="0"
                     register={register}
                     error={errors.monto?.message}

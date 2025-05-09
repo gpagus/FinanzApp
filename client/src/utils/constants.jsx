@@ -40,8 +40,10 @@ export const CATEGORIAS = [
     { value: 1, label: 'Nómina o pensión', tipo: 'ingreso', icono: '💵' },
     { value: 3, label: 'Otros ingresos', tipo: 'ingreso', icono: '💰' },
     { value: 2, label: 'Subvenciones', tipo: 'ingreso', icono: '🏦' },
-    { value: 5, label: 'Traspasos', tipo: 'ingreso', icono: '🔄' },
-    { value: 6, label: 'Transferencias', tipo: 'ingreso', icono: '💸' },
+
+    /* -- TRANSFERENCIA --- */
+    { value: 6, label: 'Transferencia enviada', tipo: 'transferencia', icono: '📤' },
+    { value: 5, label: 'Transferencia recibida', tipo: 'transferencia', icono: '📥' },
 
     /* --- GASTOS --- */
     { value: 17, label: 'Agua', tipo: 'gasto', icono: '💧' },
@@ -74,5 +76,4 @@ export const CATEGORIAS = [
     { value: 18, label: 'Teléfono', tipo: 'gasto', icono: '📱' },
     { value: 19, label: 'Viajes', tipo: 'gasto', icono: '✈️' },
     { value: 10, label: 'Restaurantes y bares', tipo: 'gasto', icono: '🍽️' },
-    { value: 39, label: 'Transferencias y bizums enviadas', tipo: 'gasto', icono: '📤' }
 ];

@@ -38,7 +38,7 @@ const crearTransaccion = async (req, res) => {
         console.error("Error en crearTransaccion:", err.message);
         return res.status(400).json({ error: err.message || 'Datos inválidos' });
     }
-};
+    };
 
 
 const actualizarTransaccion = async (req, res) => {

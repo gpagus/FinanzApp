@@ -4,6 +4,7 @@ import useTransacciones from '../../../hooks/useTransacciones';
 import {useCuentas} from '../../../hooks/useCuentas';
 import Boton from '../Boton';
 import FormField from '../FormField';
+import {Euro} from "lucide-react";
 
 /* --- esquema de validación --- */
 const transferenciaSchema = (cuentaId, cuentasDisponibles) =>
@@ -56,8 +57,8 @@ export default function TransferenciaForm({
                 {
                     ...data,
                     cuenta_id: cuentaId,
-                    tipo: 'transferencia',
-                    categoria_id: 6 // Asegura que siempre se envíe el ID 6 (Transferencias)
+                    tipo: 'gasto',
+                    categoria_id: 6,
                 },
                 { onSuccess }
             );
@@ -84,6 +85,7 @@ export default function TransferenciaForm({
                     type="number"
                     step="0.01"
                     placeholder="0.00"
+                    prefix={<Euro size={16} className="text-neutral-600" />}
                     register={register}
                     error={errors.monto?.message}
                 />

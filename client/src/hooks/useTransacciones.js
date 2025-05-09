@@ -33,6 +33,7 @@ export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit 
     const addMutation = useMutation({
         mutationFn: addTransaccion,
         onSuccess: (nueva) => {
+            // Actualizar transacciones de cuenta origen
             qc.setQueryData(['transacciones', cuentaId, filtroFecha], (old) => {
                 if (!old) return {pages: [[nueva]], pageParams: [0]};
                 const firstPage = old.pages[0] ?? [];
@@ -41,7 +42,39 @@ export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit 
                     pages: [[nueva, ...firstPage], ...old.pages.slice(1)],
                 };
             });
+
+            // Actualizar saldo de cuenta origen
             actualizarSaldoCuenta(cuentaId, nueva.monto, nueva.tipo);
+
+            // Si es una transferencia, actualizar también la cuenta destino
+            if (nueva.cuenta_destino_id && nueva.categoria_id === 6) {
+                // Actualizar transacciones de cuenta destino (añadir la entrada espejo)
+                qc.setQueryData(['transacciones', nueva.cuenta_destino_id, filtroFecha], (old) => {
+                    // Si no hay datos, crear una nueva estructura
+                    if (!old) return {pages: [[]], pageParams: [0]};
+
+                    // Crear transacción espejo (ingreso en cuenta destino)
+                    const transaccionEspejo = {
+                        ...nueva,
+                        id: `temp-${nueva.id || Date.now()}`, // ID temporal hasta refresco
+                        cuenta_id: nueva.cuenta_destino_id,
+                        cuenta_origen_id: nueva.cuenta_id,
+                        tipo: 'ingreso',
+                        categoria_id: 5, // Categoría de transferencia recibida
+                        descripcion: `Transferencia: ${nueva.descripcion || 'recibida'}`
+                    };
+
+                    const firstPage = old.pages[0] ?? [];
+                    return {
+                        ...old,
+                        pages: [[transaccionEspejo, ...firstPage], ...old.pages.slice(1)],
+                    };
+                });
+
+                // Actualizar saldo de cuenta destino (como ingreso)
+                actualizarSaldoCuenta(nueva.cuenta_destino_id, nueva.monto, 'ingreso');
+            }
+
             toast.success('Movimiento registrado');
         },
     });
