@@ -1,45 +1,71 @@
 import {useNavigate} from "react-router-dom";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useAuth} from "../context/AuthContext";
 import FormField from "../components/ui/FormField";
 import Boton from "../components/ui/Boton";
-import useForm from "../components/useForm";
-import {validarRegistroForm} from "../utils/validaciones";
 import {UserRoundPlus} from "lucide-react";
+import useCustomForm from "../hooks/useCustomForm";
+import registerSchema from "../schemas/registerSchema";
 
 const Register = () => {
-    const {register, error} = useAuth();
+    const {register: registerUser, error} = useAuth();
     const navigate = useNavigate();
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarError, setAvatarError] = useState(null);
 
-    // Configuración inicial para useForm
-    const {values, errors, handleChange, handleBlur, handleSubmit} = useForm(
-        {
+    const {register, handleSubmit, errors} = useCustomForm({
+        schema: registerSchema,
+        onSubmit: async (data) => {
+            // Añadimos el avatar a los datos
+            const formData = {
+                ...data,
+                avatar: avatarFile
+            };
+            await registerUser(formData);
+            navigate("/dashboard");
+        },
+        defaultValues: {
             nombre: "",
             apellidos: "",
             email: "",
             password: "",
-            avatar: "",
         },
-        validarRegistroForm,
-        async () => {
-            await register(values);
-            navigate("/dashboard");
-        }
-    );
+    });
 
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            setPreviewUrl(URL.createObjectURL(file));
-            handleChange({
-                target: {
-                    name: 'avatar',
-                    value: file
-                }
-            });
+
+        if (!file) {
+            setPreviewUrl(null);
+            setAvatarFile(null);
+            setAvatarError(null);
+            return;
         }
+
+        if (file.size > 1024 * 1024) {
+            setAvatarError("El archivo no puede ser mayor de 1MB");
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            setAvatarError("El archivo debe ser una imagen");
+            return;
+        }
+
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(URL.createObjectURL(file));
+        setAvatarFile(file); // Almacena el archivo en estado local
+        setAvatarError(null);
     };
+    // Limpiar URLs de objeto al desmontar
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
 
     return (
         <div className="flex flex-col min-h-[calc(100vh-4rem-2.5rem)] lg:flex-row bg-neutral-100">
@@ -58,51 +84,48 @@ const Register = () => {
                             <FormField
                                 label="Nombre"
                                 name="nombre"
-                                value={values.nombre}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={errors?.nombre}
+                                register={register}
+                                error={errors?.nombre?.message}
                             />
 
                             <FormField
                                 label="Apellidos"
                                 name="apellidos"
-                                value={values.apellidos}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={errors?.apellidos}
+                                register={register}
+                                error={errors?.apellidos?.message}
                             />
 
                             <FormField
                                 label="Email"
                                 name="email"
                                 type="email"
-                                value={values.email}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={errors?.email}
+                                register={register}
+                                error={errors?.email?.message}
                             />
 
                             <FormField
                                 label="Contraseña"
                                 name="password"
                                 type="password"
-                                value={values.password}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={errors?.password}
+                                register={register}
+                                error={errors?.password?.message}
                             />
 
-                            <FormField
-                                type="file"
-                                name="avatar"
-                                label="Avatar (opcional)"
-                                accept="image/*"
-                                placeholder="Selecciona una imagen..."
-                                onChange={handleAvatarChange}
-                                onBlur={handleBlur}
-                                error={errors?.avatar}
-                            />
+                            <div className="space-y-1">
+                                <label htmlFor="avatar" className="block text-sm font-medium text-neutral-700">
+                                    Avatar (opcional)
+                                </label>
+                                <input
+                                    type="file"
+                                    id="avatar"
+                                    accept="image/*"
+                                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aguazul"
+                                    onChange={handleAvatarChange}
+                                />
+                                {avatarError && (
+                                    <p className="text-xs text-error">{avatarError}</p>
+                                )}
+                            </div>
 
                             {previewUrl && (
                                 <div className="mt-2 flex justify-center">
@@ -139,7 +162,7 @@ const Register = () => {
                         <div className="mb-8">
                             <div
                                 className="w-24 h-24 mx-auto bg-dollar-500 bg-opacity-30 rounded-full flex items-center justify-center">
-                                <UserRoundPlus className="w-12 h-12 text-white" />
+                                <UserRoundPlus className="w-12 h-12 text-white"/>
                             </div>
                         </div>
                         <h2 className="text-3xl font-bold mb-4">

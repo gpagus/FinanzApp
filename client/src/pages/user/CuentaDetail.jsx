@@ -59,9 +59,6 @@ const CuentaDetail = () => {
         filtroFecha,
         setFiltroFecha,
         cargarMasTransacciones,
-        agregarTransaccion,
-        actualizarTransaccion,
-        eliminarTransaccion,
     } = useTransacciones({cuentaId: id});
 
 
@@ -263,8 +260,8 @@ const CuentaDetail = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <div className="p-3 bg-neutral-100 rounded-lg">
-                            <p className="text-neutral-600 text-sm mb-1">Identificador</p>
-                            <p className="font-medium text-neutral-900">{cuenta.id}</p>
+                            <p className="text-neutral-600 text-sm mb-1">Tipo de cuenta</p>
+                            <p className="font-medium text-neutral-900">{cuenta.tipo}</p>
                         </div>
                         <div className="p-3 bg-neutral-100 rounded-lg">
                             <p className="text-neutral-600 text-sm mb-1">Titular</p>
@@ -294,7 +291,7 @@ const CuentaDetail = () => {
             />
 
 
-            {/* Modal para confirmar la eliminaciónd de la cuenta */}
+            {/* Modal para confirmar la eliminación de la cuenta */}
             <ConfirmModal
                 isOpen={mostrarConfirmacion}
                 onClose={() => setMostrarConfirmacion(false)}

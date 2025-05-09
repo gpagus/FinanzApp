@@ -9,7 +9,7 @@ import {Euro} from "lucide-react";
 
 /* --- esquema de validación para GASTOS --- */
 const gastoSchema = z.object({
-    monto: z.coerce.number().positive('Debe ser menor que 0'),
+    monto: z.coerce.number().positive('Debe ser mayor que 0'),
     categoria_id: z.coerce
         .number()
         .min(10, 'Categoría no válida')

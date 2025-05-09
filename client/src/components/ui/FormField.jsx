@@ -53,7 +53,7 @@ const FormField = ({
                     <select
                         id={name}
                         name={name}
-                        {...register(name)} // ✅ Aquí ya debería funcionar bien
+                        {...register(name)}
                         disabled={disabled}
                         className={inputClasses}
                     >
@@ -92,7 +92,7 @@ const FormField = ({
                         id={name}
                         name={name}
                         type={type}
-                        {...register(name)} // ✅ También aquí
+                        {...register(name)}
                         placeholder={placeholder}
                         disabled={disabled}
                         step={step}

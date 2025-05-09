@@ -1,28 +1,30 @@
 import React from "react";
-import {useAuth} from "../../../context/AuthContext.jsx";
-import Boton from "../Boton.jsx";
-import FormField from "../FormField.jsx";
-import useForm from "../../useForm.jsx";
-import {validarRecuperarContrasena} from "../../../utils/validaciones.js";
+import {z} from "zod";
+import {useAuth} from "../../../context/AuthContext";
+import Boton from "../Boton";
+import FormField from "../FormField";
 import {X} from "lucide-react";
+import useCustomForm from "../../../hooks/useCustomForm";
+
+
+const emailSchema = z.object({
+        email: z.string().email('Email no válido'),
+    }
+);
 
 const ForgotPasswordForm = ({onClose}) => {
     const {recuperarContrasena} = useAuth();
 
-    const handleRecuperarContrasena = async () => {
-        try {
-            await recuperarContrasena(values.email);
-        } catch (error) {
-            console.error("Error al enviar el correo de recuperación:", error);
-        }
-    }
+    const {register, handleSubmit, errors} = useCustomForm({
+        schema: emailSchema,
+        onSubmit: (data) => {
+            recuperarContrasena(data.email);
+        },
+        defaultValues: {
+            email: '',
+        },
+    });
 
-    // Configuración inicial para useForm
-    const {values, errors, handleChange, handleSubmit, handleBlur} = useForm(
-        {email: ""},
-        validarRecuperarContrasena,
-        handleRecuperarContrasena
-    );
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -49,10 +51,8 @@ const ForgotPasswordForm = ({onClose}) => {
                         label="Email"
                         name="email"
                         type="email"
-                        value={values.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={errors?.email}
+                        register={register}
+                        error={errors?.email?.message}
                         placeholder="ejemplo@correo.com"
                     />
 

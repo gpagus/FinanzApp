@@ -1,16 +1,27 @@
 import React, {useState} from "react";
-import {useAuth} from "../../../context/AuthContext.jsx";
-import Boton from "../Boton.jsx";
-import FormField from "../FormField.jsx";
-import useForm from "../../useForm.jsx";
-import {validarLoginForm} from "../../../utils/validaciones.js";
-import ForgotPasswordForm from "./ForgotPasswordForm.jsx";
+import {useAuth} from "../../../context/AuthContext";
+import Boton from "../Boton";
+import FormField from "../FormField";
+import ForgotPasswordForm from "./ForgotPasswordForm";
 import {X} from "lucide-react";
+import useCustomForm from "../../../hooks/useCustomForm";
+import loginSchema from "../../../schemas/loginSchema";
+
 
 const LoginForm = ({onClose}) => {
     const {login} = useAuth();
-
     const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+    const {register, handleSubmit, errors} = useCustomForm({
+        schema: loginSchema,
+        onSubmit: async (data) => {
+            await login(data.email, data.password);
+        },
+        defaultValues: {
+            email: '',
+            password: '',
+        },
+    });
 
     // Función para mostrar el modal de recuperación
     const handleShowForgotPassword = () => {
@@ -22,14 +33,6 @@ const LoginForm = ({onClose}) => {
         setShowForgotPassword(false);
     };
 
-    // Configuración inicial para useForm
-    const {values, errors, handleChange, handleSubmit, handleBlur} = useForm(
-        {email: "", password: ""},
-        validarLoginForm,
-        async () => {
-            await login(values);
-        }
-    );
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -48,19 +51,16 @@ const LoginForm = ({onClose}) => {
                     <FormField
                         label="Email"
                         name="email"
-                        value={values.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={errors?.email}
+                        register={register}
+                        error={errors?.email?.message}
                     />
+
                     <FormField
                         label="Contraseña"
                         name="password"
                         type="password"
-                        value={values.password}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={errors?.password}
+                        register={register}
+                        error={errors?.password?.message}
                     />
 
                     <Boton

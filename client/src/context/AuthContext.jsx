@@ -47,7 +47,7 @@ export const AuthProvider = ({children}) => {
         localStorage.setItem("user", JSON.stringify(perfil));
     };
 
-    const login = async ({email, password}) => {
+    const login = async (email, password) => {
         setLoading(true);
         setError(null);
         try {
@@ -79,6 +79,8 @@ export const AuthProvider = ({children}) => {
     };
 
     const register = async (values) => {
+        debugger;
+        console.log(values);
         setLoading(true);
         setError(null);
         try {
