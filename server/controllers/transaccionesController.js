@@ -15,6 +15,54 @@ const obtenerTransacciones = async (req, res) => {
     res.json(data);
 };
 
+const obtenerTodasLasTransacciones = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const {
+            fecha_desde,
+            fecha_hasta,
+            cuenta_id,
+            tipo,
+            categoria_id,
+            busqueda,
+            limit = 50,
+            offset = 0
+        } = req.query;
+
+        let query = supabase
+            .from('transacciones')
+            .select('*, cuentas!transacciones_cuenta_id_fkey(nombre)') // Especificar la relación exacta
+            .eq('user_id', userId)
+            .order('fecha', { ascending: false });
+
+        // Aplicar filtros si existen
+        if (fecha_desde) query = query.gte('fecha', fecha_desde);
+        if (fecha_hasta) query = query.lte('fecha', fecha_hasta);
+        if (cuenta_id) query = query.eq('cuenta_id', cuenta_id);
+        if (tipo === 'ingreso') query = query.gt('monto', 0);
+        if (tipo === 'gasto') query = query.lt('monto', 0);
+        if (categoria_id) query = query.eq('categoria_id', categoria_id);
+        if (busqueda) query = query.ilike('descripcion', `%${busqueda}%`);
+
+        // Paginación
+        const limitNum = Number(limit) || 50;
+        const offsetNum = Number(offset) || 0;
+        query = query.range(offsetNum, offsetNum + limitNum - 1);
+
+        const { data, error } = await query;
+
+        if (error) {
+            console.error("Error en Supabase:", error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.json(data || []);
+    } catch (err) {
+        console.error("Error en obtenerTodasLasTransacciones:", err);
+        return res.status(500).json({ error: 'Error al obtener todas las transacciones' });
+    }
+};
+
 const crearTransaccion = async (req, res) => {
     const userId = req.user.id;
 
@@ -29,6 +77,10 @@ const crearTransaccion = async (req, res) => {
             .from('transacciones')
             .insert([nuevaTransaccion])
             .select();
+
+        if (error?.message === 'numeric field overflow') {
+            return res.status(400).json({ error: 'El balance de la cuenta no puede exceder de los 10 dígitos' });
+        }
 
         if (error) return res.status(500).json({ error: error.message });
 
@@ -46,22 +98,22 @@ const actualizarTransaccion = async (req, res) => {
     const transaccionId = req.params.id;
 
     try {
-        const datosValidados = TransaccionSchema.parse(req.body);
 
-        const {data, error} = await supabase
+        const cambios = req.body;
+
+        const { data, error } = await supabase
             .from('transacciones')
-            .update({...datosValidados})
+            .update(cambios)
             .eq('id', transaccionId)
-            .eq('user_id', userId) // solo permite modificar si es suya
+            .eq('user_id', userId) // Solo permite modificar si es del usuario
             .select();
 
-        if (error) return res.status(500).json({error: error.message});
-        if (data.length === 0) return res.status(404).json({error: 'Transacción no encontrada o no autorizada'});
+        if (error) return res.status(500).json({ error: error.message });
+        if (data.length === 0) return res.status(404).json({ error: 'Transacción no encontrada o no autorizada' });
 
         res.json(data[0]);
-
     } catch (err) {
-        return res.status(400).json({error: err.errors?.[0]?.message || 'Datos inválidos'});
+        return res.status(400).json({ error: err.message || 'Datos inválidos' });
     }
 };
 
@@ -78,11 +130,12 @@ const eliminarTransaccion = async (req, res) => {
     if (error) return res.status(500).json({error: error.message});
     if (data.length === 0) return res.status(404).json({error: 'Transacción no encontrada o no autorizada'});
 
-    res.json({mensaje: 'Transacción eliminada correctamente'});
+    res.json({mensaje: 'Transacción eliminada'});
 };
 
 module.exports = {
     obtenerTransacciones,
+    obtenerTodasLasTransacciones,
     crearTransaccion,
     actualizarTransaccion,
     eliminarTransaccion

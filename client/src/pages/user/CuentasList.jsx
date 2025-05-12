@@ -39,6 +39,10 @@ const CuentasList = () => {
     const navigate = useNavigate();
     const {mostrarSaldos} = useSaldos();
 
+    // Ordenar cuentas por balance descendente
+    const cuentasOrdenadas = [...cuentas].sort((a, b) => b.balance - a.balance);
+
+
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
     const handleCreateCuenta = async (data) => {
@@ -158,7 +162,7 @@ const CuentasList = () => {
                     </div>
                 ) : (
                     <ul className="divide-y divide-neutral-200">
-                        {cuentas.map((cuenta) => {
+                        {cuentasOrdenadas.map((cuenta) => { // Cambiar de cuentas a cuentasOrdenadas
                             const IconoTipo = () => getIconoTipo(cuenta.tipo);
                             const tipoInfo = tiposCuenta.find(t => t.id === cuenta.tipo);
                             return (

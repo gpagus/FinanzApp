@@ -14,23 +14,38 @@ const obtenerCuentas = async (req, res) => {
 
 const crearCuenta = async (req, res) => {
     const userId = req.user.id;
+    const LIMITE_CUENTAS = 10; // Límite máximo de cuentas por usuario
 
     try {
+        // Verificar el número de cuentas existentes del usuario
+        const { count, error: countError } = await supabase
+            .from('cuentas')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId);
+
+        if (countError) return res.status(500).json({ error: countError.message });
+
+        if (count >= LIMITE_CUENTAS) {
+            return res.status(400).json({ error: `No puedes tener más de ${LIMITE_CUENTAS} cuentas.` });
+        }
+
+        // Crear la nueva cuenta
         const nuevaCuenta = {
             ...req.body,
-            user_id: userId
+            user_id: userId,
         };
 
-        const {data, error} = await supabase
+        const { data, error } = await supabase
             .from('cuentas')
             .insert([nuevaCuenta])
             .select();
 
-        if (error) return res.status(500).json({error: error.message});
-        res.status(201).json(data[0]);
+        if (error) return res.status(500).json({ error: error.message });
 
+        res.status(201).json(data[0]);
     } catch (err) {
-        return res.status(400).json({error: err.errors?.[0]?.message || 'Datos inválidos'});
+        console.error("Error en crearCuenta:", err.message);
+        return res.status(400).json({ error: err.message || 'Datos inválidos' });
     }
 };
 
@@ -69,7 +84,7 @@ const eliminarCuenta = async (req, res) => {
 
     if (error) return res.status(500).json({error: error.message});
 
-    res.json({mensaje: 'Cuenta eliminada correctamente'});
+    res.json({mensaje: 'Cuenta eliminada'});
 };
 
 module.exports = {

@@ -4,7 +4,6 @@ function DropdownMenu({ triggerIcon, actions = [] }) {
     const [abierto, setAbierto] = useState(false);
     const menuRef = useRef(null);
 
-    // Cierra el menú si se hace clic fuera de él
     useEffect(() => {
         function manejarClickFuera(event) {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -29,14 +28,19 @@ function DropdownMenu({ triggerIcon, actions = [] }) {
 
             {abierto && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                    {actions.map(({ label, onClick, className = '' }, index) => (
+                    {actions.map(({ label, onClick, className = '', disabled = false }, index) => (
                         <button
                             key={index}
                             onClick={() => {
-                                onClick();
-                                setAbierto(false);
+                                if (!disabled) {
+                                    onClick();
+                                    setAbierto(false);
+                                }
                             }}
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${className}`}
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+                                disabled ? 'text-gray-400 cursor-not-allowed' : className
+                            }`}
+                            disabled={disabled}
                         >
                             {label}
                         </button>
@@ -46,5 +50,4 @@ function DropdownMenu({ triggerIcon, actions = [] }) {
         </div>
     );
 }
-
 export default DropdownMenu;

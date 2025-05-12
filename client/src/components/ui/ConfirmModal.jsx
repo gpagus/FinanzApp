@@ -1,4 +1,4 @@
-import {AlertTriangle, X} from 'lucide-react';
+import {AlertTriangle, Loader, X} from 'lucide-react';
 import Boton from './Boton';
 
 const ConfirmModal = ({
@@ -50,7 +50,7 @@ const ConfirmModal = ({
                         {isWaiting ? (
                             <>
                                 <Loader size={16} className="animate-spin mr-2"/>
-                                Eliminando...
+                                Procesando...
                             </>
                         ) : (
                             confirmLabel

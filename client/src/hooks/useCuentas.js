@@ -27,11 +27,11 @@ export const useCuentas = () => {
         },
         onSuccess: (nuevaCuenta) => {
             queryClient.setQueryData(['cuentas'], (old = []) => [...old, nuevaCuenta]);
-            toast.success('Cuenta creada correctamente');
+            toast.success('Cuenta creada');
         },
         onError: (error) => {
             console.error("Error al crear cuenta:", error);
-            toast.error(`Error al crear cuenta: ${error.message}`);
+            toast.error(`${error.message}`);
         }
     });
 
@@ -42,7 +42,7 @@ export const useCuentas = () => {
             queryClient.setQueryData(['cuentas'], (old = []) =>
                 old.map(cuenta => cuenta.id === cuentaActualizada.id ? cuentaActualizada : cuenta)
             );
-            toast.success('Cuenta actualizada correctamente');
+            toast.success('Cuenta actualizada');
         },
         onError: (error) => toast.error(`Error al actualizar cuenta: ${error.message}`)
     });
@@ -54,7 +54,7 @@ export const useCuentas = () => {
             queryClient.setQueryData(['cuentas'], (old = []) =>
                 old.filter(cuenta => cuenta.id !== id)
             );
-            toast.success('Cuenta eliminada correctamente');
+            toast.success('Cuenta eliminada');
         },
         onError: (error) => toast.error(`Error al eliminar cuenta: ${error.message}`)
     });

@@ -2,6 +2,18 @@ import {useInfiniteQuery, useMutation, useQueryClient} from '@tanstack/react-que
 import {getTransacciones, addTransaccion, updateTransaccion, deleteTransaccion} from '../api/transaccionesApi';
 import toast from 'react-hot-toast';
 
+const useAllTransacciones = (filtros = {}, limit = 15) => {
+    return useInfiniteQuery({
+        queryKey: ['allTransacciones', filtros],
+        queryFn: ({ pageParam = 0 }) =>
+            getAllTransacciones({ ...filtros, limit, offset: pageParam }),
+        getNextPageParam: (lastPage, allPages) =>
+            lastPage.length === limit ? allPages.length * limit : undefined,
+        staleTime: 5 * 60 * 1000, // 5 minutos
+        onError: (e) => toast.error(`Error cargando transacciones: ${e.message}`)
+    });
+};
+
 export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit = 15}) {
     const qc = useQueryClient();
 
@@ -76,6 +88,9 @@ export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit 
             }
 
             toast.success('Movimiento registrado');
+        },
+        onError: (e) => {
+            toast.error(`${e.message}`);
         },
     });
 
