@@ -1,49 +1,15 @@
 import {useInfiniteQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {getTransacciones, addTransaccion, updateTransaccion, deleteTransaccion} from '../api/transaccionesApi';
 import toast from 'react-hot-toast';
-import { useState } from 'react';
+import {useState} from 'react';
 
 export default function useTransacciones({cuentaId, limit = 15}) {
     const qc = useQueryClient();
-    const [filtroFecha, setFiltroFecha] = useState('ultimos30');
-    const [fechasPersonalizadas, setFechasPersonalizadas] = useState({
-        desde: '',
-        hasta: ''
+    const [filtros, setFiltros] = useState({
+        fecha_desde: '',
+        fecha_hasta: '',
+        busqueda: ''
     });
-
-    // Calcular fechas basadas en el filtro
-    const obtenerFechasParaFiltro = () => {
-        const hoy = new Date();
-        switch(filtroFecha) {
-            case 'ultimos30':
-                { const hace30Dias = new Date(hoy);
-                hace30Dias.setDate(hoy.getDate() - 30);
-                return {
-                    desde: hace30Dias.toISOString().split('T')[0],
-                    hasta: hoy.toISOString().split('T')[0]
-                }; }
-            case 'ultimos90':
-                { const hace90Dias = new Date(hoy);
-                hace90Dias.setDate(hoy.getDate() - 90);
-                return {
-                    desde: hace90Dias.toISOString().split('T')[0],
-                    hasta: hoy.toISOString().split('T')[0]
-                }; }
-            case 'año':
-                { const inicioAnio = new Date(hoy.getFullYear(), 0, 1);
-                return {
-                    desde: inicioAnio.toISOString().split('T')[0],
-                    hasta: hoy.toISOString().split('T')[0]
-                }; }
-            case 'personalizado':
-                return fechasPersonalizadas;
-            case 'todo':
-            default:
-                return { desde: '', hasta: '' };
-        }
-    };
-
-    const fechasFiltro = obtenerFechasParaFiltro();
 
     /* ---------- lectura (scroll infinito) ---------- */
     const {
@@ -55,14 +21,17 @@ export default function useTransacciones({cuentaId, limit = 15}) {
         error,
         refetch,
     } = useInfiniteQuery({
-        queryKey: ['transacciones', cuentaId, filtroFecha, fechasPersonalizadas],
+        queryKey: ['transacciones', cuentaId, filtros],
         queryFn: ({pageParam = 0}) =>
             getTransacciones({
                 cuentaId,
                 limit,
                 offset: pageParam,
-                fecha_desde: fechasFiltro.desde,
-                fecha_hasta: fechasFiltro.hasta
+                fecha_desde: filtros.fecha_desde,
+                fecha_hasta: filtros.fecha_hasta,
+                busqueda: filtros.busqueda,
+                tipo: filtros.tipo,
+                categoria_id: filtros.categoria_id
             }),
         getNextPageParam: (lastPage, allPages) =>
             lastPage.length === limit ? allPages.length * limit : undefined,
@@ -70,7 +39,6 @@ export default function useTransacciones({cuentaId, limit = 15}) {
         staleTime: 5 * 60 * 1000,
         onError: (e) => toast.error(`Error cargando transacciones: ${e.message}`),
     });
-
     // aplanamos páginas
     const transacciones = data?.pages.flat() ?? [];
 
@@ -80,7 +48,7 @@ export default function useTransacciones({cuentaId, limit = 15}) {
         mutationFn: addTransaccion,
         onSuccess: (nueva) => {
             // Actualizar transacciones de cuenta origen
-            qc.setQueryData(['transacciones', cuentaId, filtroFecha], (old) => {
+            qc.setQueryData(['transacciones', cuentaId, filtros], (old) => {
                 if (!old) return {pages: [[nueva]], pageParams: [0]};
                 const firstPage = old.pages[0] ?? [];
                 return {
@@ -95,7 +63,7 @@ export default function useTransacciones({cuentaId, limit = 15}) {
             // Si es una transferencia, actualizar también la cuenta destino
             if (nueva.cuenta_destino_id && nueva.categoria_id === 6) {
                 // Actualizar transacciones de cuenta destino (añadir la entrada espejo)
-                qc.setQueryData(['transacciones', nueva.cuenta_destino_id, filtroFecha], (old) => {
+                qc.setQueryData(['transacciones', nueva.cuenta_destino_id, filtros], (old) => {
                     // Si no hay datos, crear una nueva estructura
                     if (!old) return {pages: [[]], pageParams: [0]};
 
@@ -134,7 +102,7 @@ export default function useTransacciones({cuentaId, limit = 15}) {
         mutationFn: ({id, datos}) => updateTransaccion(id, datos),
         onSuccess: (act, variables) => {
             const {id, datos, montoAnterior} = variables;
-            qc.setQueryData(['transacciones', cuentaId, filtroFecha], (old) => {
+            qc.setQueryData(['transacciones', cuentaId, filtros], (old) => {
                 if (!old) return old;
                 return {
                     ...old,
@@ -154,7 +122,7 @@ export default function useTransacciones({cuentaId, limit = 15}) {
     const deleteMutation = useMutation({
         mutationFn: ({id}) => deleteTransaccion(id),
         onSuccess: (_, {id, montoEliminado}) => {
-            qc.setQueryData(['transacciones', cuentaId, filtroFecha], (old) => {
+            qc.setQueryData(['transacciones', cuentaId, filtros], (old) => {
                 if (!old) return old;
                 return {
                     ...old,
@@ -184,6 +152,22 @@ export default function useTransacciones({cuentaId, limit = 15}) {
         });
     };
 
+    // Función para actualizar los filtros
+    const actualizarFiltros = (nuevosFiltros) => {
+        setFiltros(prev => ({...prev, ...nuevosFiltros}));
+    };
+
+// Función para resetear los filtros
+    const resetearFiltros = () => {
+        setFiltros({
+            fecha_desde: '',
+            fecha_hasta: '',
+            busqueda: '',
+            tipo: '',
+            categoria_id: ''
+        });
+    };
+
     return {
         transacciones,
         cargandoTransacciones: isLoading,
@@ -192,10 +176,9 @@ export default function useTransacciones({cuentaId, limit = 15}) {
         errorTransacciones: error,
         refetchTransacciones: refetch,
         cargarMasTransacciones: fetchNextPage,
-        filtroFecha,
-        setFiltroFecha,
-        fechasPersonalizadas,
-        setFechasPersonalizadas,
+        filtros,
+        actualizarFiltros,
+        resetearFiltros,
         // acciones
         agregarTransaccion: addMutation.mutate,
         actualizarTransaccion: updateMutation.mutate,

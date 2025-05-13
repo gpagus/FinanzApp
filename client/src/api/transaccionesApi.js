@@ -3,16 +3,28 @@ import {fetchWithAuth} from "./fetchWithAuth";
 const API_URL = import.meta.env.VITE_API_URL;
 const TRANSACCIONES_ENDPOINT = `${API_URL}/api/transacciones`;
 
-export async function getTransacciones({cuentaId, limit = 15, offset = 0, fecha_desde, fecha_hasta}) {
+export async function getTransacciones({
+    cuentaId,
+    limit = 15,
+    offset = 0,
+    fecha_desde,
+    fecha_hasta,
+    busqueda,
+    tipo,
+    categoria_id
+}) {
     try {
         const url = new URL(TRANSACCIONES_ENDPOINT);
         url.searchParams.append('cuenta_id', cuentaId);
         url.searchParams.append('limit', limit);
         url.searchParams.append('offset', offset);
 
-        // Añadir filtros de fecha si existen
+        // Añadir filtros si existen
         if (fecha_desde) url.searchParams.append('fecha_desde', fecha_desde);
         if (fecha_hasta) url.searchParams.append('fecha_hasta', fecha_hasta);
+        if (busqueda) url.searchParams.append('busqueda', busqueda);
+        if (tipo) url.searchParams.append('tipo', tipo);
+        if (categoria_id) url.searchParams.append('categoria_id', categoria_id);
 
         const res = await fetchWithAuth(url.toString());
 

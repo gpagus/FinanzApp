@@ -56,8 +56,9 @@ const CuentaDetail = () => {
         hayMasTransacciones,
         cargandoTransacciones,
         cargandoMas,
-        filtroFecha,
-        setFiltroFecha,
+        filtros,
+        actualizarFiltros,
+        resetearFiltros,
         cargarMasTransacciones,
     } = useTransacciones({cuentaId: id});
 
@@ -271,8 +272,10 @@ const CuentaDetail = () => {
 
             {/* Filtros de transacciones */}
             <TransaccionesFilters
-                filtroFecha={filtroFecha}
-                setFiltroFecha={setFiltroFecha}
+                filtros={filtros}
+                onFilterChange={actualizarFiltros}
+                onReset={resetearFiltros}
+                vistaDetalleCuenta={true}
             />
 
             {/* Lista de transacciones */}

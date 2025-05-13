@@ -2,7 +2,16 @@ const supabase = require('../config/supabaseClient');
 
 
 const obtenerTransacciones = async (req, res) => {
-    const {cuenta_id, limit = 15, offset = 0, fecha_desde, fecha_hasta} = req.query;
+    const {
+        cuenta_id,
+        limit = 15,
+        offset = 0,
+        fecha_desde,
+        fecha_hasta,
+        busqueda,
+        tipo,
+        categoria_id
+    } = req.query;
 
     let query = supabase
         .from('transacciones')
@@ -19,6 +28,15 @@ const obtenerTransacciones = async (req, res) => {
         fechaHastaCompleta.setHours(23, 59, 59, 999);
         query = query.lte('fecha', fechaHastaCompleta.toISOString());
     }
+
+    // Filtro de búsqueda en descripción
+    if (busqueda) query = query.ilike('descripcion', `%${busqueda}%`);
+
+    // Filtro por tipo (usar columna 'tipo' directamente)
+    if (tipo) query = query.eq('tipo', tipo);
+
+    // Filtro por categoría
+    if (categoria_id) query = query.eq('categoria_id', categoria_id);
 
     const {data, error} = await query;
 
@@ -67,14 +85,7 @@ const obtenerTodasLasTransacciones = async (req, res) => {
 
         if (cuenta_id) query.eq('cuenta_id', cuenta_id);
 
-        switch (tipo) {
-            case 'ingreso':
-                query.gt('monto', 0);
-                break;
-            case 'gasto':
-                query.lt('monto', 0);
-                break;
-        }
+        if (tipo) query.eq('tipo', tipo);
 
         if (categoria_id) query.eq('categoria_id', categoria_id);
         if (busqueda) query.ilike('descripcion', `%${busqueda}%`);
