@@ -1,14 +1,18 @@
-import { fetchWithAuth } from "./fetchWithAuth";
+import {fetchWithAuth} from "./fetchWithAuth";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const TRANSACCIONES_ENDPOINT = `${API_URL}/api/transacciones`;
 
-export async function getTransacciones({ cuentaId, limit = 15, offset = 0 }) {
+export async function getTransacciones({cuentaId, limit = 15, offset = 0, fecha_desde, fecha_hasta}) {
     try {
         const url = new URL(TRANSACCIONES_ENDPOINT);
         url.searchParams.append('cuenta_id', cuentaId);
         url.searchParams.append('limit', limit);
         url.searchParams.append('offset', offset);
+
+        // Añadir filtros de fecha si existen
+        if (fecha_desde) url.searchParams.append('fecha_desde', fecha_desde);
+        if (fecha_hasta) url.searchParams.append('fecha_hasta', fecha_hasta);
 
         const res = await fetchWithAuth(url.toString());
 
@@ -86,7 +90,7 @@ export async function deleteTransaccion(id) {
     }
 }
 
-export async function getAllTransacciones({ limit = 15, offset = 0, ...filtros } = {}) {
+export async function getAllTransacciones({limit = 15, offset = 0, ...filtros} = {}) {
     try {
         const queryParams = new URLSearchParams();
 
@@ -104,17 +108,8 @@ export async function getAllTransacciones({ limit = 15, offset = 0, ...filtros }
         const res = await fetchWithAuth(`${TRANSACCIONES_ENDPOINT}/all?${queryParams}`);
 
         if (!res.ok) {
-            // Clonar la respuesta antes de leerla para poder leerla de nuevo si es necesario
-            const clon = res.clone();
-
-            try {
-                const errorData = await res.json();
-                throw new Error(errorData.error || 'Error al obtener todas las transacciones');
-            } catch (jsonError) {
-                // Si no podemos parsear JSON, usamos el clon para leer texto
-                const errorText = await clon.text();
-                throw new Error(errorText || `Error HTTP: ${res.status}`);
-            }
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Error al obtener todas las transacciones');
         }
 
         return await res.json();

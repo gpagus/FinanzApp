@@ -4,17 +4,16 @@ import {
     CreditCard,
     PiggyBank,
     TrendingUp,
-    BarChart2,
     Loader
 } from 'lucide-react';
 import Boton from '../../components/ui/Boton';
 import {useCuentas} from '../../hooks/useCuentas';
 import {useNavigate} from "react-router-dom";
 import {useSaldos} from "../../context/SaldosContext";
-import {formatearMoneda, formatearFecha} from "../../utils/formatters";
+import {formatearFecha, formatearMoneda} from "../../utils/formatters";
 import CuentaForm from "../../components/ui/forms/CuentaForm.jsx";
 import {TIPOS_CUENTA} from "../../utils/constants";
-
+import ResumenFinanciero from "../../components/ui/ResumenFinanciero";
 
 const tiposCuenta = [
     {id: 'corriente', nombre: 'Cuenta Corriente', icono: <CreditCard size={20}/>},
@@ -88,42 +87,21 @@ const CuentasList = () => {
     }
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-6 min-h-[calc(100vh-4rem-2.5rem)]">
+        <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
+
             {/* Cabecera */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-aguazul">Mis Cuentas</h1>
             </div>
 
-            {/* Panel de resumen */}
-            <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-                <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-aguazul flex items-center">
-                        <BarChart2 size={20} className="mr-2"/>
-                        Resumen financiero
-                    </h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 bg-neutral-100 rounded-lg">
-                        <p className="text-neutral-600 text-sm mb-1">Balance total</p>
-                        <p className={`text-xl font-bold ${balanceTotal >= 0 ? 'text-success' : 'text-error'}`}>
-                            {mostrarSaldos ? formatearMoneda(balanceTotal) : '••••••'}
-                        </p>
-                    </div>
-                    <div className="p-4 bg-neutral-100 rounded-lg">
-                        <p className="text-neutral-600 text-sm mb-1">Activos</p>
-                        <p className="text-xl font-bold text-success">
-                            {mostrarSaldos ? formatearMoneda(balancePositivo) : '••••••'}
-                        </p>
-                    </div>
-                    <div className="p-4 bg-neutral-100 rounded-lg">
-                        <p className="text-neutral-600 text-sm mb-1">Pasivos</p>
-                        <p className="text-xl font-bold text-error">
-                            {mostrarSaldos ? formatearMoneda(balanceNegativo) : '••••••'}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            {/* Panel de resumen financiero (ahora usando el componente) */}
+            <ResumenFinanciero
+                balanceTotal={balanceTotal}
+                balancePositivo={balancePositivo}
+                balanceNegativo={balanceNegativo}
+                mostrarSaldos={mostrarSaldos}
+                className="mb-6"
+            />
 
             {/* Lista de cuentas */}
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -153,7 +131,7 @@ const CuentasList = () => {
                     <div className="p-8 text-center">
                         <p className="text-neutral-600 mb-4">No tienes cuentas configuradas</p>
                         <Boton
-                            tipo="primario"
+                            tipo="texto"
                             onClick={() => setMostrarFormulario(true)}
                             disabled={isAdding}
                         >
@@ -162,7 +140,7 @@ const CuentasList = () => {
                     </div>
                 ) : (
                     <ul className="divide-y divide-neutral-200">
-                        {cuentasOrdenadas.map((cuenta) => { // Cambiar de cuentas a cuentasOrdenadas
+                        {cuentasOrdenadas.map((cuenta) => {
                             const IconoTipo = () => getIconoTipo(cuenta.tipo);
                             const tipoInfo = tiposCuenta.find(t => t.id === cuenta.tipo);
                             return (

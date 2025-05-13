@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCuentas, addCuenta, updateCuenta, deleteCuenta } from '../api/cuentasApi';
+import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import {getCuentas, addCuenta, updateCuenta, deleteCuenta} from '../api/cuentasApi';
 import toast from 'react-hot-toast';
 
 export const useCuentas = () => {
@@ -37,7 +37,7 @@ export const useCuentas = () => {
 
     // Mutación para actualizar cuenta
     const updateMutation = useMutation({
-        mutationFn: ({ id, datos }) => updateCuenta(id, datos),
+        mutationFn: ({id, datos}) => updateCuenta(id, datos),
         onSuccess: (cuentaActualizada) => {
             queryClient.setQueryData(['cuentas'], (old = []) =>
                 old.map(cuenta => cuenta.id === cuentaActualizada.id ? cuentaActualizada : cuenta)
@@ -54,6 +54,11 @@ export const useCuentas = () => {
             queryClient.setQueryData(['cuentas'], (old = []) =>
                 old.filter(cuenta => cuenta.id !== id)
             );
+            // Invalidar caché de transacciones globales
+            queryClient.invalidateQueries(['todas-transacciones']);
+
+            // También invalidar la caché específica de esta cuenta
+            queryClient.invalidateQueries(['transacciones', id]);
             toast.success('Cuenta eliminada');
         },
         onError: (error) => toast.error(`Error al eliminar cuenta: ${error.message}`)

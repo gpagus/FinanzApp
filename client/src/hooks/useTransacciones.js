@@ -1,21 +1,49 @@
 import {useInfiniteQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {getTransacciones, addTransaccion, updateTransaccion, deleteTransaccion} from '../api/transaccionesApi';
 import toast from 'react-hot-toast';
+import { useState } from 'react';
 
-const useAllTransacciones = (filtros = {}, limit = 15) => {
-    return useInfiniteQuery({
-        queryKey: ['allTransacciones', filtros],
-        queryFn: ({ pageParam = 0 }) =>
-            getAllTransacciones({ ...filtros, limit, offset: pageParam }),
-        getNextPageParam: (lastPage, allPages) =>
-            lastPage.length === limit ? allPages.length * limit : undefined,
-        staleTime: 5 * 60 * 1000, // 5 minutos
-        onError: (e) => toast.error(`Error cargando transacciones: ${e.message}`)
-    });
-};
-
-export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit = 15}) {
+export default function useTransacciones({cuentaId, limit = 15}) {
     const qc = useQueryClient();
+    const [filtroFecha, setFiltroFecha] = useState('ultimos30');
+    const [fechasPersonalizadas, setFechasPersonalizadas] = useState({
+        desde: '',
+        hasta: ''
+    });
+
+    // Calcular fechas basadas en el filtro
+    const obtenerFechasParaFiltro = () => {
+        const hoy = new Date();
+        switch(filtroFecha) {
+            case 'ultimos30':
+                { const hace30Dias = new Date(hoy);
+                hace30Dias.setDate(hoy.getDate() - 30);
+                return {
+                    desde: hace30Dias.toISOString().split('T')[0],
+                    hasta: hoy.toISOString().split('T')[0]
+                }; }
+            case 'ultimos90':
+                { const hace90Dias = new Date(hoy);
+                hace90Dias.setDate(hoy.getDate() - 90);
+                return {
+                    desde: hace90Dias.toISOString().split('T')[0],
+                    hasta: hoy.toISOString().split('T')[0]
+                }; }
+            case 'año':
+                { const inicioAnio = new Date(hoy.getFullYear(), 0, 1);
+                return {
+                    desde: inicioAnio.toISOString().split('T')[0],
+                    hasta: hoy.toISOString().split('T')[0]
+                }; }
+            case 'personalizado':
+                return fechasPersonalizadas;
+            case 'todo':
+            default:
+                return { desde: '', hasta: '' };
+        }
+    };
+
+    const fechasFiltro = obtenerFechasParaFiltro();
 
     /* ---------- lectura (scroll infinito) ---------- */
     const {
@@ -27,9 +55,15 @@ export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit 
         error,
         refetch,
     } = useInfiniteQuery({
-        queryKey: ['transacciones', cuentaId, filtroFecha],
+        queryKey: ['transacciones', cuentaId, filtroFecha, fechasPersonalizadas],
         queryFn: ({pageParam = 0}) =>
-            getTransacciones({cuentaId, limit, offset: pageParam}),
+            getTransacciones({
+                cuentaId,
+                limit,
+                offset: pageParam,
+                fecha_desde: fechasFiltro.desde,
+                fecha_hasta: fechasFiltro.hasta
+            }),
         getNextPageParam: (lastPage, allPages) =>
             lastPage.length === limit ? allPages.length * limit : undefined,
         enabled: !!cuentaId,
@@ -87,6 +121,7 @@ export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit 
                 actualizarSaldoCuenta(nueva.cuenta_destino_id, nueva.monto, 'ingreso');
             }
 
+            qc.invalidateQueries(['todas-transacciones']);
             toast.success('Movimiento registrado');
         },
         onError: (e) => {
@@ -109,6 +144,8 @@ export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit 
                 };
             });
             actualizarSaldoCuenta(cuentaId, datos.monto - montoAnterior);
+
+            qc.invalidateQueries(['todas-transacciones']);
             toast.success('Transacción actualizada');
         },
     });
@@ -125,6 +162,8 @@ export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit 
                 };
             });
             actualizarSaldoCuenta(cuentaId, -montoEliminado);
+
+            qc.invalidateQueries(['todas-transacciones']);
             toast.success('Transacción eliminada');
         },
     });
@@ -153,6 +192,10 @@ export default function useTransacciones({cuentaId, filtroFecha = 'todo', limit 
         errorTransacciones: error,
         refetchTransacciones: refetch,
         cargarMasTransacciones: fetchNextPage,
+        filtroFecha,
+        setFiltroFecha,
+        fechasPersonalizadas,
+        setFechasPersonalizadas,
         // acciones
         agregarTransaccion: addMutation.mutate,
         actualizarTransaccion: updateMutation.mutate,

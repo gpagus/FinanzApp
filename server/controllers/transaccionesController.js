@@ -2,14 +2,25 @@ const supabase = require('../config/supabaseClient');
 
 
 const obtenerTransacciones = async (req, res) => {
-    const {cuenta_id, limit = 15, offset = 0} = req.query;
+    const {cuenta_id, limit = 15, offset = 0, fecha_desde, fecha_hasta} = req.query;
 
-    const {data, error} = await supabase
+    let query = supabase
         .from('transacciones')
         .select('*')
         .eq('cuenta_id', cuenta_id)
         .order('fecha', {ascending: false})
         .range(Number(offset), Number(offset) + Number(limit) - 1);
+
+    // Aplicar filtros de fecha si existen
+    if (fecha_desde) query = query.gte('fecha', fecha_desde);
+    if (fecha_hasta) {
+        // Modificar la fecha hasta para incluir todo el día
+        const fechaHastaCompleta = new Date(fecha_hasta);
+        fechaHastaCompleta.setHours(23, 59, 59, 999);
+        query = query.lte('fecha', fechaHastaCompleta.toISOString());
+    }
+
+    const {data, error} = await query;
 
     if (error) return res.status(500).json({error: error.message});
     res.json(data);
@@ -29,39 +40,68 @@ const obtenerTodasLasTransacciones = async (req, res) => {
             offset = 0
         } = req.query;
 
+        // Validación de parámetros
+        const limitNum = Number.isInteger(Number(limit)) ? Number(limit) : 50;
+        const offsetNum = Number.isInteger(Number(offset)) ? Number(offset) : 0;
+
+        if ((fecha_desde && isNaN(Date.parse(fecha_desde))) || (fecha_hasta && isNaN(Date.parse(fecha_hasta)))) {
+            return res.status(400).json({ error: "Formato de fecha inválido" });
+        }
+
         let query = supabase
             .from('transacciones')
-            .select('*, cuentas!transacciones_cuenta_id_fkey(nombre)') // Especificar la relación exacta
+            .select('*, cuentas!transacciones_cuenta_id_fkey(nombre)')
             .eq('user_id', userId)
             .order('fecha', { ascending: false });
 
-        // Aplicar filtros si existen
-        if (fecha_desde) query = query.gte('fecha', fecha_desde);
-        if (fecha_hasta) query = query.lte('fecha', fecha_hasta);
-        if (cuenta_id) query = query.eq('cuenta_id', cuenta_id);
-        if (tipo === 'ingreso') query = query.gt('monto', 0);
-        if (tipo === 'gasto') query = query.lt('monto', 0);
-        if (categoria_id) query = query.eq('categoria_id', categoria_id);
-        if (busqueda) query = query.ilike('descripcion', `%${busqueda}%`);
 
-        // Paginación
-        const limitNum = Number(limit) || 50;
-        const offsetNum = Number(offset) || 0;
-        query = query.range(offsetNum, offsetNum + limitNum - 1);
-
-        const { data, error } = await query;
-
-        if (error) {
-            console.error("Error en Supabase:", error);
-            return res.status(500).json({ error: error.message });
+        // Aplicar filtros de manera más clara y ordenada
+        if (fecha_desde) query.gte('fecha', fecha_desde);
+        if (fecha_hasta) {
+            // Modificar la fecha hasta para incluir todo el día
+            const fechaHastaCompleta = new Date(fecha_hasta);
+            fechaHastaCompleta.setHours(23, 59, 59, 999);
+            query.lte('fecha', fechaHastaCompleta.toISOString());
         }
 
-        return res.json(data || []);
+
+        if (cuenta_id) query.eq('cuenta_id', cuenta_id);
+
+        switch (tipo) {
+            case 'ingreso':
+                query.gt('monto', 0);
+                break;
+            case 'gasto':
+                query.lt('monto', 0);
+                break;
+        }
+
+        if (categoria_id) query.eq('categoria_id', categoria_id);
+        if (busqueda) query.ilike('descripcion', `%${busqueda}%`);
+
+        // Paginación
+        query.range(offsetNum, offsetNum + limitNum - 1);
+
+        const { data, error, count } = await query;
+
+        if (error) {
+            console.error("Error en Supabase:", error.message);
+            return res.status(500).json({ error: "Error al obtener transacciones." });
+        }
+
+        // Respuesta con datos y paginación
+        return res.status(200).json({
+            data: data || [],
+            total: count || 0,
+            limit: limitNum,
+            offset: offsetNum
+        });
     } catch (err) {
-        console.error("Error en obtenerTodasLasTransacciones:", err);
+        console.error("Error en obtenerTodasLasTransacciones:", err.message);
         return res.status(500).json({ error: 'Error al obtener todas las transacciones' });
     }
 };
+
 
 const crearTransaccion = async (req, res) => {
     const userId = req.user.id;

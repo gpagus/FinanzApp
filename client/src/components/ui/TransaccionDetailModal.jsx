@@ -8,8 +8,10 @@ import {CATEGORIAS} from "../../utils/constants";
 import DropdownMenu from "./DropdownMenu";
 import EditarTransaccionForm from "./forms/EditarTransaccionForm";
 import ConfirmModal from "./ConfirmModal";
+import {useQueryClient} from "@tanstack/react-query";
 
 const TransaccionDetailModal = ({transaccion, onClose}) => {
+    const queryClient = useQueryClient();
 
     const {
         agregarTransaccion,
@@ -75,6 +77,9 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
 
         agregarTransaccion(nuevaTransaccion, {
             onSuccess: () => {
+
+                queryClient.invalidateQueries(['todas-transacciones']);
+
                 toast.success('Movimiento rectificado');
                 setIsRectifyingMode(false);
                 onClose();

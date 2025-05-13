@@ -186,7 +186,7 @@ const CuentaDetail = () => {
     const IconoTipo = tipoCuenta.Icono;
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-6 min-h-[calc(100vh-4rem-2.5rem)]">
+        <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
             {/* Botón volver y cabecera */}
             <div className="mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
@@ -212,16 +212,10 @@ const CuentaDetail = () => {
                         />
                     </div>
 
-                    <div className="flex space-x-2">
-                        <Boton tipo="secundario" className="flex items-center" aria-label="Compartir">
-                            <Share2 size={18} className="mr-1"/>
-                            <span className="hidden sm:inline">Compartir</span>
-                        </Boton>
-                        <Boton tipo="secundario" className="flex items-center" aria-label="Exportar">
-                            <Download size={18} className="mr-1"/>
-                            <span className="hidden sm:inline">Exportar</span>
-                        </Boton>
-                    </div>
+                    <Boton tipo="secundario" className="flex items-center" aria-label="Exportar">
+                        <Download size={18} className="mr-1"/>
+                        <span className="hidden sm:inline">Exportar</span>
+                    </Boton>
                 </div>
             </div>
 
