@@ -21,6 +21,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const transaccionesRoutes = require('./routes/transaccionesRoutes');
 const cuentasRoutes = require('./routes/cuentasRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
+const presupuestosRoutes = require('./routes/presupuestosRoutes');
 
 const app = express();
 app.use(cors(/*corsOptions*/));
@@ -34,6 +35,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/transacciones', transaccionesRoutes);
 app.use('/api/cuentas', cuentasRoutes);
 app.use('/api/categorias', categoriasRoutes);
+app.use('/api/presupuestos', presupuestosRoutes);
 
 // Servidor
 const PORT = /*process.env.PORT ||*/ 3000;

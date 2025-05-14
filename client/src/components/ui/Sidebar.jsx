@@ -30,7 +30,7 @@ const Sidebar = () => {
             {name: 'Inicio', icon: Home, path: '/dashboard'},
             {name: 'Cuentas', icon: Wallet, path: '/cuentas'},
             {name: 'Movimientos', icon: TrendingUp, path: '/movimientos'},
-            {name: 'Huchas', icon: PiggyBank, path: '/huchas'},
+            {name: 'Presupuestos', icon: PiggyBank, path: '/presupuestos'},
             {name: 'Estadísticas', icon: BarChart2, path: '/estadisticas'},
         ];
     } else {
