@@ -61,7 +61,7 @@ const TransaccionesFilters = ({
                 <div className="space-y-6">
                     {/* Fechas personalizadas */}
                     <div className="space-y-4">
-                        <h3 className="font-medium text-neutral-800">Período</h3>
+                        <h3 className="font-medium text-neutral-800">Periodo</h3>
                         <div className="grid grid-cols-1 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-neutral-700 mb-1">Fecha desde</label>

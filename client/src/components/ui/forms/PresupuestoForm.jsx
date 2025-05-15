@@ -6,45 +6,42 @@ import FormField from "../FormField";
 import useCustomForm from "../../../hooks/useCustomForm";
 import { CATEGORIAS } from "../../../utils/constants";
 
-// Esquema de validación con Zod
+// Esquema de validación con Zod (sin fecha_inicio)
 const presupuestoSchema = z.object({
     categoria_id: z.string().min(1, 'La categoría es obligatoria'),
     limite: z.coerce
         .number()
         .positive('El límite debe ser un número positivo')
-        .min(1, 'El límite debe ser mayor a 0'),
-    fecha_inicio: z.string().min(1, 'La fecha de inicio es obligatoria'),
+        .min(10, 'El límite debe ser al menos 10'),
     fecha_fin: z.string().min(1, 'La fecha de fin es obligatoria')
 }).refine(data => {
-    return new Date(data.fecha_inicio) < new Date(data.fecha_fin);
+    const fechaHoy = new Date();
+    fechaHoy.setHours(0, 0, 0, 0); // Normalizar la hora actual
+    return new Date(fechaHoy) < new Date(data.fecha_fin);
 }, {
-    message: "La fecha de fin debe ser posterior a la fecha de inicio",
+    message: "La fecha de fin debe ser posterior a la fecha actual",
     path: ["fecha_fin"]
 });
 
 const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto, onClose }) => {
     // Valores por defecto
     const getDefaultValues = () => {
-        if (presupuestoSeleccionado) {
-            return {
-                categoria_id: presupuestoSeleccionado.categoria_id?.toString() || '',
-                limite: presupuestoSeleccionado.limite || '',
-                fecha_inicio: presupuestoSeleccionado.fecha_inicio ? new Date(presupuestoSeleccionado.fecha_inicio).toISOString().split('T')[0] : '',
-                fecha_fin: presupuestoSeleccionado.fecha_fin ? new Date(presupuestoSeleccionado.fecha_fin).toISOString().split('T')[0] : ''
-            };
-        }
-
         const hoy = new Date();
-        const fechaInicio = hoy.toISOString().split('T')[0];
-
         //Fecha fin por defecto: un mes después
         const fechaFin = new Date(hoy);
         fechaFin.setMonth(hoy.getMonth() + 1);
 
+        if (presupuestoSeleccionado) {
+            return {
+                categoria_id: presupuestoSeleccionado.categoria_id?.toString() || '',
+                limite: presupuestoSeleccionado.limite || '',
+                fecha_fin: presupuestoSeleccionado.fecha_fin ? new Date(presupuestoSeleccionado.fecha_fin).toISOString().split('T')[0] : fechaFin.toISOString().split('T')[0]
+            };
+        }
+
         return {
             categoria_id: '',
             limite: '',
-            fecha_inicio: fechaInicio,
             fecha_fin: fechaFin.toISOString().split('T')[0]
         };
     };
@@ -52,7 +49,10 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
     const { register, errors, handleSubmit, isSubmitting, reset } = useCustomForm({
         schema: presupuestoSchema,
         defaultValues: getDefaultValues(),
-        onSubmit: onSubmitPresupuesto,
+        onSubmit: (values) => {
+            // Ya no se añade fecha_inicio, el servidor la establecerá automáticamente
+            return onSubmitPresupuesto(values);
+        },
     });
 
     // Actualizar el formulario cuando cambia el presupuesto seleccionado
@@ -61,16 +61,6 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
             reset(getDefaultValues());
         }
     }, [presupuestoSeleccionado, mostrar, reset]);
-
-    // Manejar cambio de fecha inicio manualmente
-    const handleFechaInicioChange = (e) => {
-        if (e.target.value) {
-            const fechaInicioInput = document.querySelector('input[name="fecha_fin"]');
-            if (fechaInicioInput) {
-                fechaInicioInput.min = e.target.value;
-            }
-        }
-    };
 
     if (!mostrar) return null;
 
@@ -114,26 +104,14 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
                         error={errors.limite?.message}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            label="Fecha de inicio"
-                            name="fecha_inicio"
-                            type="date"
-                            register={register}
-                            error={errors.fecha_inicio?.message}
-                            onChange={handleFechaInicioChange}
-                            disabled={!!presupuestoSeleccionado}
-                        />
-
-                        <FormField
-                            label="Fecha de fin"
-                            name="fecha_fin"
-                            type="date"
-                            register={register}
-                            error={errors.fecha_fin?.message}
-                            attributes={{ min: getDefaultValues().fecha_inicio }}
-                        />
-                    </div>
+                    <FormField
+                        label="Fecha de fin"
+                        name="fecha_fin"
+                        type="date"
+                        register={register}
+                        error={errors.fecha_fin?.message}
+                        attributes={{ min: new Date().toISOString().split('T')[0] }}
+                    />
 
                     <div className="flex justify-end space-x-2">
                         <Boton

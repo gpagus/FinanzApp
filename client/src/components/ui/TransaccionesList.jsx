@@ -94,12 +94,10 @@ const TransaccionesList = ({
                                     </p>
                                     <div className="flex flex-col xs:flex-row xs:gap-2">
                                       <p className="text-sm text-neutral-600">
-                                        {new Date(
-                                            new Date(transaccion.fecha).getTime() +
-                                            2 * 60 * 60 * 1000
-                                        ).toLocaleTimeString("es-ES", {
+                                        {new Date(transaccion.fecha).toLocaleTimeString("es-ES", {
                                           hour: "2-digit",
                                           minute: "2-digit",
+                                          timeZone: "UTC"
                                         })}
                                       </p>
                                       {mostrarCuenta && transaccion.cuenta && (

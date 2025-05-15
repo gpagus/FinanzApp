@@ -63,14 +63,14 @@ const obtenerTodasLasTransacciones = async (req, res) => {
         const offsetNum = Number.isInteger(Number(offset)) ? Number(offset) : 0;
 
         if ((fecha_desde && isNaN(Date.parse(fecha_desde))) || (fecha_hasta && isNaN(Date.parse(fecha_hasta)))) {
-            return res.status(400).json({ error: "Formato de fecha inválido" });
+            return res.status(400).json({error: "Formato de fecha inválido"});
         }
 
         let query = supabase
             .from('transacciones')
             .select('*, cuentas!transacciones_cuenta_id_fkey(nombre)')
             .eq('user_id', userId)
-            .order('fecha', { ascending: false });
+            .order('fecha', {ascending: false});
 
 
         // Aplicar filtros de manera más clara y ordenada
@@ -93,11 +93,11 @@ const obtenerTodasLasTransacciones = async (req, res) => {
         // Paginación
         query.range(offsetNum, offsetNum + limitNum - 1);
 
-        const { data, error, count } = await query;
+        const {data, error, count} = await query;
 
         if (error) {
             console.error("Error en Supabase:", error.message);
-            return res.status(500).json({ error: "Error al obtener transacciones." });
+            return res.status(500).json({error: "Error al obtener transacciones."});
         }
 
         // Respuesta con datos y paginación
@@ -109,7 +109,7 @@ const obtenerTodasLasTransacciones = async (req, res) => {
         });
     } catch (err) {
         console.error("Error en obtenerTodasLasTransacciones:", err.message);
-        return res.status(500).json({ error: 'Error al obtener todas las transacciones' });
+        return res.status(500).json({error: 'Error al obtener todas las transacciones'});
     }
 };
 
@@ -118,30 +118,43 @@ const crearTransaccion = async (req, res) => {
     const userId = req.user.id;
 
     try {
+        // Copiar el cuerpo de la solicitud
+        const transaccionData = {...req.body};
+
+        // Ajustar la zona horaria si viene fecha
+        if (transaccionData.fecha) {
+            // Convertir a objeto Date
+            const fechaOriginal = new Date(transaccionData.fecha);
+            // Sumar 2 horas (7200000 ms) para zona horaria española
+            fechaOriginal.setTime(fechaOriginal.getTime() + 2 * 60 * 60 * 1000);
+            // Actualizar la fecha en formato ISO
+            transaccionData.fecha = fechaOriginal.toISOString();
+        }
+
         const nuevaTransaccion = {
-            ...req.body,
+            ...transaccionData,
             user_id: userId
         };
 
         // Insertar la nueva transacción
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from('transacciones')
             .insert([nuevaTransaccion])
             .select();
 
         if (error?.message === 'numeric field overflow') {
-            return res.status(400).json({ error: 'El balance de la cuenta no puede exceder de los 10 dígitos' });
+            return res.status(400).json({error: 'El balance de la cuenta no puede exceder de los 10 dígitos'});
         }
 
-        if (error) return res.status(500).json({ error: error.message });
+        if (error) return res.status(500).json({error: error.message});
 
         res.status(201).json(data[0]);
 
     } catch (err) {
         console.error("Error en crearTransaccion:", err.message);
-        return res.status(400).json({ error: err.message || 'Datos inválidos' });
+        return res.status(400).json({error: err.message || 'Datos inválidos'});
     }
-    };
+};
 
 
 const actualizarTransaccion = async (req, res) => {
@@ -149,24 +162,68 @@ const actualizarTransaccion = async (req, res) => {
     const transaccionId = req.params.id;
 
     try {
-
         const cambios = req.body;
 
-        const { data, error } = await supabase
+        // 1️⃣ 🔎 Obtener la categoría actual de la transacción
+        const {data: transaccionActual, error: errorTransaccion} = await supabase
+            .from('transacciones')
+            .select('categoria_id')
+            .eq('id', transaccionId)
+            .single();
+
+        if (errorTransaccion) return res.status(500).json({error: errorTransaccion.message});
+
+        // 2️⃣ 🔎 Comprobar si la categoría actual está vinculada a un presupuesto
+        const {data: presupuestoActual, error: errorPresupuestoActual} = await supabase
+            .from('presupuestos')
+            .select('id')
+            .eq('categoria_id', transaccionActual.categoria_id)
+            .eq('estado', true)
+            .limit(1);
+
+        if (errorPresupuestoActual) return res.status(500).json({error: errorPresupuestoActual.message});
+
+        if (presupuestoActual.length > 0) {
+            return res.status(403).json({
+                error: 'Esta transacción está vinculada a un presupuesto activo. No puedes cambiar la categoría.'
+            });
+        }
+
+        // 3️⃣ 🔎 Comprobar si la nueva categoría que intenta asignar está vinculada a un presupuesto
+        if (cambios.categoria_id && cambios.categoria_id !== transaccionActual.categoria_id) {
+            const {data: presupuestoNuevo, error: errorPresupuestoNuevo} = await supabase
+                .from('presupuestos')
+                .select('id')
+                .eq('categoria_id', cambios.categoria_id)
+                .eq('estado', true)
+                .limit(1);
+
+            if (errorPresupuestoNuevo) return res.status(500).json({error: errorPresupuestoNuevo.message});
+
+            if (presupuestoNuevo.length > 0) {
+                return res.status(403).json({
+                    error: 'La nueva categoría seleccionada pertenece a un presupuesto activo. No puedes asignarla.'
+                });
+            }
+        }
+
+        // 4️⃣ 🔄 Si no hay conflictos, procedemos a actualizar
+        const {data, error} = await supabase
             .from('transacciones')
             .update(cambios)
             .eq('id', transaccionId)
-            .eq('user_id', userId) // Solo permite modificar si es del usuario
+            .eq('user_id', userId)
             .select();
 
-        if (error) return res.status(500).json({ error: error.message });
-        if (data.length === 0) return res.status(404).json({ error: 'Transacción no encontrada o no autorizada' });
+        if (error) return res.status(500).json({error: error.message});
+        if (data.length === 0) return res.status(404).json({error: 'Transacción no encontrada o no autorizada'});
 
         res.json(data[0]);
     } catch (err) {
-        return res.status(400).json({ error: err.message || 'Datos inválidos' });
+        return res.status(400).json({error: err.message || 'Datos inválidos'});
     }
 };
+
 
 const eliminarTransaccion = async (req, res) => {
     const userId = req.user.id;

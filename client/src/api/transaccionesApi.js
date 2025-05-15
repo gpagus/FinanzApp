@@ -1,4 +1,5 @@
 import {fetchWithAuth} from "./fetchWithAuth";
+import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const TRANSACCIONES_ENDPOINT = `${API_URL}/api/transacciones`;
@@ -74,6 +75,14 @@ export async function updateTransaccion(id, datosActualizados) {
 
         if (!res.ok) {
             const errorData = await res.json();
+
+            // 🔎 Comprobación específica para presupuesto activo
+            if (res.status === 403) {
+                toast.error(errorData.error || 'No puedes cambiar esta categoría porque pertenece a un presupuesto activo.');
+            } else {
+                toast.error(errorData.error || 'Error al actualizar la transacción');
+            }
+
             throw new Error(errorData.error || 'Error al actualizar la transaccion');
         }
 
@@ -83,6 +92,7 @@ export async function updateTransaccion(id, datosActualizados) {
         throw error;
     }
 }
+
 
 export async function deleteTransaccion(id) {
     try {

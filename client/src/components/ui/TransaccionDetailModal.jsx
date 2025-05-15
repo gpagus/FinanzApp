@@ -28,14 +28,15 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
+        timeZone: 'UTC'
     });
 
-    const horaFormateada = new Date(new Date(transaccion.fecha).getTime() + 2 * 60 * 60 * 1000)
-        .toLocaleTimeString('es-ES', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+    const horaFormateada = new Date(transaccion.fecha).toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC'
+    });
 
     const acciones = [
         {
@@ -61,12 +62,8 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
             cuenta_id: transaccion.cuenta_id,
             monto: transaccion.monto,
             descripcion: `Rectificación: ${transaccion.descripcion || 'Sin descripción'}`,
-            fecha: new Date().toISOString(),
-            // Si era gasto → ingreso, si era ingreso → gasto
             tipo: transaccion.tipo === 'gasto' ? 'ingreso' : 'gasto',
-            // Mantener la misma categoría para facilitar el seguimiento
             categoria_id: transaccion.categoria_id,
-            // Referencia a la transacción original (opcional)
             transaccion_original_id: transaccion.id
         };
 
@@ -100,16 +97,24 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
                         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
                             <div className="flex items-center">
                                 <h3 className="text-lg font-semibold text-aguazul">Detalles de la transacción</h3>
-                                <DropdownMenu
-                                    triggerIcon={<EllipsisVertical className="text-neutral-400"/>}
-                                    actions={acciones}
-                                />
+
+                                {/* No se muestra el Dropdown en transacciones rectificadas, rectificativas o categorías 5 o 6 */}
+                                {!transaccion.transaccion_rectificativa_id &&
+                                    !transaccion.transaccion_original_id &&
+                                    transaccion.categoria_id !== 5 &&
+                                    transaccion.categoria_id !== 6 && (
+                                        <DropdownMenu
+                                            triggerIcon={<EllipsisVertical className="text-neutral-400"/>}
+                                            actions={acciones}
+                                        />
+                                    )}
                             </div>
 
                             <Boton tipo="icono" onClick={onClose} aria-label="Cerrar">
                                 <X size={20}/>
                             </Boton>
                         </div>
+
 
                         <div className="p-4">
                             <div className="flex flex-col mb-4 pb-4 border-b border-neutral-100">
@@ -123,6 +128,15 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
                                     </div>
                                 </div>
                                 <div className="flex justify-end mt-1">
+                                    {transaccion.transaccion_rectificativa_id ? (
+                                        <p className="text-sm text-neutral-600 mr-2 rounded-full bg-neutral-100 px-2 py-0.5">
+                                            <span className="inline-block align-middle mr-1">🔄</span> Rectificado
+                                        </p>
+                                    ) : transaccion.transaccion_original_id && (
+                                        <p className="text-sm text-neutral-600 mr-2 rounded-full bg-sky-50 px-2 py-0.5">
+                                            <span className="inline-block align-middle mr-1">📝</span> Rectificativa
+                                        </p>
+                                    )}
                                     <p className={`font-bold text-xl ${transaccion.tipo === 'gasto' ? 'text-error' : 'text-success'}`}>
                                         {transaccion.tipo === 'gasto' ? '-' : '+'}{formatearMoneda(transaccion.monto)}
                                     </p>
