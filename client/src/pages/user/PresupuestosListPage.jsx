@@ -1,18 +1,20 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import {
     PlusCircle,
     Calendar,
     Loader,
-    PieChart
+    PieChart,
+    Clock, EllipsisVertical
 } from 'lucide-react';
 import Boton from '../../components/ui/Boton';
-import { useNavigate } from "react-router-dom";
-import { useSaldos } from "../../context/SaldosContext";
-import { formatearFecha, formatearMoneda } from "../../utils/formatters";
+import {useSaldos} from "../../context/SaldosContext";
+import {formatearFecha, formatearMoneda} from "../../utils/formatters";
 import PresupuestoForm from "../../components/ui/forms/PresupuestoForm";
-import { usePresupuestos } from '../../hooks/usePresupuestos';
+import {usePresupuestos} from '../../hooks/usePresupuestos';
 import ProgressBar from '../../components/ui/ProgressBar';
-import { CATEGORIAS } from '../../utils/constants'; // Importa la constante CATEGORIAS
+import {CATEGORIAS} from '../../utils/constants';
+import DropdownMenu from "../../components/ui/DropdownMenu";
+import ConfirmModal from "../../components/ui/ConfirmModal";
 
 const PresupuestosListPage = () => {
     const {
@@ -21,25 +23,45 @@ const PresupuestosListPage = () => {
         isError,
         error,
         agregarPresupuesto,
+        actualizarPresupuesto,
+        eliminarPresupuesto,
         isAdding,
     } = usePresupuestos();
 
-    const navigate = useNavigate();
-    const { mostrarSaldos } = useSaldos();
+    const {mostrarSaldos} = useSaldos();
+    const [tipoVistaActual, setTipoVistaActual] = useState('activos'); // 'activos' o 'expirados'
+    const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
+
+    // Filtrar presupuestos según su estado
+    const presupuestosActivos = presupuestos?.filter(p => p.estado) || [];
+    const presupuestosExpirados = presupuestos?.filter(p => !p.estado) || [];
 
     // Ordenar presupuestos por fecha de fin (más cercanos primero)
-    const presupuestosOrdenados = [...presupuestos || []].sort(
+    const presupuestosActivosOrdenados = [...presupuestosActivos].sort(
         (a, b) => new Date(a.fecha_fin) - new Date(b.fecha_fin)
+    );
+
+    // Ordenar presupuestos expirados por fecha de fin (más recientes primero)
+    const presupuestosExpiradosOrdenados = [...presupuestosExpirados].sort(
+        (a, b) => new Date(b.fecha_fin) - new Date(a.fecha_fin)
     );
 
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
-    const handleCreatePresupuesto = async (data) => {
+    const handleSubmitPresupuesto = async (data) => {
         try {
-            await agregarPresupuesto(data);
+            if (presupuestoSeleccionado) {
+                await actualizarPresupuesto({
+                    id: presupuestoSeleccionado.id,
+                    datos: data
+                });
+            } else {
+                await agregarPresupuesto(data);
+            }
             setMostrarFormulario(false);
+            setPresupuestoSeleccionado(null);
         } catch (error) {
-            console.error("Error al crear el presupuesto:", error.message);
+            console.error("Error al gestionar el presupuesto:", error.message);
         }
     };
 
@@ -50,18 +72,71 @@ const PresupuestosListPage = () => {
         return Math.max(0, Math.ceil(diferencia / (1000 * 60 * 60 * 24)));
     };
 
+    const calcularDiasExpirado = (fechaFin) => {
+        const hoy = new Date();
+        const fin = new Date(fechaFin);
+        const diferencia = hoy - fin;
+        return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
+    };
+
     const getEstadoPresupuesto = (presupuesto) => {
         const porcentaje = (presupuesto.progreso / presupuesto.limite) * 100;
 
-        if (porcentaje < 70) return { clase: 'text-success', estado: 'Controlado' };
-        if (porcentaje < 90) return { clase: 'text-warning', estado: 'Limitado' };
-        return { clase: 'text-error', estado: 'Excedido' };
+        if (porcentaje < 70) return {clase: 'text-success', estado: 'Controlado'}; // Verde
+        if (porcentaje < 99) return {clase: 'text-warning', estado: 'Limitado'}; // Amarillo
+        return {clase: 'text-error', estado: 'Excedido'}; // Rojo
     };
 
     const obtenerCategoria = (categoriaId) => {
         const categoria = CATEGORIAS.find(cat => cat.value === categoriaId);
         return categoria ? categoria.label : "Sin categoría";
     };
+
+    const handleNuevoPresupuesto = () => {
+        setPresupuestoSeleccionado(null);
+        setMostrarFormulario(true);
+    };
+
+
+    /* ---------------------- acciones dropdown ---------------------- */
+    const [presupuestoSeleccionado, setPresupuestoSeleccionado] = useState(null);
+
+    const acciones = (presupuesto) => {
+        return [
+            {
+                label: 'Editar',
+                onClick: () => handleEditarPresupuesto(presupuesto),
+                hidden: presupuesto.estado === false
+            },
+            {
+                label: 'Eliminar',
+                onClick: () => {
+                    setPresupuestoSeleccionado(presupuesto);
+                    setMostrarModalEliminacion(true);
+                },
+                className: 'text-red-600',
+            },
+        ].filter(action => !action.hidden);
+    };
+
+    /* ---------------------- eliminar presupuesto ---------------------- */
+    const handleEliminarPresupuesto = () => {
+        setMostrarModalEliminacion(false);
+        eliminarPresupuesto(presupuestoSeleccionado.id)
+            .then(() => {
+                console.log("Presupuesto eliminado");
+            })
+            .catch((error) => {
+                console.error("Error al eliminar el presupuesto:", error.message);
+            });
+    };
+
+    /* ---------------------- editar presupuesto ---------------------- */
+    const handleEditarPresupuesto = (presupuesto) => {
+        setPresupuestoSeleccionado(presupuesto);
+        setMostrarFormulario(true);
+    };
+
 
     if (isLoading) {
         return (
@@ -96,7 +171,6 @@ const PresupuestosListPage = () => {
             {/* Cabecera */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-aguazul">Mis Presupuestos</h1>
-                <p className="text-neutral-600">Gestiona tus límites de gastos por categoría</p>
             </div>
 
             {/* Resumen de presupuestos */}
@@ -104,7 +178,7 @@ const PresupuestosListPage = () => {
                 <div className="bg-white rounded-lg shadow-sm p-4">
                     <h3 className="text-sm text-neutral-600 mb-1">Presupuestos activos</h3>
                     <p className="text-2xl font-bold text-aguazul">
-                        {presupuestos?.filter(p => new Date(p.fecha_fin) >= new Date()).length || 0}
+                        {presupuestosActivos.length}
                     </p>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-4">
@@ -125,11 +199,31 @@ const PresupuestosListPage = () => {
                 </div>
             </div>
 
+            {/* Botones de navegación entre vistas */}
+            <div className="flex mb-6">
+                <div className="rounded-lg inline-flex">
+                    <Boton
+                        tipo="texto"
+                        className={`px-4 py-2 rounded-l-lg font-medium ${tipoVistaActual === 'activos' ? 'bg-aguazul text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}
+                        onClick={() => setTipoVistaActual('activos')}
+                    >
+                        Presupuestos Activos ({presupuestosActivos.length})
+                    </Boton>
+                    <Boton
+                        tipo="texto"
+                        className={`px-4 py-2 rounded-r-lg font-medium ${tipoVistaActual === 'expirados' ? 'bg-aguazul text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}
+                        onClick={() => setTipoVistaActual('expirados')}
+                    >
+                        Presupuestos Expirados ({presupuestosExpirados.length})
+                    </Boton>
+                </div>
+            </div>
+
             {/* Botón de añadir */}
             <div className="flex justify-end mb-4">
                 <Boton
                     tipo="primario"
-                    onClick={() => setMostrarFormulario(true)}
+                    onClick={handleNuevoPresupuesto}
                     className="flex items-center"
                     disabled={isAdding}
                 >
@@ -147,85 +241,205 @@ const PresupuestosListPage = () => {
                 </Boton>
             </div>
 
-            {/* Lista de presupuestos */}
-            {(!presupuestos || presupuestos.length === 0) ? (
-                <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                    <PieChart size={48} className="mx-auto mb-4 text-neutral-300" />
-                    <p className="text-neutral-600 mb-4">No tienes presupuestos configurados</p>
-                    <Boton
-                        tipo="texto"
-                        onClick={() => setMostrarFormulario(true)}
-                        disabled={isAdding}
-                    >
-                        Crea tu primer presupuesto
-                    </Boton>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {presupuestosOrdenados.map((presupuesto) => {
-                        const diasRestantes = calcularDiasRestantes(presupuesto.fecha_fin);
-                        const porcentajeProgreso = Math.min(100, (presupuesto.progreso / presupuesto.limite) * 100);
-                        const estadoInfo = getEstadoPresupuesto(presupuesto);
-
-                        return (
-                            <div
-                                key={presupuesto.id}
-                                className="bg-white rounded-lg shadow-sm hover:shadow transition-shadow cursor-pointer"
-                                onClick={() => navigate(`/presupuestos/${presupuesto.id}`)}
+            {/* Lista de presupuestos activos */}
+            {tipoVistaActual === 'activos' && (
+                <>
+                    {presupuestosActivos.length === 0 ? (
+                        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+                            <PieChart size={48} className="mx-auto mb-4 text-neutral-300"/>
+                            <p className="text-neutral-600 mb-4">No tienes presupuestos activos</p>
+                            <Boton
+                                tipo="texto"
+                                onClick={handleNuevoPresupuesto}
+                                disabled={isAdding}
                             >
-                                <div className="p-4 border-b border-neutral-200">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-semibold text-neutral-900 text-lg">
-                                            {obtenerCategoria(presupuesto.categoria_id)}
-                                        </h3>
-                                        <span className={`text-sm font-medium px-2 py-1 rounded-full ${estadoInfo.clase === 'text-success' ? 'bg-success-100 text-success' : estadoInfo.clase === 'text-warning' ? 'bg-warning-100 text-warning' : 'bg-error-100 text-error'}`}>
-                                            {estadoInfo.estado}
-                                        </span>
-                                    </div>
+                                Crea un nuevo presupuesto
+                            </Boton>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {presupuestosActivosOrdenados.map((presupuesto) => {
+                                const diasRestantes = calcularDiasRestantes(presupuesto.fecha_fin);
+                                const porcentajeProgreso = Math.min(100, (presupuesto.progreso / presupuesto.limite) * 100);
+                                const estadoInfo = getEstadoPresupuesto(presupuesto);
 
-                                    <div className="flex items-center text-neutral-600 text-sm mb-4">
-                                        <Calendar size={16} className="mr-1" />
-                                        <span>
-                                            {formatearFecha(presupuesto.fecha_inicio)} - {formatearFecha(presupuesto.fecha_fin)}
-                                            {diasRestantes > 0 && ` (${diasRestantes} días restantes)`}
-                                        </span>
-                                    </div>
+                                return (
+                                    <div
+                                        key={presupuesto.id}
+                                        className="bg-white rounded-lg shadow-sm"
+                                    >
+                                        <div className="p-4 border-b border-neutral-200">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center">
+                                                    <h3 className="font-semibold text-neutral-900 text-lg">
+                                                        {obtenerCategoria(presupuesto.categoria_id)}
+                                                    </h3>
+                                                    <DropdownMenu
+                                                        triggerIcon={<EllipsisVertical size={20}
+                                                                                       className="text-neutral-400"/>}
+                                                        actions={acciones(presupuesto)}
+                                                    />
+                                                </div>
 
-                                    <div className="mb-2">
-                                        <ProgressBar
-                                            porcentaje={porcentajeProgreso}
-                                            className={porcentajeProgreso < 70 ? 'bg-success' : porcentajeProgreso < 90 ? 'bg-warning' : 'bg-error'}
-                                        />
-                                    </div>
+                                                <span
+                                                    className={`text-sm font-medium px-2 py-1 rounded-full ${estadoInfo.clase === 'text-success' ? 'bg-success-100 text-success' : estadoInfo.clase === 'text-warning' ? 'bg-warning-100 text-warning' : 'bg-error-100 text-error'}`}>
+                                                    {estadoInfo.estado}
+                                                </span>
+                                            </div>
 
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <p className="text-sm text-neutral-600">Gastado</p>
-                                            <p className="font-medium text-neutral-900">
-                                                {mostrarSaldos ? formatearMoneda(presupuesto.progreso) : '••••••'}
-                                            </p>
+                                            <div className="flex items-center text-neutral-600 text-sm mb-4">
+                                                <Calendar size={16} className="mr-1"/>
+                                                <span>
+                                                    {formatearFecha(presupuesto.fecha_inicio)} - {formatearFecha(presupuesto.fecha_fin)}
+                                                    {diasRestantes > 0 &&
+                                                        <span className="ml-1 text-success-700">
+                                                            ({diasRestantes} días restantes)
+                                                        </span>
+                                                    }
+                                                </span>
+                                            </div>
+
+                                            <div className="mb-2">
+                                                <ProgressBar
+                                                    porcentaje={porcentajeProgreso}
+                                                    className={
+                                                        porcentajeProgreso < 70
+                                                            ? 'bg-success'
+                                                            : porcentajeProgreso < 99
+                                                                ? 'bg-warning'
+                                                                : 'bg-error'
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="text-sm text-neutral-600">Gastado</p>
+                                                    <p className="font-medium text-neutral-900">
+                                                        {mostrarSaldos ? formatearMoneda(presupuesto.progreso) : '••••••'}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm text-neutral-600">Límite</p>
+                                                    <p className="font-medium text-neutral-900">
+                                                        {mostrarSaldos ? formatearMoneda(presupuesto.limite) : '••••••'}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-sm text-neutral-600">Límite</p>
-                                            <p className="font-medium text-neutral-900">
-                                                {mostrarSaldos ? formatearMoneda(presupuesto.limite) : '••••••'}
-                                            </p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* Lista de presupuestos expirados */}
+            {tipoVistaActual === 'expirados' && (
+                <>
+                    {presupuestosExpirados.length === 0 ? (
+                        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+                            <Clock size={48} className="mx-auto mb-4 text-neutral-300"/>
+                            <p className="text-neutral-600">No tienes presupuestos expirados</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {presupuestosExpiradosOrdenados.map((presupuesto) => {
+                                const diasExpirado = calcularDiasExpirado(presupuesto.fecha_fin);
+                                const porcentajeProgreso = Math.min(100, (presupuesto.progreso / presupuesto.limite) * 100);
+
+                                return (
+                                    <div
+                                        key={presupuesto.id}
+                                        className="bg-neutral-50 rounded-lg shadow-sm hover:shadow transition-shadow cursor-pointer"
+                                    >
+                                        <div className="p-4 border-b border-neutral-200">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center">
+                                                    <h3 className="font-semibold text-neutral-700 text-lg">
+                                                        {obtenerCategoria(presupuesto.categoria_id)}
+                                                    </h3>
+                                                    <DropdownMenu
+                                                        triggerIcon={<EllipsisVertical size={20}
+                                                                                       className="text-neutral-400"/>}
+                                                        actions={acciones(presupuesto)}
+                                                    />
+                                                </div>
+                                                <span
+                                                    className="text-sm font-medium px-2 py-1 rounded-full bg-neutral-200 text-neutral-700">
+                                                    Expirado
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center text-neutral-600 text-sm mb-4">
+                                                <Calendar size={16} className="mr-1"/>
+                                                <span>
+                                                    {formatearFecha(presupuesto.fecha_inicio)} - {formatearFecha(presupuesto.fecha_fin)}
+                                                    <span className="ml-1 text-neutral-500">
+                                                        (Hace {diasExpirado} días)
+                                                    </span>
+                                                </span>
+                                            </div>
+
+                                            <div className="mb-2">
+                                                <ProgressBar
+                                                    porcentaje={porcentajeProgreso}
+                                                    className={
+                                                        porcentajeProgreso < 70
+                                                            ? 'bg-success opacity-60'
+                                                            : porcentajeProgreso < 99
+                                                                ? 'bg-warning opacity-60'
+                                                                : 'bg-error opacity-60'
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="text-sm text-neutral-500">Gastado</p>
+                                                    <p className="font-medium text-neutral-700">
+                                                        {mostrarSaldos ? formatearMoneda(presupuesto.progreso) : '••••••'}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm text-neutral-500">Límite</p>
+                                                    <p className="font-medium text-neutral-700">
+                                                        {mostrarSaldos ? formatearMoneda(presupuesto.limite) : '••••••'}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Formulario de creación de presupuesto */}
             <PresupuestoForm
                 mostrar={mostrarFormulario}
-                presupuestoSeleccionado={null}
-                onSubmitPresupuesto={handleCreatePresupuesto}
-                onClose={() => setMostrarFormulario(false)}
+                presupuestoSeleccionado={presupuestoSeleccionado}
+                onSubmitPresupuesto={handleSubmitPresupuesto}
+                onClose={() => {
+                    setMostrarFormulario(false);
+                    setPresupuestoSeleccionado(null);
+                }}
             />
+
+            {/* Modal de confirmación de eliminación */}
+            <ConfirmModal
+                isOpen={mostrarModalEliminacion}
+                onClose={() => setMostrarModalEliminacion(false)}
+                onConfirm={handleEliminarPresupuesto}
+                title="Confirmar eliminación"
+                message="¿Estás seguro de que deseas eliminar esta presupuesto?."
+                confirmLabel="Eliminar"
+                cancelLabel="Cancelar"
+            />
+
         </div>
     );
 }

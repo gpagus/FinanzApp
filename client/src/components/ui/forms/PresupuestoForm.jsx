@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { z } from 'zod';
-import { X } from 'lucide-react';
+import { X, EuroIcon } from 'lucide-react';
 import Boton from "../Boton";
 import FormField from "../FormField";
 import useCustomForm from "../../../hooks/useCustomForm";
@@ -27,7 +27,7 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
     const getDefaultValues = () => {
         if (presupuestoSeleccionado) {
             return {
-                categoria_id: presupuestoSeleccionado.categoria_id || '',
+                categoria_id: presupuestoSeleccionado.categoria_id?.toString() || '',
                 limite: presupuestoSeleccionado.limite || '',
                 fecha_inicio: presupuestoSeleccionado.fecha_inicio ? new Date(presupuestoSeleccionado.fecha_inicio).toISOString().split('T')[0] : '',
                 fecha_fin: presupuestoSeleccionado.fecha_fin ? new Date(presupuestoSeleccionado.fecha_fin).toISOString().split('T')[0] : ''
@@ -49,11 +49,18 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
         };
     };
 
-    const { register, errors, handleSubmit, isSubmitting } = useCustomForm({
+    const { register, errors, handleSubmit, isSubmitting, reset } = useCustomForm({
         schema: presupuestoSchema,
         defaultValues: getDefaultValues(),
         onSubmit: onSubmitPresupuesto,
     });
+
+    // Actualizar el formulario cuando cambia el presupuesto seleccionado
+    useEffect(() => {
+        if (mostrar) {
+            reset(getDefaultValues());
+        }
+    }, [presupuestoSeleccionado, mostrar, reset]);
 
     // Manejar cambio de fecha inicio manualmente
     const handleFechaInicioChange = (e) => {
@@ -68,18 +75,18 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
     if (!mostrar) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center p-4">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm z-51 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center border-b p-4">
-                    <h2 className="text-xl font-bold text-neutral-900">
+                <div className="flex justify-between items-center border-b border-neutral-200 p-4">
+                    <h2 className="text-xl font-bold text-aguazul">
                         {presupuestoSeleccionado ? 'Editar presupuesto' : 'Nuevo presupuesto'}
                     </h2>
-                    <button
-                        className="text-neutral-500 hover:text-neutral-700"
+                    <Boton
+                        tipo="icono"
                         onClick={onClose}
                     >
                         <X size={20} />
-                    </button>
+                    </Boton>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
@@ -89,13 +96,11 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
                         type="select"
                         register={register}
                         error={errors.categoria_id?.message}
-                        options={[
-                            { value: "", label: "Selecciona una categoría" },
-                            ...CATEGORIAS.map(categoria => ({
-                                value: categoria.id,
-                                label: categoria.nombre
-                            }))
-                        ]}
+                        options={CATEGORIAS.filter((cat) => cat.tipo === 'gasto').map((cat) => ({
+                            value: cat.value,
+                            label: `${cat.icono} ${cat.label}`,
+                        }))}
+                        disabled={!!presupuestoSeleccionado}
                     />
 
                     <FormField
@@ -104,6 +109,7 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
                         type="number"
                         step="0.01"
                         placeholder="0.00"
+                        prefix={<EuroIcon size={16} className="text-neutral-600"/>}
                         register={register}
                         error={errors.limite?.message}
                     />
@@ -116,6 +122,7 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
                             register={register}
                             error={errors.fecha_inicio?.message}
                             onChange={handleFechaInicioChange}
+                            disabled={!!presupuestoSeleccionado}
                         />
 
                         <FormField
@@ -128,9 +135,9 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
                         />
                     </div>
 
-                    <div className="flex justify-end space-x-2 pt-4 border-t">
+                    <div className="flex justify-end space-x-2">
                         <Boton
-                            tipo="secundario"
+                            tipo="texto"
                             onClick={onClose}
                             disabled={isSubmitting}
                         >
@@ -138,7 +145,7 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
                         </Boton>
                         <Boton
                             tipo="primario"
-                            submit
+                            type="submit"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Guardando...' : presupuestoSeleccionado ? 'Actualizar' : 'Crear'}

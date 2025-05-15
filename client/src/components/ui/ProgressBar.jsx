@@ -2,11 +2,13 @@ import React from 'react';
 
 const ProgressBar = ({ porcentaje, className = '', bgClassName = 'bg-neutral-200' }) => {
     return (
-        <div className={`w-full h-2 rounded-full ${bgClassName}`}>
+        <div className={`w-full h-3.5 rounded-full relative ${bgClassName}`}>
             <div
-                className={`h-2 rounded-full ${className}`}
+                className={`h-3.5 rounded-full ${className} relative group cursor-pointer`}
                 style={{ width: `${porcentaje}%` }}
-            />
+            >
+                <span className="tooltip">{porcentaje.toFixed(2)}%</span>
+            </div>
         </div>
     );
 };

@@ -1,4 +1,3 @@
-// client/src/api/presupuestosApi.js
 import { fetchWithAuth } from "./fetchWithAuth";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -75,7 +74,7 @@ export async function deletePresupuesto(id) {
             throw new Error(errorData.error || 'Error al eliminar el presupuesto');
         }
 
-        return res.ok; // Devuelve true si la eliminación fue exitosa
+        return res.ok;
     } catch (error) {
         console.error("Error en eliminarPresupuesto:", error);
         throw error;

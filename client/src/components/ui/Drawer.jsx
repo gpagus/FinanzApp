@@ -38,8 +38,8 @@ const Drawer = ({ isOpen, onClose, title, children, position = 'right' }) => {
                     : position === 'left' ? '-translate-x-full' : 'translate-x-full'}`}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-xl font-semibold">{title}</h2>
+                <div className="flex items-center justify-between p-4 border-b border-neutral-200">
+                    <h2 className="text-xl font-semibold text-aguazul">{title}</h2>
                     <button
                         onClick={onClose}
                         className="p-2 rounded-full hover:bg-neutral-100 transition-colors"

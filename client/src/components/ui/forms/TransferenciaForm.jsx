@@ -5,6 +5,7 @@ import {useCuentas} from '../../../hooks/useCuentas';
 import Boton from '../Boton';
 import FormField from '../FormField';
 import {Euro} from "lucide-react";
+import {obtenerFechaHoraActual} from "../../../utils/formatters";
 
 /* --- esquema de validación --- */
 const transferenciaSchema = (cuentaId, cuentasDisponibles) =>
@@ -66,8 +67,9 @@ export default function TransferenciaForm({
             );
         },
         defaultValues: {
-            categoria_id: 6
-        }
+            fecha: obtenerFechaHoraActual(),
+            categoria_id: 6,
+        },
     });
 
     if (isLoading) {

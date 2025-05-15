@@ -67,6 +67,28 @@ body {
     cursor: pointer;
 }
 
+.tooltip {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.group:hover .tooltip {
+    opacity: 1;
+}
+
+
 html {
     scroll-behavior: smooth;
 }

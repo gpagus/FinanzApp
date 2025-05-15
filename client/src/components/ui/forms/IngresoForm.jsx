@@ -2,6 +2,7 @@ import {z} from 'zod';
 import {CATEGORIAS} from "../../../utils/constants";
 import useCustomForm from "../../../hooks/useCustomForm";
 import useTransacciones from '../../../hooks/useTransacciones';
+import {obtenerFechaHoraActual} from "../../../utils/formatters";
 import Boton from '../Boton';
 import FormField from "../FormField";
 import {Euro} from "lucide-react";
@@ -23,6 +24,9 @@ export default function IngresoForm({cuentaId, onSuccess, onBack}) {
 
     const {register, handleSubmit, errors, isSubmitting} = useCustomForm({
         schema: ingresoSchema,
+        defaultValues: {
+            fecha: obtenerFechaHoraActual()
+        },
         onSubmit: (data) => {
             agregarTransaccion(
                 {
@@ -34,7 +38,6 @@ export default function IngresoForm({cuentaId, onSuccess, onBack}) {
             );
         },
     });
-
 
     return (
         <>

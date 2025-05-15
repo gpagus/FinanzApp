@@ -6,7 +6,7 @@ require('dotenv').config();
 /*
 const corsOptions = {
     origin: [
-        'https://finanziapp.vercel.app',
+        'https://finanz-app.es',
         process.env.FRONTEND_URL
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -15,9 +15,12 @@ const corsOptions = {
 }
 */
 
+// 🔎 === IMPORTACIÓN DEL CRON ===
+require('./crons/updatePresupuestos');
+
+// 🔎 === IMPORTACIÓN DE RUTAS ===
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-
 const transaccionesRoutes = require('./routes/transaccionesRoutes');
 const cuentasRoutes = require('./routes/cuentasRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
@@ -28,8 +31,7 @@ app.use(cors(/*corsOptions*/));
 app.use(morgan('dev'));
 app.use(express.json());
 
-
-// Rutas
+// 🔎 === REGISTRO DE RUTAS ===
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/transacciones', transaccionesRoutes);
@@ -37,7 +39,7 @@ app.use('/api/cuentas', cuentasRoutes);
 app.use('/api/categorias', categoriasRoutes);
 app.use('/api/presupuestos', presupuestosRoutes);
 
-// Servidor
+// 🔎 === SERVIDOR INICIADO ===
 const PORT = /*process.env.PORT ||*/ 3000;
 console.log(`Servidor iniciado en puerto ${PORT}!`);
 app.listen(PORT, () => {
