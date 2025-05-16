@@ -2,7 +2,7 @@ import React from "react";
 import {useAuth} from "../context/AuthContext";
 import { Activity, Users, FileText, PieChart, TrendingUp, DollarSign, Calendar, Bell } from "lucide-react";
 
-const Dashboard = () => {
+const AdminDashboardPage = () => {
     const {user} = useAuth();
     const isAdmin = user?.rol === "admin";
 
@@ -135,11 +135,11 @@ const Dashboard = () => {
             {/* Main Content */}
             <div className="flex-1 p-6 overflow-y-auto">
                 <h1 className="text-2xl font-bold text-neutral-900 mb-4">
-                    Bienvenido, {user?.nombre || "Usuario"}
+                    No tienes acceso a esta sección
                 </h1>
             </div>
         </div>
     );
 };
 
-export default Dashboard;
+export default AdminDashboardPage;

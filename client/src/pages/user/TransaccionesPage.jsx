@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader } from 'lucide-react';
-import { useSaldos } from "../../context/SaldosContext";
-import { useCuentas } from '../../hooks/useCuentas';
+import React, {useState} from 'react';
+import {useInfiniteQuery, useQueryClient} from '@tanstack/react-query';
+import {Loader} from 'lucide-react';
+import {useSaldos} from "../../context/SaldosContext";
+import {useCuentas} from '../../hooks/useCuentas';
 import TransaccionesList from "../../components/ui/TransaccionesList";
 import TransaccionesFilters from "../../components/ui/TransaccionesFilters";
 import Boton from "../../components/ui/Boton";
-import { getAllTransacciones } from '../../api/transaccionesApi';
+import {getAllTransacciones} from '../../api/transaccionesApi';
 import ResumenFinanciero from "../../components/ui/ResumenFinanciero";
 
 const TransaccionesPage = () => {
-    const { mostrarSaldos } = useSaldos();
+    const {mostrarSaldos} = useSaldos();
     const queryClient = useQueryClient();
-    
+
 
     const {
         balancePositivo,
@@ -43,7 +43,7 @@ const TransaccionesPage = () => {
         refetch
     } = useInfiniteQuery({
         queryKey: ['todas-transacciones', filtros],
-        queryFn: ({ pageParam = 0 }) =>
+        queryFn: ({pageParam = 0}) =>
             getAllTransacciones({
                 ...filtros,
                 limit: 15,
@@ -107,17 +107,8 @@ const TransaccionesPage = () => {
 
     return (
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
-            <div className="mb-8 {/*flex justify-between items-center*/}">
-                <h1 className="text-2xl font-bold text-aguazul">Mis movimientos</h1>
-                {/*<Boton
-                    tipo="secundario"
-                    onClick={forceRefresh}
-                    className="flex items-center"
-                >
-                    <Loader size={16} className="mr-2" />
-                    Actualizar
-                </Boton>*/}
-            </div>
+
+            <h1 className="text-2xl mb-6 font-bold text-aguazul">Mis movimientos</h1>
 
             {/* Resumen financiero - siempre visible */}
             <ResumenFinanciero

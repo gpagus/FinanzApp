@@ -4,7 +4,8 @@ import Welcome from "./pages/Welcome";
 import EmailConfirmed from "./pages/EmailConfirmed";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import UserDashboardPage from "./pages/user/UserDashboardPage";
 import CuentasList from "./pages/user/CuentasList";
 import PresupuestosListPage from "./pages/user/PresupuestosListPage";
 import CuentaDetail from "./pages/user/CuentaDetail";
@@ -39,7 +40,7 @@ export default function App() {
                     {/* Rutas privadas para usuarios logueados */}
                     <Route element={<PrivateRoute/>}>
                         <Route element={<PrivateLayout/>}>
-                            <Route path="/dashboard" element={<Dashboard/>}/>
+                            <Route path="/dashboard" element={<UserDashboardPage/>}/>
                             <Route path="/cuentas" element={<CuentasList/>}/>
                             <Route path="/cuentas/:id" element={<CuentaDetail/>}/>
                             <Route path="movimientos" element={<TransaccionesPage/>}/>
@@ -47,11 +48,11 @@ export default function App() {
 
                             {/* Rutas privadas solo para admin */}
                             <Route element={<AdminRoute/>}>
+                                <Route path="/admin" element={<AdminDashboardPage/>}/>
                                 <Route path="/admin-usuarios" element={<UserListAdmin/>}/>
                                 <Route path="/admin-estadisticas" element={<h1>Estadísticas</h1>}/>
                                 <Route path="/admin-reportes" element={<h1>Reportes</h1>}/>
                             </Route>
-
                         </Route>
                     </Route>
                 </Routes>

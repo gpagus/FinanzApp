@@ -90,9 +90,7 @@ const CuentasList = () => {
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
 
             {/* Cabecera */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-aguazul">Mis Cuentas</h1>
-            </div>
+            <h1 className="text-2xl mb-6 font-bold text-aguazul">Mis Cuentas</h1>
 
             {/* Panel de resumen financiero (ahora usando el componente) */}
             <ResumenFinanciero
