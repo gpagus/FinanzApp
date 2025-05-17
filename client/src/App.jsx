@@ -10,6 +10,7 @@ import CuentasList from "./pages/user/CuentasList";
 import PresupuestosListPage from "./pages/user/PresupuestosListPage";
 import CuentaDetail from "./pages/user/CuentaDetail";
 import TransaccionesPage from "./pages/user/TransaccionesPage";
+import SettingsPage from "./pages/user/SettingsPage";
 import ResetPassword from "./pages/ResetPassword";
 import Redireccionador from "./components/Redireccionador";
 import UserListAdmin from "./pages/admin/UserListAdmin";
@@ -45,6 +46,8 @@ export default function App() {
                             <Route path="/cuentas/:id" element={<CuentaDetail/>}/>
                             <Route path="movimientos" element={<TransaccionesPage/>}/>
                             <Route path="/presupuestos" element={<PresupuestosListPage/>}/>
+                            <Route path="/ajustes" element={<SettingsPage/>}/>
+
 
                             {/* Rutas privadas solo para admin */}
                             <Route element={<AdminRoute/>}>

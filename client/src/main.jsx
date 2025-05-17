@@ -21,13 +21,13 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <>
-        <AuthProvider>
-            <SaldosProvider>
-                <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <SaldosProvider>
                     <App/>
-                </QueryClientProvider>
-            </SaldosProvider>
-        </AuthProvider>
+                </SaldosProvider>
+            </AuthProvider>
+        </QueryClientProvider>
         <Toaster
             position="top-center"
             reverseOrder={false}

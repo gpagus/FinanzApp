@@ -9,7 +9,12 @@ const cuentaSchema = z.object({
     tipo: z.string().min(1, 'Seleccione un tipo de cuenta'),
     balance: z.coerce.number({
         errorMap: () => ({ message: 'Saldo inválido' }),
-    }).default(0),
+    })
+    .refine(val => {
+        const numString = Math.abs(val).toString();
+        return numString.length <= 10;
+    }, { message: 'El saldo no puede exceder de 10 dígitos' })
+    .default(0),
 });
 
 const CuentaForm = ({

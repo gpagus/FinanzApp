@@ -130,7 +130,7 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
                                 <div className="flex justify-end mt-1">
                                     {transaccion.transaccion_rectificativa_id ? (
                                         <p className="text-sm text-neutral-600 mr-2 rounded-full bg-neutral-100 px-2 py-0.5">
-                                            <span className="inline-block align-middle mr-1">🔄</span> Rectificado
+                                            <span className="inline-block align-middle mr-1">🔄</span> Rectificada
                                         </p>
                                     ) : transaccion.transaccion_original_id && (
                                         <p className="text-sm text-neutral-600 mr-2 rounded-full bg-sky-50 px-2 py-0.5">

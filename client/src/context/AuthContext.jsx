@@ -1,4 +1,5 @@
 import {createContext, useContext, useState, useEffect} from "react";
+import {useQueryClient} from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const AuthContext = createContext({});
@@ -13,6 +14,7 @@ export const AuthProvider = ({children}) => {
     const [accessToken, setAccessToken] = useState(null); // Token de acceso
     const [loading, setLoading] = useState(true); // Estado de carga
     const [error, setError] = useState(null);  // Mensaje de error
+    const queryClient = useQueryClient();
 
     const handleError = (error) => {
         const errorMessage = error.message || String(error);
@@ -79,8 +81,6 @@ export const AuthProvider = ({children}) => {
     };
 
     const register = async (values) => {
-        debugger;
-        console.log(values);
         setLoading(true);
         setError(null);
         try {
@@ -183,11 +183,18 @@ export const AuthProvider = ({children}) => {
 
 
     const logout = () => {
+        // Limpiar el estado de autenticación
         setUser(null);
         setAccessToken(null);
+
+        // Limpiar localStorage
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("user");
+
+        // Limpiar toda la caché de React Query
+        queryClient.clear();
+
         toast.success("Sesión cerrada, ¡hasta pronto!", {icon: "👋"});
     };
 

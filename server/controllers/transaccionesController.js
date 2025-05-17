@@ -121,6 +121,9 @@ const crearTransaccion = async (req, res) => {
         // Copiar el cuerpo de la solicitud
         const transaccionData = {...req.body};
 
+        // Guardar el cuenta_id para la actualización posterior
+        const cuentaId = transaccionData.cuenta_id;
+
         // Ajustar la zona horaria si viene fecha
         if (transaccionData.fecha) {
             // Convertir a objeto Date
@@ -148,6 +151,19 @@ const crearTransaccion = async (req, res) => {
 
         if (error) return res.status(500).json({error: error.message});
 
+        // Actualizar el campo last_update de la cuenta
+        const fechaActual = new Date().toISOString();
+        const {error: errorActualizarCuenta} = await supabase
+            .from('cuentas')
+            .update({ last_update: fechaActual })
+            .eq('id', cuentaId)
+            .eq('user_id', userId);
+
+        if (errorActualizarCuenta) {
+            console.error("Error al actualizar last_update de la cuenta:", errorActualizarCuenta.message);
+            // Seguimos adelante aunque falle la actualización de last_update
+        }
+
         res.status(201).json(data[0]);
 
     } catch (err) {
@@ -155,7 +171,6 @@ const crearTransaccion = async (req, res) => {
         return res.status(400).json({error: err.message || 'Datos inválidos'});
     }
 };
-
 
 const actualizarTransaccion = async (req, res) => {
     const userId = req.user.id;

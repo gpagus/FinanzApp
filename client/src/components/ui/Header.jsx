@@ -1,14 +1,16 @@
 import React from "react";
 import {useAuth} from "../../context/AuthContext";
 import {useSaldos} from "../../context/SaldosContext";
+import {useNavigate} from "react-router-dom";
 import Boton from "./Boton";
-import {CircleDollarSign, UserRound, Eye, EyeClosed, Headset, DoorOpen} from "lucide-react";
+import {CircleDollarSign, UserRound, Eye, EyeClosed, DoorOpen, Settings} from "lucide-react";
 
 const Header = () => {
     const {user, logout} = useAuth();
     const baseUrl = import.meta.env.VITE_SUPABASE_AVATAR_BASE_URL;
     const avatarFullUrl = user ? `${baseUrl}${user.avatar}` : null;
     const {toggleMostrarSaldos, mostrarSaldos} = useSaldos();
+    const navigate = useNavigate();
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm w-full h-16">
@@ -65,8 +67,10 @@ const Header = () => {
                         )}
                     </Boton>
 
-                    <Boton tipo="icono" aria-label="Settings">
-                        <Headset className="text-neutral-600"/>
+                    <Boton tipo="icono" aria-label="Settings" onClick={() => {
+                        navigate("/ajustes");
+                    }}>
+                        <Settings className="text-neutral-600"/>
                     </Boton>
 
                     <Boton tipo="icono" aria-label="Logout" onClick={logout}>

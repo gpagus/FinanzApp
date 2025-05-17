@@ -1,12 +1,9 @@
 import React from "react";
 import {
-    PlusCircle,
     LineChart as LineChartIcon,
     CreditCard,
     ArrowUpRight,
     ArrowDownRight,
-    Wallet,
-    Calendar
 } from "lucide-react";
 import Boton from "../../components/ui/Boton";
 import {useAuth} from "../../context/AuthContext";
@@ -31,16 +28,15 @@ const UserDashboardPage = () => {
 
     // Obtener las últimas 3 cuentas (para el acceso rápido)
     const cuentasRecientes = [...cuentas]
-        .sort((a, b) => new Date(b.lastUpdate) - new Date(a.lastUpdate))
+        .sort((a, b) => new Date(b.last_update) - new Date(a.last_update))
         .slice(0, 3);
 
 
     return (
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
             {/* Cabecera con saludo */}
-
             <h1 className="text-2xl mb-6 font-bold text-aguazul">
-                Bienvenido, {user?.nombre || "Usuario"}
+                Bienvenido, {user?.nombre || "Usuario"} 👋
             </h1>
 
             {/* Panel de resumen financiero */}
@@ -52,80 +48,30 @@ const UserDashboardPage = () => {
                 className="mb-6"
             />
 
-            {/* Sección de acciones rápidas */}
-            <div className="mb-8">
-                <h2 className="text-lg font-semibold text-aguazul mb-4">Acciones rápidas</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Boton
-                        tipo="primario"
-                        onClick={() => navigate("/operaciones/nueva")}
-                        className="flex items-center justify-center py-4"
-                    >
-                        <PlusCircle size={20} className="mr-2"/>
-                        Nueva operación
-                    </Boton>
-                    <Boton
-                        tipo="secundario"
-                        onClick={() => navigate("/cuentas")}
-                        className="flex items-center justify-center py-4"
-                    >
-                        <CreditCard size={20} className="mr-2"/>
-                        Ver cuentas
-                    </Boton>
-                    <Boton
-                        tipo="secundario"
-                        onClick={() => navigate("/operaciones")}
-                        className="flex items-center justify-center py-4"
-                    >
-                        <Calendar size={20} className="mr-2"/>
-                        Historial
-                    </Boton>
-                    <Boton
-                        tipo="secundario"
-                        onClick={() => navigate("/presupuestos")}
-                        className="flex items-center justify-center py-4"
-                    >
-                        <Wallet size={20} className="mr-2"/>
-                        Presupuestos
-                    </Boton>
-                </div>
-            </div>
-
             {/* Sección de gráfica */}
-            <div className="mb-8">
+            <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-aguazul">Flujo de ingresos y gastos (último mes)</h2>
+                    <h2 className="text-lg font-semibold text-aguazul">Flujo de ingresos y gastos</h2>
                 </div>
-                <div className="bg-white rounded-lg shadow-sm p-2 flex flex-col items-center justify-center"
-                     style={{height: "300px"}}>
+                <div className="bg-white rounded-lg shadow-sm p-4 h-80">
                     <GraficaIngresosGastos/>
                 </div>
             </div>
 
             {/* Cuentas recientes */}
-            <div>
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-aguazul">Cuentas recientes</h2>
-                    <Boton
-                        tipo="texto"
-                        onClick={() => navigate("/cuentas")}
-                        className="text-aguazul"
-                    >
-                        Ver todas
-                    </Boton>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                    {cuentasRecientes.length === 0 ? (
-                        <div className="p-8 text-center">
-                            <p className="text-neutral-600 mb-4">No tienes cuentas configuradas</p>
-                            <Boton
-                                tipo="texto"
-                                onClick={() => navigate("/cuentas")}
-                            >
-                                Añade tu primera cuenta
-                            </Boton>
-                        </div>
-                    ) : (
+            {cuentasRecientes.length > 0 && (
+                <div>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold text-aguazul">Cuentas recientes</h2>
+                        <Boton
+                            tipo="texto"
+                            onClick={() => navigate("/cuentas")}
+                            className="text-aguazul"
+                        >
+                            Ver todas
+                        </Boton>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                         <ul className="divide-y divide-neutral-200">
                             {cuentasRecientes.map((cuenta) => (
                                 <li key={cuenta.id}>
@@ -159,9 +105,11 @@ const UserDashboardPage = () => {
                                 </li>
                             ))}
                         </ul>
-                    )}
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {/* Botón para ver todas las cuentas */}
         </div>
     );
 }

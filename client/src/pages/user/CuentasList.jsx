@@ -158,7 +158,7 @@ const CuentasList = () => {
                                                     <h3 className="font-medium text-neutral-900">{cuenta.nombre}</h3>
                                                     <p className="text-sm text-neutral-600">
                                                         {tipoInfo?.nombre} •
-                                                        Actualizado: {formatearFecha(cuenta.lastUpdate)}
+                                                        Actualizado: {formatearFecha(cuenta.last_update)}
                                                     </p>
                                                 </div>
                                             </div>
