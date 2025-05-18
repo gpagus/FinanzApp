@@ -1,6 +1,7 @@
 import {createContext, useContext, useState, useEffect} from "react";
 import {useQueryClient} from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import {fetchWithAuth} from "../api/fetchWithAuth";
 
 const AuthContext = createContext({});
 
@@ -181,6 +182,36 @@ export const AuthProvider = ({children}) => {
         }
     }
 
+    const cambiarContrasena = async (currentPassword, newPassword) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL}/api/auth/cambiar-contrasena`, {
+                method: 'POST',
+                body: JSON.stringify({currentPassword, newPassword})
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+
+            // Actualiza los tokens con la nueva sesión
+            if (data.session) {
+                localStorage.setItem('access_token', data.session.access_token);
+                localStorage.setItem('refresh_token', data.session.refresh_token);
+                setAccessToken(data.session.access_token);
+            }
+
+            toast.success(data.message);
+            return true;
+        } catch (err) {
+            handleError(err);
+            return false;
+        } finally {
+            setLoading(false);
+            setError(null);
+        }
+    };
+
 
     const logout = () => {
         // Limpiar el estado de autenticación
@@ -215,6 +246,7 @@ export const AuthProvider = ({children}) => {
                 confirmarRegistro,
                 recuperarContrasena,
                 restablecerContrasena,
+                cambiarContrasena,
                 setAccessToken,
                 isAuthenticated,
             }}

@@ -310,6 +310,60 @@ const refreshToken = async (req, res) => {
     }
 };
 
+const cambiarContrasena = async (req, res) => {
+    const userId = req.user.id;
+    const {currentPassword, newPassword} = req.body;
+
+    try {
+        // Verificar la contraseña actual
+        const {data, error} = await supabase.auth.signInWithPassword({
+            email: req.user.email,
+            password: currentPassword
+        });
+
+        if (error) {
+            return res.status(401).json({error: 'La contraseña actual es incorrecta'});
+        }
+
+        // Actualizar la contraseña
+        const {data: updateData, error: updateError} = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (updateError) {
+            if (updateError.message === "New password should be different from the old password.") {
+                return res.status(400).json({error: 'La nueva contraseña debe ser diferente a la anterior.'});
+            } else return res.status(400).json({error: updateError.message});
+        }
+
+        // Iniciar sesión de nuevo con la nueva contraseña para obtener nuevos tokens
+        const {data: newSessionData, error: sessionError} = await supabase.auth.signInWithPassword({
+            email: req.user.email,
+            password: newPassword
+        });
+
+        if (sessionError) {
+            return res.status(500).json({error: 'Error al generar nueva sesión'});
+        }
+
+        // Devolver la nueva sesión
+        return res.status(200).json({
+            message: 'Contraseña actualizada',
+            session: newSessionData.session
+        });
+    } catch (err) {
+        console.error('Error al cambiar contraseña:', err);
+        return res.status(500).json({error: 'Error interno del servidor'});
+    }
+};
+
 module.exports = {
-    register, login, obtenerPerfil, confirmarRegistro, recuperarContrasena, restablecerContrasena, refreshToken
+    register,
+    login,
+    obtenerPerfil,
+    confirmarRegistro,
+    recuperarContrasena,
+    restablecerContrasena,
+    cambiarContrasena,
+    refreshToken
 };
