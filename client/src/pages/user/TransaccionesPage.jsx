@@ -119,7 +119,7 @@ const TransaccionesPage = () => {
                 className="mb-6"
             />
 
-            {/* Filtros - siempre visibles */}
+            {/* Filtros */}
             <TransaccionesFilters
                 onFilterChange={handleFilterChange}
                 onReset={handleResetFilters}
@@ -127,7 +127,7 @@ const TransaccionesPage = () => {
                 filtros={filtros}
             />
 
-            {/* Lista de transacciones con estado de carga controlado */}
+            {/* Lista de transacciones */}
             <TransaccionesList
                 transacciones={transacciones}
                 cargando={isLoading || cuentasLoading}

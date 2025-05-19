@@ -15,6 +15,7 @@ const {
     recuperarContrasena,
     restablecerContrasena,
     cambiarContrasena,
+    actualizarPerfil,
     refreshToken,
 } = require('../controllers/authController');
 
@@ -27,6 +28,7 @@ router.post('/register', upload.single('avatar'), register);
 router.get('/perfil', auth, obtenerPerfil);
 router.post('/refresh-token', refreshToken);
 router.post('/cambiar-contrasena', auth, cambiarContrasena);
+router.post('/actualizar-perfil', auth, upload.single('avatar'), actualizarPerfil);
 
 // 📧 Email-based
 router.post('/confirmar-registro', confirmarRegistro);

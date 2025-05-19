@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Filter, Search, X } from 'lucide-react';
+import {useState, useEffect} from 'react';
+import {Filter, Search, X} from 'lucide-react';
 import Boton from './Boton';
-import { CATEGORIAS } from '../../utils/constants';
+import {CATEGORIAS} from '../../utils/constants';
 import Drawer from './Drawer';
 
 const TransaccionesFilters = ({
@@ -12,12 +12,23 @@ const TransaccionesFilters = ({
                                   className = "mx-auto max-w-3xl bg-white rounded-lg shadow-sm mb-6 p-4",
                                   vistaDetalleCuenta = false
                               }) => {
-    const [mostrarDrawer, setMostrarDrawer] = useState(false);
 
-    // Determinar si hay filtros activos (incluir tipo y categoría para la vista detalle)
-    const hayFiltrosActivos = !vistaDetalleCuenta ?
-        (filtros.busqueda || filtros.categoria_id || filtros.tipo || filtros.cuenta_id || filtros.fecha_desde || filtros.fecha_hasta) :
-        (filtros.fecha_desde || filtros.fecha_hasta || filtros.busqueda || filtros.tipo || filtros.categoria_id);
+
+    const [mostrarDrawer, setMostrarDrawer] = useState(false);
+    const [busquedaLocal, setBusquedaLocal] = useState(filtros.busqueda || '');
+
+    // Debounce para el filtro de búsqueda
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            onFilterChange({...filtros, busqueda: busquedaLocal});
+        }, 500);
+
+        return () => clearTimeout(timeout);
+    }, [busquedaLocal, filtros, onFilterChange]);
+
+    const hayFiltrosActivos = !vistaDetalleCuenta
+        ? (filtros.busqueda || filtros.categoria_id || filtros.tipo || filtros.cuenta_id || filtros.fecha_desde || filtros.fecha_hasta)
+        : (filtros.fecha_desde || filtros.fecha_hasta || filtros.busqueda || filtros.tipo || filtros.categoria_id);
 
     const cerrarDrawer = () => {
         setMostrarDrawer(false);
@@ -34,7 +45,7 @@ const TransaccionesFilters = ({
                         className={`flex items-center text-sm ${mostrarDrawer ? 'bg-aguazul text-white' : ''}`}
                         onClick={() => setMostrarDrawer(true)}
                     >
-                        <Filter size={16} className="mr-1" />
+                        <Filter size={16} className="mr-1"/>
                         Filtros
                     </Boton>
 
@@ -44,14 +55,13 @@ const TransaccionesFilters = ({
                             className="flex items-center text-sm text-error"
                             onClick={onReset}
                         >
-                            <X size={16} className="mr-1" />
+                            <X size={16} className="mr-1"/>
                             Limpiar
                         </Boton>
                     )}
                 </div>
             </div>
 
-            {/* Drawer para filtros */}
             <Drawer
                 isOpen={mostrarDrawer}
                 onClose={cerrarDrawer}
@@ -92,10 +102,11 @@ const TransaccionesFilters = ({
                                 type="text"
                                 placeholder="Buscar en descripción..."
                                 className="w-full border border-neutral-200 rounded-lg p-2 pl-9 focus:outline-none focus:ring-2 focus:ring-aguazul-100"
-                                value={filtros.busqueda || ''}
-                                onChange={(e) => onFilterChange({...filtros, busqueda: e.target.value})}
+                                value={busquedaLocal}
+                                onChange={(e) => setBusquedaLocal(e.target.value)}
                             />
-                            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-600" />
+                            <Search size={16}
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-600"/>
                         </div>
                     </div>
 
@@ -148,16 +159,9 @@ const TransaccionesFilters = ({
                     )}
 
                     {/* Botones de acción */}
-                    <div className="flex flex-col gap-3 pt-4 mt-6 border-t border-neutral-200">
-                        <Boton
-                            tipo="primario"
-                            onClick={cerrarDrawer}
-                            fullWidth
-                        >
-                            Aplicar filtros
-                        </Boton>
+                    {hayFiltrosActivos && (
+                        <div className="flex flex-col gap-3 pt-4 mt-6 border-t border-neutral-200">
 
-                        {hayFiltrosActivos && (
                             <Boton
                                 tipo="secundario"
                                 onClick={() => {
@@ -168,8 +172,8 @@ const TransaccionesFilters = ({
                             >
                                 Limpiar filtros
                             </Boton>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </Drawer>
         </div>

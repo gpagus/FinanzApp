@@ -4,7 +4,7 @@ import Welcome from "./pages/Welcome";
 import EmailConfirmed from "./pages/EmailConfirmed";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
-import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import UserDashboardPage from "./pages/user/UserDashboardPage";
 import CuentasList from "./pages/user/CuentasList";
 import PresupuestosListPage from "./pages/user/PresupuestosListPage";
@@ -38,7 +38,7 @@ export default function App() {
                         <Route path="*" element={<NotFound/>}/>
                     </Route>
 
-                    {/* Rutas privadas para usuarios logueados */}
+                    {/* Rutas privadas para usuarios normales */}
                     <Route element={<PrivateRoute/>}>
                         <Route element={<PrivateLayout/>}>
                             <Route path="/dashboard" element={<UserDashboardPage/>}/>
@@ -47,15 +47,16 @@ export default function App() {
                             <Route path="movimientos" element={<TransaccionesPage/>}/>
                             <Route path="/presupuestos" element={<PresupuestosListPage/>}/>
                             <Route path="/ajustes" element={<SettingsPage/>}/>
+                        </Route>
+                    </Route>
 
-
-                            {/* Rutas privadas solo para admin */}
-                            <Route element={<AdminRoute/>}>
-                                <Route path="/admin" element={<AdminDashboardPage/>}/>
-                                <Route path="/admin-usuarios" element={<UserListAdmin/>}/>
-                                <Route path="/admin-estadisticas" element={<h1>Estadísticas</h1>}/>
-                                <Route path="/admin-reportes" element={<h1>Reportes</h1>}/>
-                            </Route>
+                    {/* Rutas admin separadas completamente */}
+                    <Route element={<AdminRoute/>}>
+                        <Route element={<PrivateLayout/>}>
+                            <Route path="/admin" element={<AdminDashboardPage/>}/>
+                            <Route path="/admin-usuarios" element={<UserListAdmin/>}/>
+                            <Route path="/admin-estadisticas" element={<h1>Estadísticas</h1>}/>
+                            <Route path="/admin-reportes" element={<h1>Reportes</h1>}/>
                         </Route>
                     </Route>
                 </Routes>

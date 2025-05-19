@@ -12,7 +12,7 @@ import {Euro} from "lucide-react";
 const gastoSchema = z.object({
     monto: z.coerce.number()
         .positive('Debe ser mayor que 0')
-        .max(99999999, 'El monto no puede exceder de los 8 dígitos'),
+        .max(999999999, 'El monto no puede exceder de los 9 dígitos'),
     categoria_id: z.coerce
         .number()
         .min(10, 'Categoría no válida')

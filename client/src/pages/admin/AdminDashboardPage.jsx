@@ -1,5 +1,5 @@
 import React from "react";
-import {useAuth} from "../context/AuthContext";
+import {useAuth} from "../../context/AuthContext.jsx";
 import { Activity, Users, FileText, PieChart, TrendingUp, DollarSign, Calendar, Bell } from "lucide-react";
 
 const AdminDashboardPage = () => {

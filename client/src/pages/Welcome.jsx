@@ -14,9 +14,6 @@ import {
 } from "lucide-react";
 
 const Welcome = () => {
-    const {isAuthenticated, loading} = useAuth();
-    const navigate = useNavigate()
-
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     // Función para abrir el modal
@@ -29,15 +26,20 @@ const Welcome = () => {
         setShowLoginModal(false);
     };
 
-    useEffect(() => {
-        if (!loading && isAuthenticated) {
-            navigate("/dashboard", {replace: true});
-        }
-    }, [isAuthenticated, loading, navigate]);
+    const navigate = useNavigate();
+    const { user, loading } = useAuth();
 
-    if (!loading && isAuthenticated) {
-        return null; // No renderizar nada si ya está autenticado
-    }
+    useEffect(() => {
+        if (loading) return; // Espera a que termine la carga
+
+        if (user) {
+            if (user.rol === "admin") {
+                navigate("/admin");
+            } else {
+                navigate("/dashboard");
+            }
+        }
+    }, [user, loading, navigate]);
 
     return (
         <div className="flex flex-col bg-neutral-100 overflow-x-hidden">

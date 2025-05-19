@@ -1,16 +1,31 @@
-import {Navigate, Outlet} from "react-router-dom";
+// Modifica tu PrivateRoute.jsx
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-function PrivateRoute() {
-  const { user } = useAuth();
+export function PrivateRoute() {
+    const { user, loading } = useAuth();
 
-  return user ? <Outlet/> : <Navigate to="/" />;
+    if (loading) return <p>Cargando...</p>;
+
+    // Si no hay usuario autenticado, redirige al inicio
+    if (!user) return <Navigate to="/" />;
+
+    return <Outlet />;
 }
 
-function AdminRoute() {
-  const { user } = useAuth();
+export function AdminRoute() {
+  const { user, loading } = useAuth();
 
-  return user && user.rol === "admin" ? <Outlet/> : <Navigate to="/dashboard" />;
+  console.log("Rol del usuario en AdminRoute:", user?.rol);
+
+  // Esperar a que termine la carga antes de decidir redireccionar
+  if (loading) return <p>Cargando...</p>;
+
+  // Verifica si el usuario es admin
+  if (!user || user.rol !== "admin") {
+    console.log("Acceso denegado: no es administrador");
+    return <Navigate to="/dashboard" />;
+  }
+
+  return <Outlet />;
 }
-
-export { PrivateRoute, AdminRoute };

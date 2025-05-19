@@ -72,9 +72,15 @@ export const AuthProvider = ({children}) => {
             await fetchPerfil(data.session.access_token);
             localStorage.setItem("access_token", data.session.access_token);
             localStorage.setItem("refresh_token", data.session.refresh_token);
+
+            // Notificar éxito
             toast.success("Sesión iniciada");
+
+            // Retornar el usuario para que otros componentes puedan decidir la redirección
+            return data.user;
         } catch (err) {
-            handleError(err)
+            handleError(err);
+            return null;
         } finally {
             setLoading(false);
             setError(null);
@@ -212,6 +218,46 @@ export const AuthProvider = ({children}) => {
         }
     };
 
+    const actualizarPerfil = async (values) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const formData = new FormData();
+            formData.append("nombre", values.nombre);
+            formData.append("apellidos", values.apellidos);
+
+            // Indicar si se debe eliminar el avatar
+            if (values.deleteAvatar) {
+                formData.append("deleteAvatar", "true");
+            } else if (values.avatar) {
+                formData.append("avatar", values.avatar);
+            }
+
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/actualizar-perfil`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("access_token")}`
+                },
+                body: formData,
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+
+            setUser(data.user);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            toast.success(data.message);
+
+            return data.user; // Retornar el usuario actualizado
+        } catch (err) {
+            handleError(err);
+            return null; // Retornar null en caso de error
+        } finally {
+            setLoading(false);
+            setError(null);
+        }
+    }
+
 
     const logout = () => {
         // Limpiar el estado de autenticación
@@ -247,6 +293,7 @@ export const AuthProvider = ({children}) => {
                 recuperarContrasena,
                 restablecerContrasena,
                 cambiarContrasena,
+                actualizarPerfil,
                 setAccessToken,
                 isAuthenticated,
             }}

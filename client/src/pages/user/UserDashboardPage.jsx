@@ -1,6 +1,5 @@
 import React from "react";
 import {
-    LineChart as LineChartIcon,
     CreditCard,
     ArrowUpRight,
     ArrowDownRight,

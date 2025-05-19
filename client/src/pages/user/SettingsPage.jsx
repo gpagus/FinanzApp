@@ -7,10 +7,10 @@ import Boton from '../../components/ui/Boton';
 import FormField from '../../components/ui/FormField';
 
 const SettingsPage = () => {
-    const {user, updateUserProfile, cambiarContrasena} = useAuth();
+    const {user, actualizarPerfil, cambiarContrasena} = useAuth();
     const [activeTab, setActiveTab] = useState('perfil');
-    const [isUploading, setIsUploading] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState(null);
+    const [avatarToDelete, setAvatarToDelete] = useState(false);
     const [avatarFile, setAvatarFile] = useState(null);
     const [avatarError, setAvatarError] = useState(null);
     const [updateSuccess, setUpdateSuccess] = useState({perfil: false, password: false});
@@ -53,12 +53,26 @@ const SettingsPage = () => {
         schema: perfilSchema,
         onSubmit: async (data) => {
             try {
-                await updateUserProfile({
+                // Enviar la actualización y recibir el usuario actualizado
+                const usuarioActualizado = await actualizarPerfil({
                     ...data,
-                    avatar: avatarFile ? await uploadAvatar(avatarFile) : user.avatar
+                    avatar: avatarFile,
+                    deleteAvatar: avatarToDelete
                 });
-                setUpdateSuccess({...updateSuccess, perfil: true});
-                setTimeout(() => setUpdateSuccess({...updateSuccess, perfil: false}), 3000);
+
+                setAvatarToDelete(false);
+
+                // Actualizar el avatar preview si se recibió un usuario actualizado con nuevo avatar
+                if (usuarioActualizado && usuarioActualizado.avatar) {
+                    const baseUrl = import.meta.env.VITE_SUPABASE_AVATAR_BASE_URL;
+                    // Añadir timestamp para evitar caché
+                    const timestamp = new Date().getTime();
+                    const avatarUrl = `${baseUrl}${usuarioActualizado.avatar}${usuarioActualizado.avatar.includes('?') ? '&' : '?'}t=${timestamp}`;
+                    setAvatarPreview(avatarUrl);
+                }
+
+                // Limpiar el archivo seleccionado
+                setAvatarFile(null);
             } catch (error) {
                 console.error('Error al actualizar perfil:', error);
             }
@@ -94,7 +108,8 @@ const SettingsPage = () => {
     useEffect(() => {
         if (user?.avatar) {
             const baseUrl = import.meta.env.VITE_SUPABASE_AVATAR_BASE_URL;
-            const avatarUrl = `${baseUrl}${user.avatar}`;
+            const timestamp = new Date().getTime();
+            const avatarUrl = `${baseUrl}${user.avatar}${user.avatar.includes('?') ? '&' : '?'}t=${timestamp}`;
             if (!avatarUrl.includes("null")) {
                 setAvatarPreview(avatarUrl);
             }
@@ -119,27 +134,20 @@ const SettingsPage = () => {
             return;
         }
 
-        setAvatarFile(file);
-        setAvatarError(null);
+        // Limpiar cualquier vista previa anterior
+        setAvatarPreview(null);
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setAvatarPreview(reader.result);
-        };
-        reader.readAsDataURL(file);
-    };
+        // Establecer el nuevo archivo después de un breve tiempo
+        setTimeout(() => {
+            setAvatarFile(file);
+            setAvatarError(null);
 
-    // Función para subir avatar
-    const uploadAvatar = async (file) => {
-        setIsUploading(true);
-        try {
-            // Esta función simula la subida del avatar
-            // En una implementación real, aquí subirías el archivo al servidor
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return 'nuevo-avatar-path.jpg';
-        } finally {
-            setIsUploading(false);
-        }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }, 50);
     };
 
     // Eliminar avatar
@@ -147,6 +155,8 @@ const SettingsPage = () => {
         setAvatarPreview(null);
         setAvatarFile(null);
         setAvatarError(null);
+        // Esta bandera indica que queremos eliminar el avatar actual
+        setAvatarToDelete(true);
     };
 
     return (
@@ -199,12 +209,6 @@ const SettingsPage = () => {
                             </label>
                             <div className="flex items-center space-x-4">
                                 <div className="relative">
-                                    {isUploading && (
-                                        <div
-                                            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                                            <Loader size={24} className="text-white animate-spin"/>
-                                        </div>
-                                    )}
                                     {avatarPreview ? (
                                         <img
                                             src={avatarPreview}
@@ -231,14 +235,16 @@ const SettingsPage = () => {
                                             accept="image/*"
                                             className="hidden"
                                             onChange={handleAvatarChange}
-                                            disabled={isUploading}
+                                            // Eliminar esta propiedad:
+                                            // disabled={isUploading}
                                         />
                                     </label>
                                     {avatarPreview && (
                                         <button
                                             onClick={handleRemoveAvatar}
                                             className="flex items-center space-x-2 text-sm text-error cursor-pointer hover:underline"
-                                            disabled={isUploading}
+                                            // Eliminar esta propiedad:
+                                            // disabled={isUploading}
                                         >
                                             <Trash2 size={16}/>
                                             <span>Eliminar foto</span>
@@ -320,6 +326,14 @@ const SettingsPage = () => {
                 {activeTab === 'seguridad' && (
                     <div>
                         <h2 className="text-xl font-semibold mb-4">Cambiar contraseña</h2>
+
+                        <div className="mb-4 p-3 bg-info-100 text-info rounded-lg border border-info/50">
+                            <p className="text-sm">
+                                <strong>Nota:</strong> Al cambiar tu contraseña, se cerrará tu sesión en todos los
+                                dispositivos
+                                donde hayas iniciado sesión anteriormente por motivos de seguridad.
+                            </p>
+                        </div>
 
                         <form onSubmit={handleSubmitPassword} className="space-y-4">
                             <FormField

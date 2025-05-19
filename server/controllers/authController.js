@@ -357,6 +357,112 @@ const cambiarContrasena = async (req, res) => {
     }
 };
 
+const actualizarPerfil = async (req, res) => {
+    const userId = req.user.id;
+    const {nombre, apellidos} = req.body;
+    const deleteAvatar = req.body.deleteAvatar === "true";
+    const avatarFile = req.file || null;
+    let avatarPath = null;
+
+    try {
+        // Obtener el perfil actual para recuperar el email y avatar actual
+        const {data: perfilActual, error: perfilError} = await supabase
+            .from('usuarios')
+            .select('email, avatar')
+            .eq('id', userId)
+            .single();
+
+        if (perfilError) {
+            return res.status(400).json({error: perfilError.message});
+        }
+
+        const datosActualizar = {nombre, apellidos};
+        if (deleteAvatar && perfilActual.avatar) {
+            // Eliminar archivo del bucket
+            const {error: deleteError} = await supabaseAdmin.storage
+                .from('avatars')
+                .remove([perfilActual.avatar]);
+
+            if (deleteError) {
+                console.error('Error al eliminar avatar:', deleteError);
+                // Continuamos aunque haya error al eliminar
+            }
+
+            // Establecer el avatar como null en la base de datos
+            datosActualizar.avatar = null;
+        } else if (avatarFile) {
+            const extension = path.extname(avatarFile.originalname);
+            const sanitizedFileName = `avatar${extension}`;
+            const fileBuffer = fs.readFileSync(avatarFile.path);
+            avatarPath = `user_${perfilActual.email}/${sanitizedFileName}`;
+
+            // Si existe un avatar anterior, lo eliminamos
+            if (perfilActual.avatar) {
+                // Eliminar archivo anterior del bucket
+                const {error: deleteError} = await supabaseAdmin.storage
+                    .from('avatars')
+                    .remove([perfilActual.avatar]);
+
+                if (deleteError) {
+                    console.error('Error al eliminar avatar anterior:', deleteError);
+                    // Continuamos aunque haya error al eliminar
+                }
+            }
+
+            // Subir archivo a Supabase Storage
+            const {error: uploadError} = await supabaseAdmin.storage
+                .from('avatars')
+                .upload(avatarPath, fileBuffer, {
+                    contentType: avatarFile.mimetype,
+                    cacheControl: '3600',
+                    upsert: true,
+                });
+
+            if (uploadError) {
+                return res.status(500).json({error: uploadError.message});
+            }
+
+            // Eliminar el archivo temporal
+            fs.unlink(avatarFile.path, (err) => {
+                if (err) {
+                    console.error('Error al eliminar el archivo temporal:', err);
+                }
+            });
+
+            // Añadir la ruta del avatar a los datos a actualizar
+            datosActualizar.avatar = `${avatarPath}?t=${Date.now()}`;
+        }
+
+        // Actualizar el perfil con los datos
+        const {error} = await supabase
+            .from('usuarios')
+            .update(datosActualizar)
+            .eq('id', userId);
+
+        if (error) {
+            return res.status(400).json({error: error.message});
+        }
+
+        // Obtener el perfil actualizado para devolver al cliente
+        const {data: userActualizado, error: fetchError} = await supabase
+            .from('usuarios')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (fetchError) {
+            return res.status(400).json({error: fetchError.message});
+        }
+
+        return res.status(200).json({
+            message: 'Perfil actualizado',
+            user: userActualizado
+        });
+    } catch (err) {
+        console.error('Error al actualizar perfil:', err);
+        return res.status(500).json({error: 'Error interno del servidor'});
+    }
+};
 module.exports = {
     register,
     login,
@@ -365,5 +471,6 @@ module.exports = {
     recuperarContrasena,
     restablecerContrasena,
     cambiarContrasena,
+    actualizarPerfil,
     refreshToken
 };

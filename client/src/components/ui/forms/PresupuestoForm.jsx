@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { z } from 'zod';
-import { X, EuroIcon } from 'lucide-react';
+import React, {useEffect} from 'react';
+import {z} from 'zod';
+import {X, EuroIcon} from 'lucide-react';
 import Boton from "../Boton";
 import FormField from "../FormField";
 import useCustomForm from "../../../hooks/useCustomForm";
-import { CATEGORIAS } from "../../../utils/constants";
+import {CATEGORIAS} from "../../../utils/constants";
 
 // Esquema de validación con Zod (sin fecha_inicio)
 const presupuestoSchema = z.object({
@@ -12,7 +12,8 @@ const presupuestoSchema = z.object({
     limite: z.coerce
         .number()
         .positive('El límite debe ser un número positivo')
-        .min(10, 'El límite debe ser al menos 10'),
+        .min(5, 'El límite debe ser al menos 5 euros')
+        .max(999999999, 'El límite no puede exceder de los 9 dígitos'),
     fecha_fin: z.string().min(1, 'La fecha de fin es obligatoria')
 }).refine(data => {
     const fechaHoy = new Date();
@@ -23,7 +24,7 @@ const presupuestoSchema = z.object({
     path: ["fecha_fin"]
 });
 
-const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto, onClose }) => {
+const PresupuestoForm = ({mostrar, presupuestoSeleccionado, onSubmitPresupuesto, onClose}) => {
     // Valores por defecto
     const getDefaultValues = () => {
         const hoy = new Date();
@@ -46,7 +47,7 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
         };
     };
 
-    const { register, errors, handleSubmit, isSubmitting, reset } = useCustomForm({
+    const {register, errors, handleSubmit, isSubmitting, reset} = useCustomForm({
         schema: presupuestoSchema,
         defaultValues: getDefaultValues(),
         onSubmit: (values) => {
@@ -65,7 +66,8 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
     if (!mostrar) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm z-51 flex justify-center items-center p-4">
+        <div
+            className="fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm z-51 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center border-b border-neutral-200 p-4">
                     <h2 className="text-xl font-bold text-aguazul">
@@ -75,11 +77,22 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
                         tipo="icono"
                         onClick={onClose}
                     >
-                        <X size={20} />
+                        <X size={20}/>
                     </Boton>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
+
+                    {presupuestoSeleccionado && (
+                        <div className="mb-4 p-3 bg-neutral-100 text-neutral-600 rounded-lg border border-neutral/50">
+                            <p className="text-sm">
+                                La categoría no puede ser modificada una vez creado el
+                                presupuesto.
+                                Si necesitas cambiar de categoría, deberás crear un nuevo presupuesto.
+                            </p>
+                        </div>
+                    )}
+
                     <FormField
                         label="Categoría"
                         name="categoria_id"
@@ -110,7 +123,7 @@ const PresupuestoForm = ({ mostrar, presupuestoSeleccionado, onSubmitPresupuesto
                         type="date"
                         register={register}
                         error={errors.fecha_fin?.message}
-                        attributes={{ min: new Date().toISOString().split('T')[0] }}
+                        attributes={{min: new Date().toISOString().split('T')[0]}}
                     />
 
                     <div className="flex justify-end space-x-2">

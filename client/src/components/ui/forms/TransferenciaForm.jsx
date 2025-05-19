@@ -12,7 +12,7 @@ const transferenciaSchema = (cuentaId, cuentasDisponibles) =>
     z.object({
         monto: z.coerce.number()
             .positive('Debe ser mayor que 0')
-            .max(99999999, 'El monto no puede exceder de los 8 dígitos'),
+            .max(999999999, 'El monto no puede exceder de los 9 dígitos'),
         cuenta_destino_id: z
             .string()
             .uuid('Seleccione una cuenta válida')

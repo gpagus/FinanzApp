@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
 import Boton from './Boton.jsx';
 import {useAuth} from "../../context/AuthContext";
-import {Home, Wallet, TrendingUp, PiggyBank, BarChart2, Users, MessageCircle} from 'lucide-react';
+import {Home, Settings, Wallet, TrendingUp, PiggyBank, BarChart2, Users, MessageCircle} from 'lucide-react';
 
 const Sidebar = () => {
     const {user} = useAuth();
-
+    const location = useLocation();
     const [isMobile, setIsMobile] = useState(false);
 
     // Comprobar el tamaño de la pantalla
@@ -24,23 +25,20 @@ const Sidebar = () => {
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
-    let menuItems;
-    if (user.rol !== 'admin') {
-        menuItems = [
-            {name: 'Inicio', icon: Home, path: '/dashboard'},
-            {name: 'Cuentas', icon: Wallet, path: '/cuentas'},
-            {name: 'Movimientos', icon: TrendingUp, path: '/movimientos'},
-            {name: 'Huchas', icon: PiggyBank, path: '/presupuestos'},
-        ];
-    } else {
-        menuItems = [
-            {name: 'Inicio', icon: Home, path: '/dashboard'},
-            {name: 'Usuarios', icon: Users, path: '/admin-usuarios'},
-            {name: 'Estadísticas', icon: BarChart2, path: '/admin-estadisticas'},
-            {name: 'Reportes', icon: MessageCircle, path: '/admin-reportes'},
-        ];
-    }
+    const menuItems = user.rol !== 'admin' ? [
+        {name: 'Inicio', icon: Home, path: '/dashboard'},
+        {name: 'Cuentas', icon: Wallet, path: '/cuentas'},
+        {name: 'Movimientos', icon: TrendingUp, path: '/movimientos'},
+        {name: 'Huchas', icon: PiggyBank, path: '/presupuestos'},
+    ] : [
+        {name: 'Inicio', icon: Home, path: '/admin'},
+        {name: 'Usuarios', icon: Users, path: '/admin-usuarios'},
+        {name: 'Estadísticas', icon: BarChart2, path: '/admin-estadisticas'},
+        {name: 'Reportes', icon: MessageCircle, path: '/admin-reportes'},
+    ];
 
+    // Determinar el ícono actual basado en la ruta
+    const currentItem = menuItems.find(item => location.pathname.startsWith(item.path)) || menuItems[0];
 
     // Barra de navegación móvil
     if (isMobile) {
@@ -67,7 +65,7 @@ const Sidebar = () => {
         <nav className="fixed top-16 left-0 h-screen p-4 w-60 flex flex-col bg-neutral-100 overflow-y-auto">
             <div className="flex items-center justify-center mb-8">
                 <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center">
-                    <Home className="text-neutral-600" size={24}/>
+                    <currentItem.icon className="text-neutral-600" size={24}/>
                 </div>
             </div>
 

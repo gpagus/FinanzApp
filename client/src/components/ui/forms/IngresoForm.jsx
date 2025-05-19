@@ -9,7 +9,7 @@ import {Euro} from "lucide-react";
 
 /* --- esquema de validación --- */
 const ingresoSchema = z.object({
-    monto: z.coerce.number().positive('Debe ser mayor que 0').max(99999999, 'El monto no puede exceder de los 8 dígitos'),
+    monto: z.coerce.number().positive('Debe ser mayor que 0').max(999999999, 'El monto no puede exceder de los 9 dígitos'),
     categoria_id: z.coerce.number().min(1, 'Categoría no válida').max(9, 'Categoría no válida'),
     descripcion: z.string().min(1, 'Introduzca una descripción').max(50, 'Máximo 50 caracteres'),
     fecha: z.coerce.date({
