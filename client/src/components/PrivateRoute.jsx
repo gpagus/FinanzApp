@@ -1,11 +1,11 @@
-// Modifica tu PrivateRoute.jsx
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import LoadingOverlay from "./ui/LoadingOverlay";
 
 export function PrivateRoute() {
     const { user, loading } = useAuth();
 
-    if (loading) return <p>Cargando...</p>;
+    if (loading) return <LoadingOverlay />;
 
     // Si no hay usuario autenticado, redirige al inicio
     if (!user) return <Navigate to="/" />;
@@ -19,7 +19,7 @@ export function AdminRoute() {
   console.log("Rol del usuario en AdminRoute:", user?.rol);
 
   // Esperar a que termine la carga antes de decidir redireccionar
-  if (loading) return <p>Cargando...</p>;
+  if (loading) return <LoadingOverlay />;
 
   // Verifica si el usuario es admin
   if (!user || user.rol !== "admin") {

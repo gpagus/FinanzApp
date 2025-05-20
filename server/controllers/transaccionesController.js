@@ -1,6 +1,5 @@
 const supabase = require('../config/supabaseClient');
 
-
 const obtenerTransacciones = async (req, res) => {
     const {
         cuenta_id,
@@ -70,8 +69,8 @@ const obtenerTodasLasTransacciones = async (req, res) => {
             .from('transacciones')
             .select('*, cuentas!transacciones_cuenta_id_fkey(nombre)')
             .eq('user_id', userId)
+            // Usamos el ordenamiento estándar por fecha descendente
             .order('fecha', {ascending: false});
-
 
         // Aplicar filtros de manera más clara y ordenada
         if (fecha_desde) query.gte('fecha', fecha_desde);
@@ -81,7 +80,6 @@ const obtenerTodasLasTransacciones = async (req, res) => {
             fechaHastaCompleta.setHours(23, 59, 59, 999);
             query.lte('fecha', fechaHastaCompleta.toISOString());
         }
-
 
         if (cuenta_id) query.eq('cuenta_id', cuenta_id);
 
@@ -113,7 +111,6 @@ const obtenerTodasLasTransacciones = async (req, res) => {
     }
 };
 
-
 const crearTransaccion = async (req, res) => {
     const userId = req.user.id;
 
@@ -124,14 +121,8 @@ const crearTransaccion = async (req, res) => {
         // Guardar el cuenta_id para la actualización posterior
         const cuentaId = transaccionData.cuenta_id;
 
-        // Ajustar la zona horaria si viene fecha
-        if (transaccionData.fecha) {
-            // Convertir a objeto Date
-            const fechaOriginal = new Date(transaccionData.fecha);
-            // Sumar 2 horas (7200000 ms) para zona horaria española
-            fechaOriginal.setTime(fechaOriginal.getTime() + 2 * 60 * 60 * 1000);
-            // Actualizar la fecha en formato ISO
-            transaccionData.fecha = fechaOriginal.toISOString();
+        if (!transaccionData.fecha) {
+            transaccionData.fecha = new Date().toISOString();
         }
 
         const nuevaTransaccion = {
@@ -155,7 +146,7 @@ const crearTransaccion = async (req, res) => {
         const fechaActual = new Date().toISOString();
         const {error: errorActualizarCuenta} = await supabase
             .from('cuentas')
-            .update({ last_update: fechaActual })
+            .update({last_update: fechaActual})
             .eq('id', cuentaId)
             .eq('user_id', userId);
 
@@ -179,7 +170,7 @@ const actualizarTransaccion = async (req, res) => {
     try {
         const cambios = req.body;
 
-        // 1️⃣ 🔎 Obtener la categoría actual de la transacción
+        // Obtener la categoría actual de la transacción
         const {data: transaccionActual, error: errorTransaccion} = await supabase
             .from('transacciones')
             .select('categoria_id')
@@ -188,7 +179,7 @@ const actualizarTransaccion = async (req, res) => {
 
         if (errorTransaccion) return res.status(500).json({error: errorTransaccion.message});
 
-        // 2️⃣ 🔎 Comprobar si la categoría actual está vinculada a un presupuesto
+        // Comprobar si la categoría actual está vinculada a un presupuesto
         const {data: presupuestoActual, error: errorPresupuestoActual} = await supabase
             .from('presupuestos')
             .select('id')
@@ -204,7 +195,7 @@ const actualizarTransaccion = async (req, res) => {
             });
         }
 
-        // 3️⃣ 🔎 Comprobar si la nueva categoría que intenta asignar está vinculada a un presupuesto
+        // Comprobar si la nueva categoría que intenta asignar está vinculada a un presupuesto
         if (cambios.categoria_id && cambios.categoria_id !== transaccionActual.categoria_id) {
             const {data: presupuestoNuevo, error: errorPresupuestoNuevo} = await supabase
                 .from('presupuestos')
@@ -222,7 +213,7 @@ const actualizarTransaccion = async (req, res) => {
             }
         }
 
-        // 4️⃣ 🔄 Si no hay conflictos, procedemos a actualizar
+        // Si no hay conflictos, procedemos a actualizar
         const {data, error} = await supabase
             .from('transacciones')
             .update(cambios)
@@ -238,7 +229,6 @@ const actualizarTransaccion = async (req, res) => {
         return res.status(400).json({error: err.message || 'Datos inválidos'});
     }
 };
-
 
 const eliminarTransaccion = async (req, res) => {
     const userId = req.user.id;

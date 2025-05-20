@@ -219,6 +219,7 @@ export const AuthProvider = ({children}) => {
     };
 
     const actualizarPerfil = async (values) => {
+        debugger;
         setLoading(true);
         setError(null);
         try {

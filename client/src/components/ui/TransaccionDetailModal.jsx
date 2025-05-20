@@ -61,7 +61,7 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
         const nuevaTransaccion = {
             cuenta_id: transaccion.cuenta_id,
             monto: transaccion.monto,
-            descripcion: `Rectificación: ${transaccion.descripcion || 'Sin descripción'}`,
+            descripcion: transaccion.descripcion,
             tipo: transaccion.tipo === 'gasto' ? 'ingreso' : 'gasto',
             categoria_id: transaccion.categoria_id,
             transaccion_original_id: transaccion.id

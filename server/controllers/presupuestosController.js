@@ -21,6 +21,23 @@ const crearPresupuesto = async (req, res) => {
             user_id: userId,
         };
 
+        // Comprobar si el presupuesto con la categoría ya existe
+        const {data: presupuestoExistente, error: errorPresupuesto} = await supabase
+            .from('presupuestos')
+            .select('id')
+            .eq('categoria_id', nuevoPresupuesto.categoria_id)
+            .eq('user_id', userId)
+            .eq('estado', true)
+            .limit(1);
+
+        if (errorPresupuesto) return res.status(500).json({error: errorPresupuesto.message});
+
+        if (presupuestoExistente.length > 0) {
+            return res.status(400).json({
+                error: 'Ya existe un presupuesto activo para esta categoría. No puedes crear otro.'
+            });
+        }
+
         const {data, error} = await supabase
             .from('presupuestos')
             .insert([nuevoPresupuesto])
@@ -56,10 +73,10 @@ const actualizarPresupuesto = async (req, res) => {
 
     try {
         // Solo permitir actualizar límite y fecha_fin
-        const { limite, fecha_fin } = req.body;
+        const {limite, fecha_fin} = req.body;
         const datosActualizados = {
-            ...(limite !== undefined && { limite }),
-            ...(fecha_fin !== undefined && { fecha_fin })
+            ...(limite !== undefined && {limite}),
+            ...(fecha_fin !== undefined && {fecha_fin})
         };
 
         if (Object.keys(datosActualizados).length === 0) {

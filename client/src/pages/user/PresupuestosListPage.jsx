@@ -6,6 +6,7 @@ import {
     PieChart,
     Clock, EllipsisVertical
 } from 'lucide-react';
+import InfoTooltip from "../../components/ui/InfoToolTip";
 import Boton from '../../components/ui/Boton';
 import {useSaldos} from "../../context/SaldosContext";
 import {formatearFecha, formatearMoneda} from "../../utils/formatters";
@@ -170,7 +171,29 @@ const PresupuestosListPage = () => {
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
             {/* Cabecera */}
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-aguazul">Mis Presupuestos</h1>
+                <div className="flex items-center">
+                    <h1 className="text-2xl font-bold text-aguazul">Mis Presupuestos</h1>
+                    <span className="ml-2">
+                        <InfoTooltip
+                            tooltipText="Los presupuestos te ayudan a controlar tus gastos por categoría"
+                            detailTitle="Cómo funcionan los presupuestos"
+                            detailContent={[
+                                {
+                                    title: "Crea objetivos financieros",
+                                    description: "Establece límites de gasto para diferentes categorías como transporte, alimentación o entretenimiento."
+                                },
+                                {
+                                    title: "Define períodos",
+                                    description: "Cada presupuesto tiene una fecha de inicio y fin. Puedes crear presupuestos semanales, mensuales o personalizados."
+                                },
+                                {
+                                    title: "Seguimiento automático",
+                                    description: "Tus gastos se asignan automáticamente al presupuesto correspondiente para que puedas ver tu progreso."
+                                }
+                            ]}
+                        />
+                    </span>
+                </div>
             </div>
 
             {/* Resumen de presupuestos */}
