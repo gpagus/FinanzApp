@@ -76,7 +76,7 @@ function ResetPassword() {
     return (
         <div
             className="min-h-[calc(100vh-4rem-2.5rem)] flex flex-col items-center justify-center bg-neutral-100 px-4 text-center">
-            <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+            <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg mb-4">
                 <h2 className="text-2xl font-semibold mb-6 text-neutral-900">Restablecer Contraseña</h2>
                 <form onSubmit={handleSubmit}>
                     <FormField
@@ -101,6 +101,15 @@ function ResetPassword() {
                         {loading ? "Procesando..." : "Restablecer contraseña"}
                     </Boton>
                 </form>
+            </div>
+
+            <div className="w-full max-w-md p-2">
+                <div className="mb-4 p-3 bg-neutral-200 text-neutral-700 rounded-md text-sm shadow-md">
+                    <p><strong>Importante:</strong> La nueva contraseña debe ser diferente a tu contraseña anterior. Si
+                        intentas usar la misma contraseña, el sistema rechazará el cambio y tendrás que solicitar un
+                        nuevo
+                        enlace de recuperación.</p>
+                </div>
             </div>
         </div>
     );

@@ -10,17 +10,19 @@ const EmailConfirmed = () => {
     const [tokenError, setTokenError] = useState(false);
 
     useEffect(() => {
-        debugger;
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const urlToken = hashParams.get("access_token");
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
 
-        if (!urlToken) {
+        if (!accessToken || !refreshToken) {
             setTokenError(true);
         } else {
             (async () => {
-                const result = await confirmarRegistro(urlToken);
+                const result = await confirmarRegistro(accessToken);
                 if (result) {
-                    setTimeout(() => navigate('/'), 4000);
+                    localStorage.setItem('access_token', accessToken);
+                    localStorage.setItem('refresh_token', refreshToken);
+                    setTimeout(() => navigate('/dashboard'), 4000);
                 } else {
                     setTokenError(true);
                 }
@@ -52,9 +54,6 @@ const EmailConfirmed = () => {
                 <p className="text-neutral-700 mb-6">
                     Serás redirigido al inicio en breves...
                 </p>
-                <Boton tipo="primario" to="/dashboard">
-                    Dashboard
-                </Boton>
             </div>
         );
     }

@@ -69,8 +69,6 @@ const CuentaDetail = () => {
             const cuentaEncontrada = cuentas.find((c) => c.id === id);
             if (cuentaEncontrada) {
                 setCuenta(cuentaEncontrada);
-            } else {
-                navigate('/cuentas');
             }
         }
     }, [id, cuentas, isLoading, navigate]);
@@ -159,8 +157,8 @@ const CuentaDetail = () => {
                 <div className="text-center p-6 bg-error-100 rounded-lg max-w-md">
                     <h2 className="text-xl font-bold text-error mb-2">Error al cargar la cuenta</h2>
                     <p className="text-neutral-700 mb-4">{error?.message || 'Ha ocurrido un error inesperado.'}</p>
-                    <Boton tipo="primario" onClick={() => navigate('/cuentas')}>
-                        Volver a mis cuentas
+                    <Boton tipo="primario" onClick={() => navigate('/')}>
+                        Volver al inicio
                     </Boton>
                 </div>
             </div>
@@ -173,8 +171,8 @@ const CuentaDetail = () => {
                 <div className="text-center p-6 bg-neutral-100 rounded-lg max-w-md">
                     <h2 className="text-xl font-bold text-aguazul mb-2">Cuenta no encontrada</h2>
                     <p className="text-neutral-700 mb-4">La cuenta que buscas no existe o no tienes acceso a ella.</p>
-                    <Boton tipo="primario" onClick={() => navigate('/cuentas')}>
-                        Volver a mis cuentas
+                    <Boton tipo="primario" onClick={() => navigate('/')}>
+                        Volver al inicio
                     </Boton>
                 </div>
             </div>
