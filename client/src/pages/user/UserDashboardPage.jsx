@@ -10,8 +10,9 @@ import {useSaldos} from "../../context/SaldosContext";
 import {formatearMoneda} from "../../utils/formatters";
 import {useCuentas} from "../../hooks/useCuentas";
 import {useNavigate} from "react-router-dom";
-import ResumenFinanciero from "../../components/ui/ResumenFinanciero";
+import ResumenFinanciero from "../../components/ui/stats/ResumenFinanciero";
 import GraficaIngresosGastos from "../../components/ui/GraficaIngresosGastos";
+import InfoTooltip from "../../components/ui/InfoToolTip";
 
 const UserDashboardPage = () => {
     const {user} = useAuth();
@@ -50,7 +51,13 @@ const UserDashboardPage = () => {
             {/* Sección de gráfica */}
             <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-aguazul">Flujo de ingresos y gastos</h2>
+                    <div className="flex items-center">
+                        <h2 className="text-lg font-semibold text-aguazul mr-2">Flujo de ingresos y gastos</h2>
+                        <InfoTooltip
+                            tooltipText="Visualización comparativa entre tus ingresos (barras verdes) y gastos (barras rojas) durante el período seleccionado."
+                            moreInfo={false}
+                        />
+                    </div>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-4 h-80">
                     <GraficaIngresosGastos/>

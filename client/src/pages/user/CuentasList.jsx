@@ -13,7 +13,7 @@ import {useSaldos} from "../../context/SaldosContext";
 import {formatearFecha, formatearMoneda} from "../../utils/formatters";
 import CuentaForm from "../../components/ui/forms/CuentaForm.jsx";
 import {TIPOS_CUENTA} from "../../utils/constants";
-import ResumenFinanciero from "../../components/ui/ResumenFinanciero";
+import ResumenFinanciero from "../../components/ui/stats/ResumenFinanciero.jsx";
 
 const tiposCuenta = [
     {id: 'corriente', nombre: 'Cuenta Corriente', icono: <CreditCard size={20}/>},

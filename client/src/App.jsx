@@ -14,13 +14,16 @@ import ResetPassword from "./pages/ResetPassword";
 import Redireccionador from "./components/Redireccionador";
 import UserListAdmin from "./pages/admin/UserListAdmin";
 import {PrivateRoute, AdminRoute} from "./components/PrivateRoute";
-
 import PublicLayout from "./components/ui/PublicLayout";
 import PrivateLayout from "./components/ui/PrivateLayout";
+import {useAuth} from "./context/AuthContext";
+import LoadingOverlay from "./components/ui/LoadingOverlay";
 
 
 export default function App() {
+    const {loading} = useAuth();
     return (<>
+            {loading && <LoadingOverlay/>}
             <Router>
                 <Routes>
                     {/* Rutas públicas */}

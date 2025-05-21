@@ -1,5 +1,5 @@
 import { BarChart2 } from 'lucide-react';
-import { formatearMoneda } from '../../utils/formatters';
+import { formatearMoneda } from '../../../utils/formatters.js';
 
 const ResumenFinanciero = ({
                                titulo = "Resumen financiero",

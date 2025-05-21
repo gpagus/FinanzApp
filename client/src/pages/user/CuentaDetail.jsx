@@ -40,11 +40,6 @@ const CuentaDetail = () => {
     } = useCuentas();
 
     const [cuenta, setCuenta] = useState(null);
-    const [nuevaCuenta, setNuevaCuenta] = useState({
-        nombre: '',
-        tipo: '',
-        balance: 0,
-    });
     const [openOperacion, setOpenOperacion] = useState(false);
 
     const {mostrarSaldos} = useSaldos();
@@ -76,47 +71,11 @@ const CuentaDetail = () => {
     /* ---------------------- modal / formulario ---------------------- */
     const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
-    const [errores, setErrores] = useState({});
 
-    /* ---------------------- helpers ---------------------- */
 
-    /* Pre‑rellenamos el formulario cuando abrimos el modal */
-    useEffect(() => {
-        if (mostrarFormulario && cuenta) {
-            setNuevaCuenta({
-                nombre: cuenta.nombre,
-                tipo: cuenta.tipo,
-                balance: cuenta.balance,
-            });
-        }
-    }, [mostrarFormulario, cuenta]);
-
-    const handleInputChange = (e) => {
-        const {name, value} = e.target;
-        setNuevaCuenta((prev) => ({
-            ...prev,
-            [name]: name === 'balance' ? parseFloat(value) || 0 : value,
-        }));
-        if (errores[name]) {
-            setErrores((prev) => ({...prev, [name]: undefined}));
-        }
-    };
-
-    const validarFormulario = () => {
-        const nuevosErrores = {};
-        if (!nuevaCuenta.nombre.trim()) nuevosErrores.nombre = 'El nombre es obligatorio';
-        if (!nuevaCuenta.tipo.trim()) nuevosErrores.tipo = 'El tipo es obligatorio';
-        if (Number.isNaN(nuevaCuenta.balance)) nuevosErrores.balance = 'Saldo inválido';
-
-        setErrores(nuevosErrores);
-        return Object.keys(nuevosErrores).length === 0;
-    };
-
-    const handleEditar = (e) => {
-        e.preventDefault();
-        if (!validarFormulario()) return;
-
-        actualizarCuenta(cuenta.id, nuevaCuenta);
+    /* ---------------------- editar cuenta ---------------------- */
+    const handleEditar = (data) => {
+        actualizarCuenta({ id: cuenta.id, datos: data });
         setMostrarFormulario(false);
     };
 
@@ -301,12 +260,9 @@ const CuentaDetail = () => {
             <CuentaForm
                 mostrar={mostrarFormulario}
                 cuentaSeleccionada={cuenta}
-                nuevaCuenta={nuevaCuenta}
-                errores={errores}
-                opcionesTiposCuenta={TIPOS_CUENTA}
-                onInputChange={handleInputChange}
-                onSubmit={handleEditar}
+                onSubmitCuenta={handleEditar}
                 onClose={() => setMostrarFormulario(false)}
+                opcionesTiposCuenta={TIPOS_CUENTA}
             />
 
             <NewOperationModal

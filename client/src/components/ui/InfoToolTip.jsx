@@ -6,10 +6,17 @@ const InfoTooltip = ({
                          tooltipText,
                          detailTitle,
                          detailContent,
-                         position = 'right'
+                         position = 'right',
+                         moreInfo = true,
                      }) => {
     const [showTooltip, setShowTooltip] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
+
+    const handleTooltipClick = () => {
+        if (moreInfo) {
+            setShowDetail(true);
+        }
+    }
 
     // Configuraciones de posición del tooltip
     const positionClasses = {
@@ -26,7 +33,7 @@ const InfoTooltip = ({
                 className="inline-flex cursor-help"
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
-                onClick={() => setShowDetail(true)}
+                onClick={handleTooltipClick}
             >
                 <HelpCircle className="text-aguazul w-5 h-5 hover:opacity-80 transition-opacity"/>
             </div>
@@ -42,7 +49,10 @@ const InfoTooltip = ({
                             <ChevronRight className="w-3 h-3 ml-1" />
                         </div>*/}
                     </div>
-                    <div className="mt-1 text-xs text-white/70 italic">Haz clic para más detalles</div>
+
+                    {moreInfo && (
+                        <div className="mt-1 text-xs text-white/70 italic">Haz clic para más detalles</div>
+                    )}
                 </div>
             )}
 

@@ -43,10 +43,9 @@ export default function useTransacciones({cuentaId, limit = 15}) {
     const transacciones = data?.pages.flat() ?? [];
 
     /* ---------- mutaciones ---------- */
-    // 1. añadir
     const addMutation = useMutation({
         mutationFn: addTransaccion,
-        onSuccess: (nueva) => {
+        onSuccess: (nueva, { esRectificacion } = {}) => {
             // Actualizar transacciones de cuenta origen
             qc.setQueryData(['transacciones', cuentaId, filtros], (old) => {
                 if (!old) return {pages: [[nueva]], pageParams: [0]};
@@ -90,7 +89,11 @@ export default function useTransacciones({cuentaId, limit = 15}) {
             }
 
             qc.invalidateQueries(['todas-transacciones']);
-            toast.success('Movimiento registrado');
+
+            // No mostramos el mensaje si es rectificación, ya que se mostrará en el componente
+            if (!esRectificacion) {
+                toast.success('Movimiento registrado');
+            }
         },
         onError: (e) => {
             toast.error(`${e.message}`);

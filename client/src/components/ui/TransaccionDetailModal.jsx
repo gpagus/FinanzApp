@@ -9,9 +9,12 @@ import DropdownMenu from "./DropdownMenu";
 import EditarTransaccionForm from "./forms/EditarTransaccionForm";
 import ConfirmModal from "./ConfirmModal";
 import {useQueryClient} from "@tanstack/react-query";
+import {useCuentas} from "../../hooks/useCuentas";
 
 const TransaccionDetailModal = ({transaccion, onClose}) => {
     const queryClient = useQueryClient();
+
+    const {cuentas} = useCuentas()
 
     const {
         agregarTransaccion,
@@ -74,9 +77,7 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
 
         agregarTransaccion(nuevaTransaccion, {
             onSuccess: () => {
-
                 queryClient.invalidateQueries(['todas-transacciones']);
-
                 toast.success('Movimiento rectificado');
                 setIsRectifyingMode(false);
                 onClose();
@@ -84,9 +85,12 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
             onError: (error) => {
                 toast.error(`Error al rectificar: ${error.message}`);
                 setIsRectifyingMode(false);
-            }
+            },
+            esRectificacion: true  // Indicamos que es una rectificación
         });
     };
+
+    const cuentaActual = cuentas.find(cuenta => cuenta.id === transaccion.cuenta_id);
 
     return (
         <>
@@ -149,10 +153,10 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
                                     <p className="font-medium">{fechaFormateada} a las {horaFormateada}</p>
                                 </div>
 
-                                {transaccion.cuenta && (
+                                {cuentaActual && (
                                     <div>
                                         <p className="text-sm text-neutral-600">Cuenta</p>
-                                        <p className="font-medium">{transaccion.cuenta.nombre}</p>
+                                        <p className="font-medium">{cuentaActual.nombre}</p>
                                     </div>
                                 )}
 
@@ -187,7 +191,7 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
                 onClose={() => setIsRectifyingMode(false)}
                 onConfirm={handleRectificacion}
                 title="Confirmar rectificación"
-                message="¿Estás seguro de que deseas rectificar esta transacción?"
+                message="¿Estás seguro de que deseas rectificar esta transacción? Si la transacción está vinculada a un presupuesto activo, el monto se restará del gasto acumulado en dicho presupuesto."
                 confirmLabel="Rectificar"
                 cancelLabel="Cancelar"
                 isWaiting={isRectifyingMode && isAddingTransaccion}
