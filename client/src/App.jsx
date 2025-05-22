@@ -13,6 +13,7 @@ import SettingsPage from "./pages/user/SettingsPage";
 import ResetPassword from "./pages/ResetPassword";
 import Redireccionador from "./components/Redireccionador";
 import UserListAdmin from "./pages/admin/UserListAdmin";
+import UserDetailAdmin from "./pages/admin/UserDetailAdmin";
 import {PrivateRoute, AdminRoute} from "./components/PrivateRoute";
 import PublicLayout from "./components/ui/PublicLayout";
 import PrivateLayout from "./components/ui/PrivateLayout";
@@ -53,8 +54,7 @@ export default function App() {
                         <Route element={<PrivateLayout/>}>
                             <Route path="/admin" element={<AdminDashboardPage/>}/>
                             <Route path="/admin-usuarios" element={<UserListAdmin/>}/>
-                            <Route path="/admin-estadisticas" element={<h1>Estadísticas</h1>}/>
-                            <Route path="/admin-reportes" element={<h1>Reportes</h1>}/>
+                            <Route path="/admin-usuarios/:email" element={<UserDetailAdmin/>}/>
                         </Route>
                     </Route>
                 </Routes>

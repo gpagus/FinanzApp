@@ -22,6 +22,8 @@ import DropdownMenu from '../../components/ui/DropdownMenu';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import CuentaForm from '../../components/ui/forms/CuentaForm';
 import NewOperationModal from "../../components/ui/NewOperationModal";
+import LoadingScreen from "../../components/ui/LoadingScreen";
+import ErrorScreen from "../../components/ui/ErrorScreen";
 
 const CuentaDetail = () => {
     const {id} = useParams();
@@ -75,7 +77,7 @@ const CuentaDetail = () => {
 
     /* ---------------------- editar cuenta ---------------------- */
     const handleEditar = (data) => {
-        actualizarCuenta({ id: cuenta.id, datos: data });
+        actualizarCuenta({id: cuenta.id, datos: data});
         setMostrarFormulario(false);
     };
 
@@ -101,40 +103,27 @@ const CuentaDetail = () => {
     /* ---------------------- estados de carga / error ---------------------- */
     if (isLoading) {
         return (
-            <div className="flex min-h-[calc(100vh-4rem-2.5rem)] justify-center items-center">
-                <div className="flex flex-col items-center">
-                    <Loader size={48} className="text-aguazul animate-spin mb-4"/>
-                    <p className="text-neutral-600">Cargando información de la cuenta...</p>
-                </div>
-            </div>
+            <LoadingScreen mensaje="Cargando cuenta..."/>
         );
     }
 
     if (isError) {
         return (
-            <div className="flex min-h-[calc(100vh-4rem-2.5rem)] justify-center items-center">
-                <div className="text-center p-6 bg-error-100 rounded-lg max-w-md">
-                    <h2 className="text-xl font-bold text-error mb-2">Error al cargar la cuenta</h2>
-                    <p className="text-neutral-700 mb-4">{error?.message || 'Ha ocurrido un error inesperado.'}</p>
-                    <Boton tipo="primario" onClick={() => navigate('/')}>
-                        Volver al inicio
-                    </Boton>
-                </div>
-            </div>
+            <ErrorScreen
+                titulo="Error al cargar la cuenta"
+                mensaje={error?.message || 'Ha ocurrido un error inesperado.'}
+                tipoError="error"
+            />
         );
     }
 
     if (!cuenta) {
         return (
-            <div className="flex min-h-[calc(100vh-4rem-2.5rem)] justify-center items-center">
-                <div className="text-center p-6 bg-neutral-100 rounded-lg max-w-md">
-                    <h2 className="text-xl font-bold text-aguazul mb-2">Cuenta no encontrada</h2>
-                    <p className="text-neutral-700 mb-4">La cuenta que buscas no existe o no tienes acceso a ella.</p>
-                    <Boton tipo="primario" onClick={() => navigate('/')}>
-                        Volver al inicio
-                    </Boton>
-                </div>
-            </div>
+            <ErrorScreen
+                titulo="Cuenta no encontrada"
+                mensaje="La cuenta que buscas no existe o no tienes acceso a ella."
+                tipoError="notFound"
+            />
         );
     }
 
@@ -152,10 +141,10 @@ const CuentaDetail = () => {
                         <Boton
                             tipo="icono"
                             onClick={() => navigate('/cuentas')}
-                            className="mr-3"
+                            className="mr-3 hover:bg-neutral-200"
                             aria-label="Volver a cuentas"
                         >
-                            <ArrowLeft size={20}/>
+                            <ArrowLeft size={20} className="text-aguazul"/>
                         </Boton>
                         <div
                             className={`p-2 rounded-full mr-3 ${cuenta.balance >= 0 ? 'bg-success-100' : 'bg-error-100'}`}

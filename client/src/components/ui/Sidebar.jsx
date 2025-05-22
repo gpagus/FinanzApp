@@ -33,8 +33,6 @@ const Sidebar = () => {
     ] : [
         {name: 'Inicio', icon: Home, path: '/admin'},
         {name: 'Usuarios', icon: Users, path: '/admin-usuarios'},
-        {name: 'Estadísticas', icon: BarChart2, path: '/admin-estadisticas'},
-        {name: 'Reportes', icon: MessageCircle, path: '/admin-reportes'},
     ];
 
     // Determinar el ícono actual basado en la ruta
