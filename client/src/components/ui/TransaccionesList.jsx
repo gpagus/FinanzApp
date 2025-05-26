@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSaldos } from "../../context/SaldosContext";
 import { Loader } from "lucide-react";
 import Boton from "../ui/Boton";
-import { formatearMoneda, formatearFecha } from "../../utils/formatters";
+import { formatearMoneda, formatearFecha, formatearHoraLocal } from "../../utils/formatters";
 import { CATEGORIAS } from "../../utils/constants";
 import TransaccionDetailModal from "./TransaccionDetailModal";
 
@@ -77,10 +77,17 @@ const TransaccionesList = ({
                         const categoria = CATEGORIAS.find(
                             (cat) => cat.value === transaccion.categoria_id
                         );
+                        
+                        // Determinar el estado de la transacción
+                        const esRectificada = transaccion.transaccion_rectificativa_id;
+                        const esRectificativa = transaccion.transaccion_original_id;
+                        
                         return (
                             <li
                                 key={transaccion.id}
-                                className="border-b border-neutral-200 last:border-0 hover:bg-neutral-100 cursor-pointer transition-colors"
+                                className={`border-b border-neutral-200 last:border-0 hover:bg-neutral-200 cursor-pointer transition-colors ${
+                                  esRectificada ? 'bg-neutral-50' : esRectificativa ? 'bg-sky-50' : ''
+                                }`}
                                 onClick={() => setTransaccionSeleccionada(transaccion)}
                             >
                               <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between">
@@ -89,16 +96,25 @@ const TransaccionesList = ({
                                     {categoria?.icono || "❓"}
                                   </div>
                                   <div>
-                                    <p className="font-medium text-neutral-900">
-                                      {transaccion.descripcion}
-                                    </p>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <p className="font-medium text-neutral-900">
+                                        {transaccion.descripcion}
+                                      </p>
+                                      {/* Indicadores de estado */}
+                                      {esRectificada && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700">
+                                          🔄 Rectificada
+                                        </span>
+                                      )}
+                                      {esRectificativa && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-700">
+                                          📝 Rectificativa
+                                        </span>
+                                      )}
+                                    </div>
                                     <div className="flex flex-col xs:flex-row xs:gap-2">
                                       <p className="text-sm text-neutral-600">
-                                        {new Date(transaccion.fecha).toLocaleTimeString("es-ES", {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                          timeZone: "UTC"
-                                        })}
+                                        {formatearHoraLocal(transaccion.fecha)}
                                       </p>
                                       {mostrarCuenta && transaccion.cuenta && (
                                           <p className="text-sm text-aguazul">
@@ -113,7 +129,7 @@ const TransaccionesList = ({
                                         transaccion.tipo === "gasto"
                                             ? "text-error"
                                             : "text-success"
-                                    }`}
+                                    } ${esRectificada ? 'opacity-60' : ''}`}
                                 >
                                   {mostrarSaldos
                                       ? formatearMoneda(

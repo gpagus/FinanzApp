@@ -30,7 +30,7 @@ const Header = () => {
                             <UserRound className="text-neutral-600"/>
                         </div>
                     )}
-                    <span className="font-bold text-lg text-aguazul ml-2">
+                    <span className="font-bold text-lg text-aguazul ml-2 truncate min-w-0 max-w-[120px] sm:max-w-[200px]" title={user?.nombre}>
                         {user?.nombre || "Usuario"}
                     </span>
 

@@ -44,6 +44,7 @@ const ResumenMovimientos = ({
                         <p className="text-neutral-600 text-sm mb-1 mr-2">Total de movimientos</p>
                         <InfoTooltip
                             tooltipText="Número total de transacciones (ingresos y gastos) registrados"
+                            position='top'
                             moreInfo={false}
                         />
                     </div>

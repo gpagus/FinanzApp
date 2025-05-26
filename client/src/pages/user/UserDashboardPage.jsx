@@ -5,19 +5,20 @@ import {
     ArrowDownRight,
 } from "lucide-react";
 import Boton from "../../components/ui/Boton";
-import {useAuth} from "../../context/AuthContext";
-import {useSaldos} from "../../context/SaldosContext";
-import {formatearMoneda} from "../../utils/formatters";
-import {useCuentas} from "../../hooks/useCuentas";
-import {useNavigate} from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useSaldos } from "../../context/SaldosContext";
+import { formatearMoneda } from "../../utils/formatters";
+import { useCuentas } from "../../hooks/useCuentas";
+import { useNavigate } from "react-router-dom";
 import ResumenFinanciero from "../../components/ui/stats/ResumenFinanciero";
 import GraficaIngresosGastos from "../../components/ui/GraficaIngresosGastos";
 import InfoTooltip from "../../components/ui/InfoToolTip";
+import WelcomeHeader from "../../components/ui/WelcomeHeader";
 
 const UserDashboardPage = () => {
-    const {user} = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
-    const {mostrarSaldos} = useSaldos();
+    const { mostrarSaldos } = useSaldos();
     const {
         cuentas,
         isLoading,
@@ -31,13 +32,10 @@ const UserDashboardPage = () => {
         .sort((a, b) => new Date(b.last_update) - new Date(a.last_update))
         .slice(0, 3);
 
-
     return (
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
             {/* Cabecera con saludo */}
-            <h1 className="text-2xl mb-6 font-bold text-aguazul">
-                Bienvenido, {user?.nombre || "Usuario"} 👋
-            </h1>
+            <WelcomeHeader />
 
             {/* Panel de resumen financiero */}
             <ResumenFinanciero
@@ -55,12 +53,13 @@ const UserDashboardPage = () => {
                         <h2 className="text-lg font-semibold text-aguazul mr-2">Flujo de ingresos y gastos</h2>
                         <InfoTooltip
                             tooltipText="Visualización comparativa entre tus ingresos (barras verdes) y gastos (barras rojas) durante el período seleccionado."
+                            position='top'
                             moreInfo={false}
                         />
                     </div>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-4 h-80">
-                    <GraficaIngresosGastos/>
+                    <GraficaIngresosGastos />
                 </div>
             </div>
 
@@ -90,7 +89,7 @@ const UserDashboardPage = () => {
                                             <div className="flex items-center">
                                                 <div
                                                     className={`p-2 rounded-full mr-3 ${cuenta.balance >= 0 ? 'bg-success-100' : 'bg-error-100'}`}>
-                                                    <CreditCard size={20}/>
+                                                    <CreditCard size={20} />
                                                 </div>
                                                 <div>
                                                     <h3 className="font-medium text-neutral-900">{cuenta.nombre}</h3>
@@ -101,9 +100,9 @@ const UserDashboardPage = () => {
                                                     {mostrarSaldos ? formatearMoneda(cuenta.balance) : '••••••'}
                                                 </p>
                                                 {cuenta.balance >= 0 ? (
-                                                    <ArrowUpRight size={18} className="ml-2 text-success"/>
+                                                    <ArrowUpRight size={18} className="ml-2 text-success" />
                                                 ) : (
-                                                    <ArrowDownRight size={18} className="ml-2 text-error"/>
+                                                    <ArrowDownRight size={18} className="ml-2 text-error" />
                                                 )}
                                             </div>
                                         </div>
@@ -114,8 +113,6 @@ const UserDashboardPage = () => {
                     </div>
                 </div>
             )}
-
-            {/* Botón para ver todas las cuentas */}
         </div>
     );
 }

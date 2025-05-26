@@ -11,6 +11,25 @@ export const formatearFecha = (fechaISO) =>
         year: 'numeric'
     });
 
+export const formatearHoraLocal = (fecha) => {
+    return new Date(fecha).toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Madrid'
+    });
+};
+
+export const formatearFechaHoraLocal = (fecha) => {
+    return new Date(fecha).toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Madrid'
+    });
+};
+
 export const formatearFechaHora = (fechaISO) =>
     new Date(fechaISO).toLocaleString('es-ES', {
         day: '2-digit',

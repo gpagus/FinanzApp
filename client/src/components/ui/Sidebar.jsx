@@ -29,7 +29,7 @@ const Sidebar = () => {
         {name: 'Inicio', icon: Home, path: '/dashboard'},
         {name: 'Cuentas', icon: Wallet, path: '/cuentas'},
         {name: 'Movimientos', icon: TrendingUp, path: '/movimientos'},
-        {name: 'Huchas', icon: PiggyBank, path: '/presupuestos'},
+        {name: 'Presupuestos', icon: PiggyBank, path: '/presupuestos'},
     ] : [
         {name: 'Inicio', icon: Home, path: '/admin'},
         {name: 'Usuarios', icon: Users, path: '/admin-usuarios'},

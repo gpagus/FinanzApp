@@ -120,9 +120,83 @@ const eliminarCuenta = async (req, res) => {
     res.json({mensaje: 'Cuenta eliminada'});
 };
 
+const exportarTransaccionesCuenta = async (req, res) => {
+    const userId = req.user.id;
+    const { cuentaId } = req.params;
+    
+    try {
+        const { 
+            fecha_desde, 
+            fecha_hasta, 
+            categoria_id, 
+            tipo, 
+            busqueda 
+        } = req.query;
+
+        // Verificar que la cuenta pertenece al usuario
+        const { data: cuenta, error: cuentaError } = await supabase
+            .from('cuentas')
+            .select('*')
+            .eq('id', cuentaId)
+            .eq('user_id', userId)
+            .single();
+
+        if (cuentaError || !cuenta) {
+            return res.status(404).json({ error: 'Cuenta no encontrada' });
+        }
+
+        // Construir query para obtener todas las transacciones
+        let query = supabase
+            .from('transacciones')
+            .select(`
+               *,
+                cuenta:cuentas!transacciones_cuenta_id_fkey(*),
+                 cuenta_destino:cuentas!transacciones_cuenta_destino_id_fkey(*)
+            `)
+            .eq('cuenta_id', cuentaId)
+            .order('fecha', { ascending: false });
+
+        // Aplicar filtros si existen
+        if (fecha_desde) query = query.gte('fecha', fecha_desde);
+        if (fecha_hasta) query = query.lte('fecha', fecha_hasta);
+        if (categoria_id) query = query.eq('categoria_id', categoria_id);
+        if (tipo) query = query.eq('tipo', tipo);
+        if (busqueda) query = query.ilike('descripcion', `%${busqueda}%`);
+
+        const { data: transacciones, error } = await query;
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Registrar la exportación en el log
+        await logService.registrarOperacion({
+            usuario_id: userId,
+            accion: 'exportar_transacciones',
+            descripcion: `Transacciones exportadas de cuenta: ${cuenta.nombre} (${transacciones.length} registros)`,
+            detalles: {
+                cuenta_id: cuentaId,
+                filtros: { fecha_desde, fecha_hasta, categoria_id, tipo, busqueda },
+                total_registros: transacciones.length
+            }
+        });
+
+        res.json({
+            cuenta,
+            transacciones,
+            total: transacciones.length
+        });
+
+    } catch (error) {
+        console.error('Error en exportarTransaccionesCuenta:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
 module.exports = {
     obtenerCuentas,
     crearCuenta,
     actualizarCuenta,
-    eliminarCuenta
+    eliminarCuenta,
+    exportarTransaccionesCuenta
 };

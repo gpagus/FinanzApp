@@ -1,9 +1,9 @@
-import {useState, useEffect} from 'react';
-import {useParams, useNavigate} from 'react-router-dom';
-import {useSaldos} from '../../context/SaldosContext';
-import {useAuth} from "../../context/AuthContext";
-import {formatearMoneda, formatearFecha} from '../../utils/formatters';
-import {TIPOS_CUENTA} from '../../utils/constants';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSaldos } from '../../context/SaldosContext';
+import { useAuth } from "../../context/AuthContext";
+import { formatearMoneda, formatearFecha } from '../../utils/formatters';
+import { TIPOS_CUENTA } from '../../utils/constants';
 import {
     ArrowLeft,
     Download,
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 import Boton from '../../components/ui/Boton';
-import {useCuentas} from '../../hooks/useCuentas';
+import { useCuentas } from '../../hooks/useCuentas';
 import useTransacciones from '../../hooks/useTransacciones';
 import TransaccionesList from '../../components/ui/TransaccionesList';
 import TransaccionesFilters from '../../components/ui/TransaccionesFilters';
@@ -24,11 +24,15 @@ import CuentaForm from '../../components/ui/forms/CuentaForm';
 import NewOperationModal from "../../components/ui/NewOperationModal";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import ErrorScreen from "../../components/ui/ErrorScreen";
+import { exportarTransaccionesCuenta } from '../../api/cuentasApi';
+import { exportarTransaccionesAExcel } from '../../utils/exportUtils';
+import { toast } from 'react-hot-toast';
+import InfoTooltip from '../../components/ui/InfoToolTip';
 
 const CuentaDetail = () => {
-    const {id} = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     /* ---------------------- cuentas ---------------------- */
     const {
@@ -44,7 +48,7 @@ const CuentaDetail = () => {
     const [cuenta, setCuenta] = useState(null);
     const [openOperacion, setOpenOperacion] = useState(false);
 
-    const {mostrarSaldos} = useSaldos();
+    const { mostrarSaldos } = useSaldos();
 
     /* ---------------------- transacciones ---------------------- */
 
@@ -57,7 +61,7 @@ const CuentaDetail = () => {
         actualizarFiltros,
         resetearFiltros,
         cargarMasTransacciones,
-    } = useTransacciones({cuentaId: id});
+    } = useTransacciones({ cuentaId: id });
 
 
     /* ---------------------- localizar cuenta ---------------------- */
@@ -77,14 +81,14 @@ const CuentaDetail = () => {
 
     /* ---------------------- editar cuenta ---------------------- */
     const handleEditar = (data) => {
-        actualizarCuenta({id: cuenta.id, datos: data});
+        actualizarCuenta({ id: cuenta.id, datos: data });
         setMostrarFormulario(false);
     };
 
     /* ---------------------- eliminar cuenta ---------------------- */
     const handleEliminarCuenta = () => {
         setMostrarConfirmacion(false);
-        eliminarCuenta({id: cuenta.id, nombre: cuenta.nombre});
+        eliminarCuenta({ id: cuenta.id, nombre: cuenta.nombre });
         navigate('/cuentas');
     };
 
@@ -103,7 +107,7 @@ const CuentaDetail = () => {
     /* ---------------------- estados de carga / error ---------------------- */
     if (isLoading) {
         return (
-            <LoadingScreen mensaje="Cargando cuenta..."/>
+            <LoadingScreen mensaje="Cargando cuenta..." />
         );
     }
 
@@ -127,6 +131,42 @@ const CuentaDetail = () => {
         );
     }
 
+    /* ---------------------- función de exportación ---------------------- */
+    const handleExportar = async () => {
+        // Verificar si hay transacciones
+        if (!transacciones || transacciones.length === 0) {
+            toast.error('No hay transacciones para exportar');
+            return;
+        }
+
+        try {
+            toast.loading('Obteniendo todas las transacciones...', { id: 'export-loading' });
+
+            // Obtener todas las transacciones con los filtros aplicados
+            const data = await exportarTransaccionesCuenta(cuenta.id, filtros);
+
+            // Verificar si la respuesta contiene transacciones
+            if (!data.transacciones || data.transacciones.length === 0) {
+                toast.error('No hay transacciones para exportar con los filtros aplicados', { 
+                    id: 'export-loading' 
+                });
+                return;
+            }
+
+            // Generar Excel en el frontend (ahora es async)
+            const { totalRegistros } = await exportarTransaccionesAExcel(data, user);
+
+            toast.success(`Archivo descargado (${totalRegistros} transacciones)`, {
+                id: 'export-loading',
+                duration: 4000
+            });
+
+        } catch (error) {
+            console.error('Error al exportar:', error);
+            toast.error('Error al obtener las transacciones para exportar', { id: 'export-loading' });
+        }
+    };
+
     /* ---------------------- render principal ---------------------- */
     const tipoInfo = TIPOS_CUENTA.find((t) => t.id === cuenta.tipo) || TIPOS_CUENTA[0];
     const tipoCuenta = TIPOS_CUENTA.find(tipo => tipo.id === cuenta.tipo) || TIPOS_CUENTA[0];
@@ -136,33 +176,80 @@ const CuentaDetail = () => {
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
             {/* Botón volver y cabecera */}
             <div className="mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                    <div className="flex items-center mb-3 sm:mb-0">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center mb-0">
                         <Boton
                             tipo="icono"
                             onClick={() => navigate('/cuentas')}
                             className="mr-3 hover:bg-neutral-200"
                             aria-label="Volver a cuentas"
                         >
-                            <ArrowLeft size={20} className="text-aguazul"/>
+                            <ArrowLeft size={20} className="text-aguazul" />
                         </Boton>
                         <div
                             className={`p-2 rounded-full mr-3 ${cuenta.balance >= 0 ? 'bg-success-100' : 'bg-error-100'}`}
                         >
-                            <IconoTipo size={20}/>
+                            <IconoTipo size={20} />
                         </div>
                         <h1 className="text-2xl font-bold text-aguazul">{cuenta.nombre}</h1>
 
                         <DropdownMenu
-                            triggerIcon={<EllipsisVertical className="text-neutral-400"/>}
+                            triggerIcon={<EllipsisVertical className="text-neutral-400" />}
                             actions={acciones}
                         />
                     </div>
 
-                    <Boton tipo="secundario" className="flex items-center" aria-label="Exportar">
-                        <Download size={18} className="mr-1"/>
-                        <span className="hidden sm:inline">Exportar</span>
-                    </Boton>
+                    <div className="flex gap-2.5">
+
+                        <InfoTooltip
+                            tooltipText={
+                                transacciones.length === 0 
+                                    ? "No hay transacciones para exportar. Agrega algunas operaciones primero."
+                                    : "Exporta todas las transacciones de esta cuenta a un archivo Excel con formato profesional."
+                            }
+                            detailTitle="Información sobre la exportación"
+                            detailContent={
+                                transacciones.length === 0 
+                                    ? [
+                                        {
+                                            title: "Sin transacciones",
+                                            description: "Esta cuenta no tiene transacciones para exportar. Agrega algunas operaciones primero."
+                                        }
+                                    ]
+                                    : [
+                                        {
+                                            title: "¿Qué se incluye?",
+                                            description: "Todas las transacciones de la cuenta con los filtros aplicados, información de la cuenta y estadísticas."
+                                        },
+                                        {
+                                            title: "Formato del archivo",
+                                            description: "El archivo Excel incluye dos hojas: 'Resumen' con información general y 'Transacciones' con el detalle completo."
+                                        },
+                                        {
+                                            title: "Estados de transacciones",
+                                            description: "Las transacciones rectificadas aparecen en gris, las rectificativas en azul, y las normales en verde."
+                                        },
+                                        {
+                                            title: "Filtros aplicados",
+                                            description: "Solo se exportarán las transacciones que coincidan con los filtros actualmente aplicados."
+                                        }
+                                    ]
+                            }
+                            position="left"
+                            moreInfo={true}
+                        />
+
+                        <Boton
+                            tipo="secundario"
+                            className="flex items-center justify-center w-full sm:w-auto"
+                            aria-label="Exportar"
+                            onClick={handleExportar}
+                            disabled={cargandoTransacciones || transacciones.length === 0}
+                        >
+                            <Download size={18} className="mr-1" />
+                            <span>Exportar a Excel</span>
+                        </Boton>
+                    </div>
                 </div>
             </div>
 
@@ -183,15 +270,15 @@ const CuentaDetail = () => {
 
                         <div className="mt-4 sm:mt-0">
                             <Boton tipo="primario" className="flex items-center" onClick={() => setOpenOperacion(true)}
-                                   disabled={isUpdating}>
+                                disabled={isUpdating}>
                                 {isUpdating ? (
                                     <>
-                                        <Loader size={18} className="animate-spin mr-2"/>
+                                        <Loader size={18} className="animate-spin mr-2" />
                                         Actualizando...
                                     </>
                                 ) : (
                                     <>
-                                        <PlusCircle size={18} className="mr-2"/>
+                                        <PlusCircle size={18} className="mr-2" />
                                         Nueva operación
                                     </>
                                 )}

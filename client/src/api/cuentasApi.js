@@ -85,3 +85,28 @@ export async function deleteCuenta({id, nombre}) {
         throw error;
     }
 }
+
+export async function exportarTransaccionesCuenta(cuentaId, filtros = {}) {
+    try {
+        const params = new URLSearchParams();
+        
+        if (filtros.fecha_desde) params.append('fecha_desde', filtros.fecha_desde);
+        if (filtros.fecha_hasta) params.append('fecha_hasta', filtros.fecha_hasta);
+        if (filtros.categoria_id) params.append('categoria_id', filtros.categoria_id);
+        if (filtros.tipo) params.append('tipo', filtros.tipo);
+        if (filtros.busqueda) params.append('busqueda', filtros.busqueda);
+
+        const url = `${CUENTAS_ENDPOINT}/${cuentaId}/export?${params}`;
+        const res = await fetchWithAuth(url);
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Error al exportar transacciones');
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error("Error al exportar transacciones:", error);
+        throw error;
+    }
+}
