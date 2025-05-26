@@ -63,10 +63,15 @@ export async function updateCuenta(id, datosActualizados) {
     }
 }
 
-export async function deleteCuenta(id) {
+export async function deleteCuenta({id, nombre}) {
     try {
         const res = await fetchWithAuth(`${CUENTAS_ENDPOINT}/${id}`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Enviamos el nombre en el cuerpo para que el backend pueda usarlo en el log
+            body: JSON.stringify({nombre})
         });
 
         if (!res.ok) {

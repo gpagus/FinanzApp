@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
     ArrowLeft,
     User,
@@ -11,20 +11,24 @@ import {
     XCircle,
     Loader,
     PieChart,
+    Wallet,
 } from 'lucide-react';
 import {useNavigate, useParams} from "react-router-dom";
 import {useQuery} from '@tanstack/react-query';
+import {Grid} from "gridjs-react"
 
 import Boton from '../../components/ui/Boton';
 import ProgressBar from "../../components/ui/ProgressBar";
 import {CATEGORIAS} from "../../utils/constants";
-import {formatearFecha, formatearMoneda} from '../../utils/formatters';
+import {formatearFecha, formatearFechaHora, formatearMoneda} from '../../utils/formatters';
 import ResumenFinanciero from "../../components/ui/stats/ResumenFinanciero";
 import {useSaldos} from "../../context/SaldosContext";
 import LoadingScreen from '../../components/ui/LoadingScreen';
 import ErrorScreen from '../../components/ui/ErrorScreen';
 
-import {getUserAccountsByEmail, getUserBudgetsByEmail, getUserByEmail} from "../../api/usersApi";
+import {getUserAccountsByEmail, getUserBudgetsByEmail, getUserByEmail, getUserLogsByEmail} from "../../api/usersApi";
+import {useUsers} from "../../hooks/useUsers.js";
+import ConfirmModal from "../../components/ui/ConfirmModal";
 
 const tiposCuenta = {
     corriente: {nombre: 'Cuenta Corriente', icono: <CreditCard size={20}/>},
@@ -36,7 +40,7 @@ const tiposCuenta = {
 const UserDetailAdmin = () => {
     const {mostrarSaldos} = useSaldos();
     const navigate = useNavigate();
-    const { email: encodedEmail } = useParams();
+    const {email: encodedEmail} = useParams();
     const userEmail = decodeURIComponent(encodedEmail);
 
     // Obtener datos del usuario por email
@@ -75,6 +79,19 @@ const UserDetailAdmin = () => {
         enabled: !!usuario // Solo se ejecuta si tenemos el usuario
     });
 
+    // Obtener logs del usuario
+    const {
+        data: logs = [],
+        isLoading: cargandoLogs,
+        isError: errorLogs
+    } = useQuery({
+        queryKey: ['logs-usuario', userEmail],
+        queryFn: () => getUserLogsByEmail(userEmail),
+        staleTime: 1000 * 60 * 5,
+        enabled: !!usuario
+    });
+
+
     // Calcular estadísticas
     const balanceTotal = cuentas.reduce((sum, cuenta) => sum + cuenta.balance, 0);
     const balancePositivo = cuentas
@@ -84,7 +101,6 @@ const UserDetailAdmin = () => {
         .filter(cuenta => cuenta.balance < 0)
         .reduce((sum, cuenta) => sum + cuenta.balance, 0);
 
-    const presupuestosActivos = presupuestos.filter(p => p.activa);
 
     const getIconoTipo = (tipo) => {
         return tiposCuenta[tipo]?.icono || <CreditCard size={20}/>;
@@ -116,6 +132,22 @@ const UserDetailAdmin = () => {
 
     const baseUrl = import.meta.env.VITE_SUPABASE_AVATAR_BASE_URL;
     const avatarFullUrl = usuario ? `${baseUrl}${usuario.avatar}` : null;
+
+    const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+
+    const {
+        updateUserStatus,
+        isUpdatingStatus,
+    } = useUsers();
+
+    // Añade esta función dentro del componente
+    const handleStatusChange = () => {
+        updateUserStatus({
+            userId: usuario.id,
+            isActive: !usuario.estado
+        });
+        setMostrarConfirmacion(false);
+    };
 
     // Estados de carga
     if (cargandoUsuario) {
@@ -187,8 +219,18 @@ const UserDetailAdmin = () => {
                         </div>
                     </div>
                     <div className="flex items-center">
+                        {/* Botón para activar/desactivar un usuario */}
+                        <Boton
+                            tipo="texto"
+                            className={`${usuario.estado ? 'text-error' : 'text-success'} rounded-full px-4 py-2`}
+                            onClick={() => {
+                                setMostrarConfirmacion(true);
+                            }}
+                        >
+                            {usuario.estado ? 'Desactivar' : 'Activar'}
+                        </Boton>
                         {usuario.estado ? (
-                            <div className="flex items-center text-success bg-success-100 px-3 py-1 rounded-full">
+                            <div className="flex items-center text-success bg-success-100 px-3 py-1 ml-2 rounded-full">
                                 <CheckCircle size={16} className="mr-2"/>
                                 <span className="text-sm font-medium">Activo</span>
                             </div>
@@ -204,7 +246,7 @@ const UserDetailAdmin = () => {
                 <div className="flex items-center text-neutral-600">
                     <Calendar size={16} className="mr-2"/>
                     <span className="text-sm">
-                        Último acceso: {formatearFecha(usuario.lastAccess)}
+                        Último acceso: {formatearFechaHora(usuario.lastAccess)}
                     </span>
                 </div>
             </div>
@@ -248,6 +290,7 @@ const UserDetailAdmin = () => {
                         ) : cuentas.length === 0 ? (
                             <div className="p-4 text-center text-neutral-600">
                                 Este usuario no tiene cuentas configuradas
+                                <Wallet size={32} className="mx-auto mt-2 text-neutral-300"/>
                             </div>
                         ) : (
                             <ul className="divide-y divide-neutral-200">
@@ -326,7 +369,8 @@ const UserDetailAdmin = () => {
                                                     {obtenerCategoria(presupuesto.categoria_id)}
                                                 </h4>
                                                 <div>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${esActivo ? estadoInfo.clase : 'bg-neutral-200 text-neutral-700'}`}>
+                                    <span
+                                        className={`px-2 py-1 rounded-full text-xs font-medium ${esActivo ? estadoInfo.clase : 'bg-neutral-200 text-neutral-700'}`}>
                                         {esActivo ? estadoInfo.estado : 'Expirado'}
                                     </span>
                                                     {esActivo && diasRestantes > 0 && (
@@ -378,6 +422,73 @@ const UserDetailAdmin = () => {
                     </div>
                 </div>
             </div>
+
+            <div className="mt-6 bg-white rounded-lg shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-neutral-200">
+                    <h3 className="text-lg font-semibold text-aguazul">Historial de Actividad</h3>
+                    <p className="text-sm text-neutral-600">
+                        {cargandoLogs ? (
+                            <span className="flex items-center">
+                    <Loader size={14} className="animate-spin mr-2"/> Cargando actividad...
+                </span>
+                        ) : (
+                            `${logs.length} registros de actividad`
+                        )}
+                    </p>
+                </div>
+
+                <div className="p-4">
+                    {cargandoLogs ? (
+                        <div className="flex justify-center items-center py-8">
+                            <Loader size={24} className="animate-spin text-aguazul"/>
+                        </div>
+                    ) : errorLogs ? (
+                        <div className="p-4 text-center text-error">
+                            Error al cargar los registros de actividad
+                        </div>
+                    ) : logs.length === 0 ? (
+                        <div className="p-4 text-center text-neutral-600">
+                            No hay registros de actividad para este usuario
+                        </div>
+                    ) : (
+                        <Grid
+                            data={logs.map(log => [
+                                formatearFechaHora(log.fecha),
+                                log.accion,
+                                log.descripcion,
+                            ])}
+                            columns={['Fecha', 'Acción', 'Descripción']}
+                            search={true}
+                            pagination={{
+                                limit: 10,
+                            }}
+                            sort={true}
+                            language={{
+                                search: {
+                                    placeholder: "🔍 Buscar...",
+                                },
+                                pagination: {
+                                    previous: "⬅️",
+                                    next: "➡️",
+                                    showing: "Mostrando",
+                                    results: () => "registros",
+                                },
+                            }}
+                        />
+                    )}
+                </div>
+            </div>
+
+            <ConfirmModal
+                isOpen={mostrarConfirmacion}
+                onClose={() => setMostrarConfirmacion(false)}
+                onConfirm={() => handleStatusChange(usuario.id, usuario.estado)}
+                title="Confirmación"
+                message={`¿Estás seguro de que deseas ${usuario.estado ? 'desactivar' : 'activar'} a ${usuario.nombre} ${usuario.apellidos}?`}
+                confirmLabel="Aceptar"
+                cancelLabel="Cancelar"
+            />
+
         </div>
     );
 };

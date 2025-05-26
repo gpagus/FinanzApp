@@ -1,5 +1,6 @@
 const supabase = require('../config/supabaseClient');
 const supabaseAdmin = require('../config/supabaseAdmin');
+const logService = require('../services/logService');
 const path = require('path');
 const fs = require('fs');
 
@@ -102,7 +103,7 @@ const login = async (req, res) => {
         const user = data.user;
         const userId = user.id;
 
-        // 1. Verificar si ya existe perfil
+        //  Verificar si ya existe perfil
         const {data: perfilExistente} = await supabase
             .from('usuarios')
             .select('id')
@@ -111,7 +112,7 @@ const login = async (req, res) => {
 
         if (perfilExistente) {
 
-            // 5. Actualizar último acceso
+            // Actualizar último acceso
             const {error: updateError} = await supabase
                 .from('usuarios')
                 .update({lastAccess: new Date()})
@@ -120,6 +121,16 @@ const login = async (req, res) => {
             if (updateError) {
                 console.warn('Error actualizando lastAccess:', updateError.message);
             }
+
+            // Registrar operación de inicio de sesión
+            await logService.registrarOperacion({
+                usuario_id: userId,
+                accion: 'login',
+                descripcion: `Inicio de sesión de ${perfilExistente.nombre} ${perfilExistente.apellidos}`,
+                detalles: {
+                    fecha: new Date().toISOString()
+                }
+            });
         }
 
         return res.json(data);
@@ -189,7 +200,18 @@ const confirmarRegistro = async (req, res) => {
             return res.status(500).json({error: 'No se pudo crear el perfil del usuario.'});
         }
 
-        // 3. Eliminar datos temporales
+        // 3. Registrar la operación en logs
+        await logService.registrarOperacion({
+            usuario_id: userId,
+            accion: 'registro_confirmado',
+            descripcion: `Usuario ${nombre} ${apellidos} completó su registro`,
+            detalles: {
+                email: userEmail,
+                fecha: new Date().toISOString()
+            }
+        });
+
+        // 4. Eliminar datos temporales
         await supabaseAdmin
             .from('usuarios_pendientes')
             .delete()

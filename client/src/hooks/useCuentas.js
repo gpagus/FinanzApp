@@ -49,8 +49,11 @@ export const useCuentas = () => {
 
     // Mutación para eliminar cuenta
     const deleteMutation = useMutation({
-        mutationFn: (id) => deleteCuenta(id),
-        onSuccess: (_, id) => {
+        mutationFn: ({id, nombre}) => {
+            // Pasamos el objeto completo con id y nombre a deleteCuenta
+            return deleteCuenta({id, nombre});
+        },
+        onSuccess: (_, {id, nombre}) => {
             queryClient.setQueryData(['cuentas'], (old = []) =>
                 old.filter(cuenta => cuenta.id !== id)
             );
@@ -59,7 +62,7 @@ export const useCuentas = () => {
 
             // También invalidar la caché específica de esta cuenta
             queryClient.invalidateQueries(['transacciones', id]);
-            toast.success('Cuenta eliminada');
+            toast.success("Cuenta eliminada");
         },
         onError: (error) => toast.error(`Error al eliminar cuenta: ${error.message}`)
     });

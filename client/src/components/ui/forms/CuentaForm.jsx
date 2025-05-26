@@ -5,8 +5,11 @@ import Boton from '../Boton';
 import FormField from '../FormField';
 
 const cuentaSchema = z.object({
-    nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-    tipo: z.string().min(1, 'Seleccione un tipo de cuenta'),
+    nombre: z.string()
+        .min(3, 'El nombre debe tener al menos 3 caracteres')
+        .max(50, 'El nombre no puede exceder los 50 caracteres'),
+    tipo: z.string()
+        .min(1, 'Seleccione un tipo de cuenta'),
     balance: z.coerce.number({
         errorMap: () => ({ message: 'Saldo inválido' }),
     })

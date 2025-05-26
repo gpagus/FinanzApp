@@ -1,4 +1,5 @@
 const supabase = require('../config/supabaseClient');
+const logService = require('../services/logService');
 
 const obtenerCuentas = async (req, res) => {
     const userId = req.user.id;
@@ -18,15 +19,15 @@ const crearCuenta = async (req, res) => {
 
     try {
         // Verificar el número de cuentas existentes del usuario
-        const { count, error: countError } = await supabase
+        const {count, error: countError} = await supabase
             .from('cuentas')
-            .select('*', { count: 'exact', head: true })
+            .select('*', {count: 'exact', head: true})
             .eq('user_id', userId);
 
-        if (countError) return res.status(500).json({ error: countError.message });
+        if (countError) return res.status(500).json({error: countError.message});
 
         if (count >= LIMITE_CUENTAS) {
-            return res.status(400).json({ error: `No puedes tener más de ${LIMITE_CUENTAS} cuentas.` });
+            return res.status(400).json({error: `No puedes tener más de ${LIMITE_CUENTAS} cuentas.`});
         }
 
         // Crear la nueva cuenta
@@ -35,17 +36,27 @@ const crearCuenta = async (req, res) => {
             user_id: userId,
         };
 
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from('cuentas')
             .insert([nuevaCuenta])
             .select();
 
-        if (error) return res.status(500).json({ error: error.message });
+        if (error) return res.status(500).json({error: error.message});
+
+        // Registrar la operación en el log
+        await logService.registrarOperacion({
+            usuario_id: userId,
+            accion: 'crear_cuenta',
+            descripcion: `Cuenta creada: ${data[0].nombre}`,
+            detalles: {
+                cuenta: data[0]
+            }
+        });
 
         res.status(201).json(data[0]);
     } catch (err) {
         console.error("Error en crearCuenta:", err.message);
-        return res.status(400).json({ error: err.message || 'Datos inválidos' });
+        return res.status(400).json({error: err.message || 'Datos inválidos'});
     }
 };
 
@@ -66,6 +77,16 @@ const actualizarCuenta = async (req, res) => {
             return res.status(404).json({error: 'Cuenta no encontrada o no autorizada'});
         }
 
+        // Registrar la operación en el log
+        await logService.registrarOperacion({
+            usuario_id: userId,
+            accion: 'actualizar_cuenta',
+            descripcion: `Cuenta actualizada: ${data[0].nombre}`,
+            detalles: {
+                cambios: req.body
+            }
+        });
+
         res.json(data[0]);
     } catch (err) {
         return res.status(400).json({error: err.errors?.[0]?.message || 'Datos inválidos'});
@@ -75,14 +96,26 @@ const actualizarCuenta = async (req, res) => {
 const eliminarCuenta = async (req, res) => {
     const userId = req.user.id;
     const cuentaId = req.params.id;
+    const { nombre } = req.body;
 
-    const {data, error} = await supabase
+    const {error} = await supabase
         .from('cuentas')
         .delete()
         .eq('id', cuentaId)
         .eq('user_id', userId);
 
     if (error) return res.status(500).json({error: error.message});
+
+    // Registrar la operación en el log usando el nombre de la cuenta
+    await logService.registrarOperacion({
+        usuario_id: userId,
+        accion: 'eliminar_cuenta',
+        descripcion: `Cuenta eliminada: ${nombre || 'Sin nombre'}`,
+        detalles: {
+            cuenta_id: cuentaId,
+            nombre_cuenta: nombre
+        }
+    });
 
     res.json({mensaje: 'Cuenta eliminada'});
 };

@@ -69,3 +69,41 @@ export const getUserBudgetsByEmail = async (userEmail) => {
         throw error;
     }
 };
+
+export const updateUserStatus = async (userId, isActive) => {
+    try {
+        const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL}/api/admin/usuarios/status/${userId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({estado: isActive}),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Error al actualizar el estado del usuario');
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error("Error al actualizar el estado del usuario:", error);
+        throw error;
+    }
+};
+
+export async function getUserLogsByEmail(email) {
+    try {
+        const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL}/api/admin/usuarios/${email}/logs`);
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Error al obtener logs del usuario');
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error('Error en getUserLogsByEmail:', error);
+        throw error;
+    }
+}

@@ -84,7 +84,7 @@ const CuentaDetail = () => {
     /* ---------------------- eliminar cuenta ---------------------- */
     const handleEliminarCuenta = () => {
         setMostrarConfirmacion(false);
-        eliminarCuenta(cuenta.id);
+        eliminarCuenta({id: cuenta.id, nombre: cuenta.nombre});
         navigate('/cuentas');
     };
 

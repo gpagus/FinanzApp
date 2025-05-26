@@ -11,6 +11,16 @@ export const formatearFecha = (fechaISO) =>
         year: 'numeric'
     });
 
+export const formatearFechaHora = (fechaISO) =>
+    new Date(fechaISO).toLocaleString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+
 export const obtenerFechaHoraActual = () => {
     const fechaActual = new Date();
     const anio = fechaActual.getFullYear();
