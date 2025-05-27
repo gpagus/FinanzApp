@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllTransacciones } from "../../api/transaccionesApi";
 import { Loader, ChevronDown } from "lucide-react";
@@ -47,12 +47,18 @@ const GraficaIngresosGastos = () => {
             return;
         }
 
+        // Filtrar transacciones rectificativas y rectificadas
+        const transaccionesFiltradas = transacciones.filter(transaccion => 
+            !transaccion.transaccion_original_id && // Excluir rectificativas
+            !transaccion.transaccion_rectificativa_id // Excluir rectificadas
+        );
+
         let agrupados = {};
 
         // Determinar agrupación según el rango seleccionado
         if (rangoSeleccionado === "30dias") {
             // Agrupar por día
-            transacciones.forEach(transaccion => {
+            transaccionesFiltradas.forEach(transaccion => {
                 const fecha = dayjs(transaccion.fecha);
                 const clave = fecha.format("DD/MM");
 
@@ -81,7 +87,7 @@ const GraficaIngresosGastos = () => {
 
         } else if (rangoSeleccionado === "3meses") {
             // Agrupar por semana
-            transacciones.forEach(transaccion => {
+            transaccionesFiltradas.forEach(transaccion => {
                 const fecha = dayjs(transaccion.fecha);
                 // Usar el día del mes y número de mes como identificador de semana
                 // Agrupamos cada 7 días para formar una semana
@@ -120,7 +126,7 @@ const GraficaIngresosGastos = () => {
 
         } else {
             // Agrupar por mes (para 1 año)
-            transacciones.forEach(transaccion => {
+            transaccionesFiltradas.forEach(transaccion => {
                 const fecha = dayjs(transaccion.fecha);
                 const clave = fecha.format("MM/YYYY");
 

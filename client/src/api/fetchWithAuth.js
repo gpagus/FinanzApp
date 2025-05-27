@@ -19,7 +19,6 @@ export const fetchWithAuth = async (url, options = {}) => {
         });
 
         if (!refreshRes.ok) {
-            // Si tienes un logout global, podrías llamarlo aquí
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             throw new Error("Sesión expirada");

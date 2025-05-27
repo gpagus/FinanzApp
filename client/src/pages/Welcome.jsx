@@ -69,60 +69,84 @@ const Welcome = () => {
                 {/* Columna derecha - Ilustración */}
                 <div className="md:w-1/2 mt-10 flex items-center justify-center">
                     <div className="relative w-full max-w-md">
-                        <div
-                            className="absolute -top-4 -left-4 w-full h-full bg-dollar-500 opacity-10 rounded-xl transform rotate-3"></div>
-                        <div className="relative bg-white p-4 sm:p-8 rounded-xl shadow-lg">
-                            <div className="flex justify-between items-center mb-6 sm:mb-8">
-                                <div>
-                                    <h2 className="font-bold text-lg text-neutral-900">
-                                        Balance
-                                    </h2>
-                                    <p className="font-bold text-2xl sm:text-3xl text-dollar-500">
-                                        $4,250.00
-                                    </p>
-                                </div>
-                                <div className="bg-dollar-500 bg-opacity-10 p-3 rounded-full">
-                                    <TrendingUp className="w-6 h-6 text-white" />
+                        <div className="absolute -top-4 -left-4 w-full h-full bg-dollar-500 opacity-10 rounded-xl transform rotate-3"></div>
+                        <div className="relative bg-white rounded-lg shadow-lg overflow-hidden">
+                            {/* Header del balance */}
+                            <div className="p-4 sm:p-6 border-b border-neutral-200">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h2 className="font-bold text-lg text-neutral-900">Balance</h2>
+                                        <p className="font-bold text-2xl sm:text-3xl text-dollar-500">4.250,00€</p>
+                                    </div>
+                                    <div className="bg-dollar-500 bg-opacity-10 p-3 rounded-full">
+                                        <TrendingUp className="w-6 h-6 text-white" />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="space-y-3 sm:space-y-4">
-                                <div className="p-3 sm:p-4 bg-neutral-100 rounded-lg flex justify-between items-center">
-                                    <div className="flex items-center">
-                                        <div className="bg-dollar-500 bg-opacity-10 p-2 rounded-lg mr-3">
-                                            <ShoppingCart className="w-6 h-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-neutral-900">
-                                                Supermercado
-                                            </p>
-                                            <p className="text-sm text-aguazul">Ayer</p>
-                                        </div>
-                                    </div>
-                                    <p className="font-medium text-neutral-900">-$125.00</p>
+
+                            {/* Lista de transacciones simulada */}
+                            <div>
+                                {/* Fecha */}
+                                <div className="px-4 py-2 bg-neutral-100">
+                                    <p className="font-medium text-sm text-neutral-600">Hoy</p>
                                 </div>
-                                <div className="p-3 sm:p-4 bg-neutral-100 rounded-lg flex justify-between items-center">
-                                    <div className="flex items-center">
-                                        <div className="bg-dollar-500 bg-opacity-10 p-2 rounded-lg mr-3">
-                                            <Receipt className="w-6 h-6 text-white" />
+                                
+                                {/* Transacciones */}
+                                <div className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
+                                    <div className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div className="mr-3 text-xl">🛒</div>
+                                            <div>
+                                                <p className="font-medium text-neutral-900">Supermercado</p>
+                                                <p className="text-sm text-neutral-600">14:30</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-neutral-900">Salario</p>
-                                            <p className="text-sm text-aguazul">15/03/2025</p>
-                                        </div>
+                                        <p className="font-semibold text-error">-125,00€</p>
                                     </div>
-                                    <p className="font-medium text-success">+$2,500.00</p>
                                 </div>
-                                <div className="p-3 sm:p-4 bg-neutral-100 rounded-lg flex justify-between items-center">
-                                    <div className="flex items-center">
-                                        <div className="bg-dollar-500 bg-opacity-10 p-2 rounded-lg mr-3">
-                                            <PiggyBank className="w-6 h-6 text-white" />
+
+                                <div className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
+                                    <div className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div className="mr-3 text-xl">☕</div>
+                                            <div>
+                                                <p className="font-medium text-neutral-900">Café</p>
+                                                <p className="text-sm text-neutral-600">09:15</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-neutral-900">Ahorro</p>
-                                            <p className="text-sm text-aguazul">10/03/2025</p>
-                                        </div>
+                                        <p className="font-semibold text-error">-4,50€</p>
                                     </div>
-                                    <p className="font-medium text-neutral-900">-$300.00</p>
+                                </div>
+
+                                {/* Fecha anterior */}
+                                <div className="px-4 py-2 bg-neutral-100">
+                                    <p className="font-medium text-sm text-neutral-600">Ayer</p>
+                                </div>
+
+                                <div className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
+                                    <div className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div className="mr-3 text-xl">💰</div>
+                                            <div>
+                                                <p className="font-medium text-neutral-900">Salario</p>
+                                                <p className="text-sm text-neutral-600">08:00</p>
+                                            </div>
+                                        </div>
+                                        <p className="font-semibold text-success">+2.500,00€</p>
+                                    </div>
+                                </div>
+
+                                <div className="hover:bg-neutral-50 transition-colors">
+                                    <div className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div className="mr-3 text-xl">🏦</div>
+                                            <div>
+                                                <p className="font-medium text-neutral-900">Ahorro mensual</p>
+                                                <p className="text-sm text-neutral-600">07:30</p>
+                                            </div>
+                                        </div>
+                                        <p className="font-semibold text-error">-300,00€</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -145,8 +169,8 @@ const Welcome = () => {
                                 Visualiza tus finanzas
                             </h3>
                             <p className="text-aguazul">
-                                Obtén informes claros y gráficos detallados que te permiten
-                                entender en qué gastas tu dinero.
+                                Obtén gráficas claras de ingresos y gastos que te permiten
+                                entender tus patrones de consumo de forma sencilla.
                             </p>
                         </div>
                         <div className="bg-neutral-100 p-6 rounded-xl">
@@ -157,8 +181,8 @@ const Welcome = () => {
                                 Organiza tus gastos
                             </h3>
                             <p className="text-aguazul">
-                                Clasifica automáticamente tus transacciones y crea categorías
-                                personalizadas para mantener todo en orden.
+                                Clasifica tus transacciones por categorías predefinidas
+                                para mantener un control ordenado de tus finanzas.
                             </p>
                         </div>
                         <div className="bg-neutral-100 p-6 rounded-xl">

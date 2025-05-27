@@ -176,12 +176,11 @@ const PresupuestosListPage = () => {
           <span className="ml-2">
             <InfoTooltip
               tooltipText="Los presupuestos te ayudan a controlar tus gastos por categoría"
-              detailTitle="Cómo funcionan los presupuestos"
+              detailTitle="Cómo funcionan"
               detailContent={[
                 {
-                  title: "Crea objetivos financieros",
-                  description:
-                    "Establece límites de gasto para diferentes categorías como transporte, alimentación o entretenimiento.",
+                  title: "Crea límites",
+                  description: "Establece límites de gasto por categoría (transporte, alimentación, etc.).",
                 },
                 {
                   title: "Define períodos",
@@ -190,13 +189,11 @@ const PresupuestosListPage = () => {
                 },
                 {
                   title: "Seguimiento automático",
-                  description:
-                    "Tus gastos se asignan automáticamente al presupuesto correspondiente para que puedas ver tu progreso.",
+                  description: "Tus gastos se asignan automáticamente según la categoría.",
                 },
                 {
-                  title: "Actualización automática",
-                  description:
-                    "Cuando rectifiques un gasto dentro de un presupuesto activo, el progreso se restablecerá automáticamente para reflejar los cambios.",
+                  title: "Rectificaciones",
+                  description: "Si rectificas un gasto, el progreso se actualiza automáticamente.",
                 },
               ]}
             />
@@ -219,11 +216,11 @@ const PresupuestosListPage = () => {
           <p className="text-2xl font-bold text-aguazul">
             {mostrarSaldos
               ? formatearMoneda(
-                  presupuestos?.reduce(
-                    (acc, p) => acc + parseFloat(p.limite),
-                    0
-                  ) || 0
-                )
+                presupuestos?.reduce(
+                  (acc, p) => acc + parseFloat(p.limite),
+                  0
+                ) || 0
+              )
               : "••••••"}
           </p>
         </div>
@@ -232,11 +229,11 @@ const PresupuestosListPage = () => {
           <p className="text-2xl font-bold text-aguazul">
             {mostrarSaldos
               ? formatearMoneda(
-                  presupuestos?.reduce(
-                    (acc, p) => acc + parseFloat(p.progreso),
-                    0
-                  ) || 0
-                )
+                presupuestos?.reduce(
+                  (acc, p) => acc + parseFloat(p.progreso),
+                  0
+                ) || 0
+              )
               : "••••••"}
           </p>
         </div>
@@ -247,22 +244,20 @@ const PresupuestosListPage = () => {
         <div className="rounded-lg inline-flex">
           <Boton
             tipo="texto"
-            className={`px-4 py-2 rounded-l-lg font-medium ${
-              tipoVistaActual === "activos"
+            className={`px-4 py-2 rounded-l-lg font-medium ${tipoVistaActual === "activos"
                 ? "bg-aguazul text-white"
                 : "text-neutral-600 hover:bg-neutral-100"
-            }`}
+              }`}
             onClick={() => setTipoVistaActual("activos")}
           >
             Presupuestos Activos ({presupuestosActivos.length})
           </Boton>
           <Boton
             tipo="texto"
-            className={`px-4 py-2 rounded-r-lg font-medium ${
-              tipoVistaActual === "expirados"
+            className={`px-4 py-2 rounded-r-lg font-medium ${tipoVistaActual === "expirados"
                 ? "bg-aguazul text-white"
                 : "text-neutral-600 hover:bg-neutral-100"
-            }`}
+              }`}
             onClick={() => setTipoVistaActual("expirados")}
           >
             Presupuestos Expirados ({presupuestosExpirados.length})
@@ -344,13 +339,12 @@ const PresupuestosListPage = () => {
                         </div>
 
                         <span
-                          className={`text-sm font-medium px-2 py-1 rounded-full ${
-                            estadoInfo.clase === "text-success"
+                          className={`text-sm font-medium px-2 py-1 rounded-full ${estadoInfo.clase === "text-success"
                               ? "bg-success-100 text-success"
                               : estadoInfo.clase === "text-warning"
-                              ? "bg-warning-100 text-warning"
-                              : "bg-error-100 text-error"
-                          }`}
+                                ? "bg-warning-100 text-warning"
+                                : "bg-error-100 text-error"
+                            }`}
                         >
                           {estadoInfo.estado}
                         </span>
@@ -376,8 +370,8 @@ const PresupuestosListPage = () => {
                             porcentajeProgreso < 70
                               ? "bg-success"
                               : porcentajeProgreso < 99
-                              ? "bg-warning"
-                              : "bg-error"
+                                ? "bg-warning"
+                                : "bg-error"
                           }
                         />
                       </div>
@@ -474,8 +468,8 @@ const PresupuestosListPage = () => {
                             porcentajeProgreso < 70
                               ? "bg-success opacity-60"
                               : porcentajeProgreso < 99
-                              ? "bg-warning opacity-60"
-                              : "bg-error opacity-60"
+                                ? "bg-warning opacity-60"
+                                : "bg-error opacity-60"
                           }
                         />
                       </div>

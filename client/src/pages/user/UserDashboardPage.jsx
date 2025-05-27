@@ -52,7 +52,7 @@ const UserDashboardPage = () => {
                     <div className="flex items-center">
                         <h2 className="text-lg font-semibold text-aguazul mr-2">Flujo de ingresos y gastos</h2>
                         <InfoTooltip
-                            tooltipText="Visualización comparativa entre tus ingresos (barras verdes) y gastos (barras rojas) durante el período seleccionado."
+                            tooltipText="Visualización comparativa entre tus ingresos y gastos durante el período seleccionado. Excluye transacciones rectificativas y rectificadas para mostrar solo el flujo financiero real."
                             position='top'
                             moreInfo={false}
                         />

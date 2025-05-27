@@ -112,7 +112,7 @@ export const AuthProvider = ({children}) => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
-            toast.success(data.message);
+            toast.success(data.message, {duration: 6000});
         } catch (err) {
             handleError(err);
         } finally {
