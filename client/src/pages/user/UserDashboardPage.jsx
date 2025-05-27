@@ -10,10 +10,10 @@ import { useSaldos } from "../../context/SaldosContext";
 import { formatearMoneda } from "../../utils/formatters";
 import { useCuentas } from "../../hooks/useCuentas";
 import { useNavigate } from "react-router-dom";
-import ResumenFinanciero from "../../components/ui/stats/ResumenFinanciero";
 import GraficaIngresosGastos from "../../components/ui/GraficaIngresosGastos";
 import InfoTooltip from "../../components/ui/InfoToolTip";
 import WelcomeHeader from "../../components/ui/WelcomeHeader";
+import AnalisisGastos from '../../components/ui/AnalisisGastos';
 
 const UserDashboardPage = () => {
     const { user } = useAuth();
@@ -21,32 +21,16 @@ const UserDashboardPage = () => {
     const { mostrarSaldos } = useSaldos();
     const {
         cuentas,
-        isLoading,
-        balanceTotal,
-        balancePositivo,
-        balanceNegativo
     } = useCuentas();
 
-    // Obtener las últimas 3 cuentas (para el acceso rápido)
     const cuentasRecientes = [...cuentas]
         .sort((a, b) => new Date(b.last_update) - new Date(a.last_update))
         .slice(0, 3);
 
     return (
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
-            {/* Cabecera con saludo */}
             <WelcomeHeader />
 
-            {/* Panel de resumen financiero */}
-            <ResumenFinanciero
-                balanceTotal={balanceTotal}
-                balancePositivo={balancePositivo}
-                balanceNegativo={balanceNegativo}
-                mostrarSaldos={mostrarSaldos}
-                className="mb-6"
-            />
-
-            {/* Sección de gráfica */}
             <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center">
@@ -63,7 +47,10 @@ const UserDashboardPage = () => {
                 </div>
             </div>
 
-            {/* Cuentas recientes */}
+            <div className="mb-6">
+                <AnalisisGastos />
+            </div>
+
             {cuentasRecientes.length > 0 && (
                 <div>
                     <div className="flex justify-between items-center mb-4">

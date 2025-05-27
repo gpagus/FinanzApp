@@ -27,6 +27,7 @@ const transaccionesRoutes = require('./routes/transaccionesRoutes');
 const cuentasRoutes = require('./routes/cuentasRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
 const presupuestosRoutes = require('./routes/presupuestosRoutes');
+const analisisRoutes = require('./routes/analisisRoutes');
 
 const app = express();
 app.use(cors(/*corsOptions*/));
@@ -40,6 +41,7 @@ app.use('/api/transacciones', transaccionesRoutes);
 app.use('/api/cuentas', cuentasRoutes);
 app.use('/api/categorias', categoriasRoutes);
 app.use('/api/presupuestos', presupuestosRoutes);
+app.use('/api/analisis', analisisRoutes);
 
 // 🔎 === SERVIDOR INICIADO ===
 const PORT = process.env.PORT || 3000; // ✅ Descomenta process.env.PORT
@@ -48,14 +50,7 @@ app.listen(PORT, '0.0.0.0', () => { // ✅ Añadir '0.0.0.0' para Railway
     console.log(`✅ Servidor escuchando en puerto ${PORT}`);
 });
 
-// ✅ Agregar logging de rutas para debug
-console.log('📋 Rutas registradas:');
-console.log('  GET /api/admin/usuarios');
-console.log('  GET /api/admin/stats');
-console.log('  GET /api/admin/activity');
-console.log('  GET /api/admin/health');
 
-// ✅ Ruta de prueba específica
 app.get('/api/test', (req, res) => {
     res.json({ 
         message: 'API funcionando correctamente',
@@ -68,7 +63,6 @@ app.get('/api/test', (req, res) => {
     });
 });
 
-// ✅ Manejo de rutas no encontradas
 app.use('*', (req, res) => {
     console.log(`❌ Ruta no encontrada: ${req.method} ${req.originalUrl}`);
     res.status(404).json({ 
