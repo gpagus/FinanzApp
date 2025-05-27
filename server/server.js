@@ -40,8 +40,44 @@ app.use('/api/categorias', categoriasRoutes);
 app.use('/api/presupuestos', presupuestosRoutes);
 
 // 🔎 === SERVIDOR INICIADO ===
-const PORT = /*process.env.PORT ||*/ 3000;
-console.log(`Servidor iniciado en puerto ${PORT}!`);
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en puerto ${PORT}`);
+const PORT = process.env.PORT || 3000; // ✅ Descomenta process.env.PORT
+console.log(`🚀 Servidor iniciando en puerto ${PORT}...`);
+app.listen(PORT, '0.0.0.0', () => { // ✅ Añadir '0.0.0.0' para Railway
+    console.log(`✅ Servidor escuchando en puerto ${PORT}`);
+});
+
+// ✅ Agregar logging de rutas para debug
+console.log('📋 Rutas registradas:');
+console.log('  GET /api/admin/usuarios');
+console.log('  GET /api/admin/stats');
+console.log('  GET /api/admin/activity');
+console.log('  GET /api/admin/health');
+
+// ✅ Ruta de prueba específica
+app.get('/api/test', (req, res) => {
+    res.json({ 
+        message: 'API funcionando correctamente',
+        timestamp: new Date().toISOString(),
+        routes: {
+            stats: '/api/admin/stats',
+            activity: '/api/admin/activity',
+            users: '/api/admin/usuarios'
+        }
+    });
+});
+
+// ✅ Manejo de rutas no encontradas
+app.use('*', (req, res) => {
+    console.log(`❌ Ruta no encontrada: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({ 
+        error: 'Ruta no encontrada',
+        path: req.originalUrl,
+        method: req.method,
+        availableRoutes: [
+            '/api/admin/usuarios',
+            '/api/admin/stats', 
+            '/api/admin/activity',
+            '/api/admin/health'
+        ]
+    });
 });
