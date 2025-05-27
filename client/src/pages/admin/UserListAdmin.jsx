@@ -53,18 +53,48 @@ function UserListAdmin() {
                     ref={gridRef}
                     data={data}
                     columns={[
-                        "Nombre",
-                        "Apellidos",
-                        "Correo electrónico",
-                        "Último acceso",
-                        "Estado",
+                        {
+                            name: "Nombre",
+                            width: "200px",
+                            formatter: (cell) => cell
+                        },
+                        {
+                            name: "Apellidos",
+                            width: "200px"
+                        },
+                        {
+                            name: "Correo electrónico",
+                            width: "250px"
+                        },
+                        {
+                            name: "Último acceso",
+                            width: "180px"
+                        },
+                        {
+                            name: "Estado",
+                            width: "100px"
+                        }
                     ]}
                     search={true}
-
                     pagination={{
                         limit: 10,
                     }}
                     sort={true}
+                    className={{
+                        table: "table-auto",
+                        td: "break-words max-w-0"
+                    }}
+                    style={{
+                        table: {
+                            'table-layout': 'fixed',
+                            width: '100%'
+                        },
+                        td: {
+                            'word-wrap': 'break-word',
+                            'overflow-wrap': 'break-word',
+                            'white-space': 'normal'
+                        }
+                    }}
                     language={{
                         search: {
                             placeholder: "🔍 Buscar...",

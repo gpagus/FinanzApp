@@ -22,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     if (!usuario.estado) {
-        return res.status(403).json({error: 'Cuenta desactivada. Contacte al administrador.'});
+        return res.status(403).json({error: 'Su cuenta se encuentra desactivada por el administrador.'});
     }
 
 

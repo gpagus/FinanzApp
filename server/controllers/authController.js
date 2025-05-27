@@ -106,11 +106,25 @@ const login = async (req, res) => {
         //  Verificar si ya existe perfil
         const {data: perfilExistente} = await supabase
             .from('usuarios')
-            .select('id')
+            .select('id, estado')
             .eq('id', userId)
             .single();
 
         if (perfilExistente) {
+            if (!perfilExistente.estado) {
+                // Registrar intento de login con cuenta desactivada
+                await logService.registrarOperacion({
+                    usuario_id: userId,
+                    accion: 'login_rechazado',
+                    descripcion: `Intento de inicio de sesión con cuenta desactivada.`,
+                    detalles: {
+                        fecha: new Date().toISOString(),
+                        motivo: 'cuenta_desactivada'
+                    }
+                });
+                
+                return res.status(403).json({error: 'Su cuenta se ecuentra desactivada por el administrador.'});
+            }
 
             // Actualizar último acceso
             const {error: updateError} = await supabase
@@ -126,7 +140,7 @@ const login = async (req, res) => {
             await logService.registrarOperacion({
                 usuario_id: userId,
                 accion: 'login',
-                descripcion: `Inicio de sesión de ${perfilExistente.nombre} ${perfilExistente.apellidos}`,
+                descripcion: `Inicio de sesión exitoso.`,
                 detalles: {
                     fecha: new Date().toISOString()
                 }
@@ -358,6 +372,16 @@ const cambiarContrasena = async (req, res) => {
             } else return res.status(400).json({error: updateError.message});
         }
 
+        // 📝 Log para cambio de contraseña
+        await logService.registrarOperacion({
+            usuario_id: userId,
+            accion: 'cambiar_contrasena',
+            descripcion: 'Contraseña actualizada correctamente',
+            detalles: {
+                fecha: new Date().toISOString()
+            }
+        });
+
         // Iniciar sesión de nuevo con la nueva contraseña para obtener nuevos tokens
         const {data: newSessionData, error: sessionError} = await supabase.auth.signInWithPassword({
             email: req.user.email,
@@ -390,7 +414,7 @@ const actualizarPerfil = async (req, res) => {
         // Obtener el perfil actual para recuperar el email y avatar actual
         const {data: perfilActual, error: perfilError} = await supabase
             .from('usuarios')
-            .select('email, avatar')
+            .select('email, avatar, nombre, apellidos')
             .eq('id', userId)
             .single();
 
@@ -399,6 +423,16 @@ const actualizarPerfil = async (req, res) => {
         }
 
         const datosActualizar = {nombre, apellidos};
+        const cambios = [];
+
+        // Detectar cambios en nombre y apellidos
+        if (nombre !== perfilActual.nombre) {
+            cambios.push(`nombre: "${perfilActual.nombre}" → "${nombre}"`);
+        }
+        if (apellidos !== perfilActual.apellidos) {
+            cambios.push(`apellidos: "${perfilActual.apellidos}" → "${apellidos}"`);
+        }
+
         if (deleteAvatar && perfilActual.avatar) {
             // Eliminar archivo del bucket
             const {error: deleteError} = await supabaseAdmin.storage
@@ -412,6 +446,7 @@ const actualizarPerfil = async (req, res) => {
 
             // Establecer el avatar como null en la base de datos
             datosActualizar.avatar = null;
+            cambios.push('avatar eliminado');
         } else if (avatarFile) {
             const extension = path.extname(avatarFile.originalname);
             const sanitizedFileName = `avatar${extension}`;
@@ -453,6 +488,7 @@ const actualizarPerfil = async (req, res) => {
 
             // Añadir la ruta del avatar a los datos a actualizar
             datosActualizar.avatar = `${avatarPath}?t=${Date.now()}`;
+            cambios.push(perfilActual.avatar ? 'avatar actualizado' : 'avatar añadido');
         }
 
         // Actualizar el perfil con los datos
@@ -463,6 +499,25 @@ const actualizarPerfil = async (req, res) => {
 
         if (error) {
             return res.status(400).json({error: error.message});
+        }
+
+        // 📝 Log para actualización de perfil (solo si hay cambios)
+        if (cambios.length > 0) {
+            await logService.registrarOperacion({
+                usuario_id: userId,
+                accion: 'actualizar_perfil',
+                descripcion: `Perfil actualizado: ${cambios.join(', ')}`,
+                detalles: {
+                    cambios: {
+                        nombre_anterior: perfilActual.nombre,
+                        apellidos_anterior: perfilActual.apellidos,
+                        nombre_nuevo: nombre,
+                        apellidos_nuevo: apellidos,
+                        avatar_cambio: deleteAvatar ? 'eliminado' : (avatarFile ? 'actualizado' : 'sin_cambio')
+                    },
+                    fecha: new Date().toISOString()
+                }
+            });
         }
 
         // Obtener el perfil actualizado para devolver al cliente

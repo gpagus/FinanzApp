@@ -60,7 +60,6 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
     };
 
     const handleRectificacion = () => {
-        // Crear transacción opuesta (rectificación)
         const nuevaTransaccion = {
             cuenta_id: transaccion.cuenta_id,
             monto: transaccion.monto,
@@ -70,24 +69,16 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
             transaccion_original_id: transaccion.id
         };
 
-        // Si es una transferencia, añadir info de cuenta destino
         if (transaccion.cuenta_destino_id) {
             nuevaTransaccion.cuenta_destino_id = transaccion.cuenta_destino_id;
         }
 
-        agregarTransaccion(nuevaTransaccion, {
-            onSuccess: () => {
-                queryClient.invalidateQueries(['todas-transacciones']);
-                toast.success('Movimiento rectificado');
-                setIsRectifyingMode(false);
-                onClose();
-            },
-            onError: (error) => {
-                toast.error(`Error al rectificar: ${error.message}`);
-                setIsRectifyingMode(false);
-            },
-            esRectificacion: true  // Indicamos que es una rectificación
-        });
+        // Llamar sin parámetros extra
+        agregarTransaccion(nuevaTransaccion);
+        
+        // Cerrar modal inmediatamente después de lanzar la mutación
+        setIsRectifyingMode(false);
+        onClose();
     };
 
     const cuentaActual = cuentas.find(cuenta => cuenta.id === transaccion.cuenta_id);

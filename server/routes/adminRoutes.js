@@ -10,6 +10,9 @@ const {
     obtenerPresupuestosPorEmail,
     cambiarEstadoUsuario,
     obtenerLogsPorEmail,
+    obtenerEstadisticas,
+    healthCheck,
+    obtenerActividadReciente,
 } = require('../controllers/adminController');
 
 // Middleware
@@ -22,5 +25,14 @@ router.get('/usuarios/:email/cuentas', adminMiddleware, obtenerCuentasPorEmail);
 router.get('/usuarios/:email/presupuestos', adminMiddleware, obtenerPresupuestosPorEmail);
 router.get('/usuarios/:email/logs', adminMiddleware, obtenerLogsPorEmail);
 router.patch('/usuarios/status/:id', adminMiddleware, cambiarEstadoUsuario);
+
+// 📊 estadísticas
+router.get('/stats', adminMiddleware, obtenerEstadisticas);
+
+// 📋 actividad reciente
+router.get('/activity', adminMiddleware, obtenerActividadReciente);
+
+// 🏥 health check
+router.get('/health', healthCheck);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const supabase = require('../config/supabaseClient');
+const logService = require('../services/logService');
 
 const obtenerTransacciones = async (req, res) => {
     const {
@@ -123,6 +124,16 @@ const crearTransaccion = async (req, res) => {
 
         if (!transaccionData.fecha) {
             transaccionData.fecha = new Date().toISOString();
+        } else {
+            // Si viene una fecha del usuario, asegurar que tenga timestamp completo
+            const fechaUsuario = new Date(transaccionData.fecha);
+            if (fechaUsuario.getSeconds() === 0 && fechaUsuario.getMilliseconds() === 0) {
+                // Si los segundos están a 0, añadir timestamp actual para orden cronológico
+                const ahora = new Date();
+                fechaUsuario.setSeconds(ahora.getSeconds());
+                fechaUsuario.setMilliseconds(ahora.getMilliseconds());
+                transaccionData.fecha = fechaUsuario.toISOString();
+            }
         }
 
         const nuevaTransaccion = {
@@ -155,6 +166,24 @@ const crearTransaccion = async (req, res) => {
             // Seguimos adelante aunque falle la actualización de last_update
         }
 
+        // Solo registrar transacciones "importantes" o "sospechosas"
+        const montoLimite = 1000;
+        const esTransaccionImportante = Math.abs(nuevaTransaccion.monto) >= montoLimite;
+        const tipo = nuevaTransaccion.tipo || 'gasto';
+
+        if (esTransaccionImportante) {
+            await logService.registrarOperacion({
+                usuario_id: userId,
+                accion: 'transaccion_importante',
+                descripcion: `Transacción ${tipo} de ${nuevaTransaccion.monto} en cuenta ${cuentaId}`,
+                detalles: {
+                    monto: nuevaTransaccion.monto,
+                    cuenta_id: cuentaId,
+                    fecha: new Date().toISOString()
+                }
+            });
+        }
+
         res.status(201).json(data[0]);
 
     } catch (err) {
@@ -170,46 +199,50 @@ const actualizarTransaccion = async (req, res) => {
     try {
         const cambios = req.body;
 
-        // Obtener la categoría actual de la transacción
-        const {data: transaccionActual, error: errorTransaccion} = await supabase
-            .from('transacciones')
-            .select('categoria_id')
-            .eq('id', transaccionId)
-            .single();
+        // Solo verificar restricciones de presupuesto si se está intentando cambiar la categoría
+        if (cambios.categoria_id) {
+            // Obtener la categoría actual de la transacción
+            const {data: transaccionActual, error: errorTransaccion} = await supabase
+                .from('transacciones')
+                .select('categoria_id')
+                .eq('id', transaccionId)
+                .single();
 
-        if (errorTransaccion) return res.status(500).json({error: errorTransaccion.message});
+            if (errorTransaccion) return res.status(500).json({error: errorTransaccion.message});
 
-        // Comprobar si la categoría actual está vinculada a un presupuesto
-        const {data: presupuestoActual, error: errorPresupuestoActual} = await supabase
-            .from('presupuestos')
-            .select('id')
-            .eq('categoria_id', transaccionActual.categoria_id)
-            .eq('estado', true)
-            .limit(1);
+            // Solo verificar si realmente se está cambiando la categoría
+            if (cambios.categoria_id !== transaccionActual.categoria_id) {
+                // Comprobar si la categoría actual está vinculada a un presupuesto
+                const {data: presupuestoActual, error: errorPresupuestoActual} = await supabase
+                    .from('presupuestos')
+                    .select('id')
+                    .eq('categoria_id', transaccionActual.categoria_id)
+                    .eq('estado', true)
+                    .limit(1);
 
-        if (errorPresupuestoActual) return res.status(500).json({error: errorPresupuestoActual.message});
+                if (errorPresupuestoActual) return res.status(500).json({error: errorPresupuestoActual.message});
 
-        if (presupuestoActual.length > 0) {
-            return res.status(403).json({
-                error: 'Esta transacción está vinculada a un presupuesto activo. No puedes cambiar la categoría.'
-            });
-        }
+                if (presupuestoActual.length > 0) {
+                    return res.status(403).json({
+                        error: 'Esta transacción está vinculada a un presupuesto activo. No puedes cambiar la categoría.'
+                    });
+                }
 
-        // Comprobar si la nueva categoría que intenta asignar está vinculada a un presupuesto
-        if (cambios.categoria_id && cambios.categoria_id !== transaccionActual.categoria_id) {
-            const {data: presupuestoNuevo, error: errorPresupuestoNuevo} = await supabase
-                .from('presupuestos')
-                .select('id')
-                .eq('categoria_id', cambios.categoria_id)
-                .eq('estado', true)
-                .limit(1);
+                // Comprobar si la nueva categoría está vinculada a un presupuesto
+                const {data: presupuestoNuevo, error: errorPresupuestoNuevo} = await supabase
+                    .from('presupuestos')
+                    .select('id')
+                    .eq('categoria_id', cambios.categoria_id)
+                    .eq('estado', true)
+                    .limit(1);
 
-            if (errorPresupuestoNuevo) return res.status(500).json({error: errorPresupuestoNuevo.message});
+                if (errorPresupuestoNuevo) return res.status(500).json({error: errorPresupuestoNuevo.message});
 
-            if (presupuestoNuevo.length > 0) {
-                return res.status(403).json({
-                    error: 'La nueva categoría seleccionada pertenece a un presupuesto activo. No puedes asignarla.'
-                });
+                if (presupuestoNuevo.length > 0) {
+                    return res.status(403).json({
+                        error: 'La nueva categoría seleccionada pertenece a un presupuesto activo. No puedes asignarla.'
+                    });
+                }
             }
         }
 

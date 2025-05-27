@@ -14,9 +14,16 @@ cron.schedule('0 0 * * *', async () => {
 
         if (error) throw error;
 
-        // Filtrar los que ya pasaron la fecha
         const hoy = new Date();
-        const expirados = presupuestos.filter(p => new Date(p.fecha_fin) < hoy);
+        hoy.setHours(0, 0, 0, 0);
+        
+        const expirados = presupuestos.filter(p => {
+            const fechaFin = new Date(p.fecha_fin);
+            fechaFin.setHours(0, 0, 0, 0); // Inicio del día de la fecha fin
+            
+            // Si hoy >= fecha_fin, entonces ya expiró
+            return hoy >= fechaFin;
+        });
 
         if (expirados.length > 0) {
             // Actualizar el estado a 'false'
@@ -29,6 +36,7 @@ cron.schedule('0 0 * * *', async () => {
             if (updateError) throw updateError;
 
             console.log(`✅ ${ids.length} presupuestos actualizados a estado "expirado".`);
+            console.log(`📋 IDs expirados: ${ids.join(', ')}`);
         } else {
             console.log('🟢 No hay presupuestos expirados.');
         }
@@ -36,3 +44,5 @@ cron.schedule('0 0 * * *', async () => {
         console.error('❌ Error al actualizar los presupuestos:', err.message);
     }
 });
+
+module.exports = cron;

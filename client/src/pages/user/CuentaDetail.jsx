@@ -226,10 +226,6 @@ const CuentaDetail = () => {
                                             description: "El archivo Excel incluye dos hojas: 'Resumen' con información general y 'Transacciones' con el detalle completo."
                                         },
                                         {
-                                            title: "Estados de transacciones",
-                                            description: "Las transacciones rectificadas aparecen en gris, las rectificativas en azul, y las normales en verde."
-                                        },
-                                        {
                                             title: "Filtros aplicados",
                                             description: "Solo se exportarán las transacciones que coincidan con los filtros actualmente aplicados."
                                         }
@@ -258,7 +254,7 @@ const CuentaDetail = () => {
                 <div className="p-6 border-b border-neutral-200">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
                         <div>
-                            <p className="text-neutral-600 mb-1">{tipoInfo.nombre}</p>
+                            <p className="text-neutral-600 mb-1">Saldo actual</p>
                             <div className="flex items-center">
                                 <h2
                                     className={`text-2xl font-bold ${cuenta.balance >= 0 ? 'text-success' : 'text-error'} mr-2`}
@@ -289,7 +285,7 @@ const CuentaDetail = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <div className="p-3 bg-neutral-100 rounded-lg">
                             <p className="text-neutral-600 text-sm mb-1">Tipo de cuenta</p>
-                            <p className="font-medium text-neutral-900">{cuenta.tipo}</p>
+                            <p className="font-medium text-neutral-900 capitalize">{cuenta.tipo}</p>
                         </div>
                         <div className="p-3 bg-neutral-100 rounded-lg">
                             <p className="text-neutral-600 text-sm mb-1">Titular</p>

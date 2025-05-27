@@ -66,6 +66,13 @@ export const exportarTransaccionesAExcel = async (data, usuario) => {
             // Estilizar columna de conceptos
             const conceptoCell = row.getCell('concepto');
             conceptoCell.font = { bold: true, color: { argb: 'FF094F51' } }; // aguazul
+            
+            // Alinear a la derecha si es el Balance Actual (valor monetario)
+            const valorCell = row.getCell('valor');
+            if (conceptoCell.value === 'Balance Actual') {
+                valorCell.alignment = { horizontal: 'right' };
+                valorCell.font = { bold: true, color: { argb: 'FF094F51' } };
+            }
         }
         
         // Agregar bordes solo a las celdas con contenido
@@ -167,6 +174,9 @@ export const exportarTransaccionesAExcel = async (data, usuario) => {
             const montoCell = row.getCell('montoFormateado');
             const estadoCell = row.getCell('estado');
             
+            // Alinear montos a la derecha
+            montoCell.alignment = { horizontal: 'right' };
+            
             // Estilizar según el estado (rectificada/rectificativa)
             if (estadoCell.value === 'Rectificada') {
                 estadoCell.fill = {
@@ -194,21 +204,21 @@ export const exportarTransaccionesAExcel = async (data, usuario) => {
             }
             
             if (tipoCell.value === 'Gasto') {
-                montoCell.font = { color: { argb: 'FFF44336' }, bold: true }; // --color-error
+                montoCell.font = { ...montoCell.font, color: { argb: 'FFF44336' }, bold: true }; // --color-error
                 tipoCell.fill = {
                     type: 'pattern',
                     pattern: 'solid',
                     fgColor: { argb: 'FFFFEBEE' } // --color-error-100
                 };
             } else if (tipoCell.value === 'Ingreso') {
-                montoCell.font = { color: { argb: 'FF03BD0A' }, bold: true }; // --color-success
+                montoCell.font = { ...montoCell.font, color: { argb: 'FF03BD0A' }, bold: true }; // --color-success
                 tipoCell.fill = {
                     type: 'pattern',
                     pattern: 'solid',
                     fgColor: { argb: 'FFE8F5E9' } // --color-success-100
                 };
             } else if (tipoCell.value === 'Transferencia') {
-                montoCell.font = { color: { argb: 'FF0E7B7F' }, bold: true }; // --color-aguazul-100
+                montoCell.font = { ...montoCell.font, color: { argb: 'FF0E7B7F' }, bold: true }; // --color-aguazul-100
                 tipoCell.fill = {
                     type: 'pattern',
                     pattern: 'solid',

@@ -41,12 +41,13 @@ export const formatearFechaHora = (fechaISO) =>
 
 
 export const obtenerFechaHoraActual = () => {
-    const fechaActual = new Date();
-    const anio = fechaActual.getFullYear();
-    const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
-    const dia = String(fechaActual.getDate()).padStart(2, '0');
-    const hora = String(fechaActual.getHours()).padStart(2, '0');
-    const minutos = String(fechaActual.getMinutes()).padStart(2, '0');
-
-    return `${anio}-${mes}-${dia}T${hora}:${minutos}`;
+    const ahora = new Date();
+    const year = ahora.getFullYear();
+    const month = String(ahora.getMonth() + 1).padStart(2, '0');
+    const day = String(ahora.getDate()).padStart(2, '0');
+    const hours = String(ahora.getHours()).padStart(2, '0');
+    const minutes = String(ahora.getMinutes()).padStart(2, '0');
+    
+    // Formato para datetime-local
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
