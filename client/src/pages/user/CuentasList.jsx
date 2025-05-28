@@ -89,8 +89,13 @@ const CuentasList = () => {
     return (
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
 
-            {/* Cabecera */}
-            <h1 className="text-2xl mb-6 font-bold text-aguazul">Mis Cuentas</h1>
+            {/* Encabezado mejorado */}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-aguazul mb-2">Mis Cuentas</h1>
+                <p className="text-neutral-600 text-sm">
+                    Gestiona tus cuentas y haz clic en cualquiera para ver movimientos y realizar operaciones
+                </p>
+            </div>
 
             {/* Panel de resumen financiero (ahora usando el componente) */}
             <ResumenFinanciero
@@ -104,7 +109,9 @@ const CuentasList = () => {
             {/* Lista de cuentas */}
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 flex justify-between items-center border-b border-neutral-200">
-                    <h2 className="text-lg font-semibold text-aguazul">Mis cuentas</h2>
+                    <div>
+                        <h2 className="text-lg font-semibold text-aguazul">Cuentas</h2>
+                    </div>
                     <Boton
                         tipo="primario"
                         onClick={() => setMostrarFormulario(true)}
@@ -127,7 +134,10 @@ const CuentasList = () => {
 
                 {cuentas.length === 0 ? (
                     <div className="p-8 text-center">
-                        <p className="text-neutral-600 mb-4">No tienes cuentas configuradas</p>
+                        <p className="text-neutral-600 mb-2">No tienes cuentas configuradas</p>
+                        <p className="text-neutral-500 text-sm mb-4">
+                            Añade tu primera cuenta para empezar a gestionar tus finanzas
+                        </p>
                         <Boton
                             tipo="texto"
                             onClick={() => setMostrarFormulario(true)}
@@ -146,16 +156,18 @@ const CuentasList = () => {
                                     <Boton
                                         tipo="icono"
                                         onClick={() => navigate(`/cuentas/${cuenta.id}`)}
-                                        className={`w-full text-left hover:bg-neutral-100 no-underline`}
+                                        className={`w-full text-left hover:bg-neutral-50 transition-colors duration-200 no-underline group`}
                                     >
                                         <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between">
                                             <div className="flex items-center mb-2 sm:mb-0">
                                                 <div
-                                                    className={`p-2 rounded-full mr-3 ${cuenta.balance >= 0 ? 'bg-success-100' : 'bg-error-100'}`}>
+                                                    className={`p-2 rounded-full mr-3 transition-colors duration-200 group-hover:scale-105 ${cuenta.balance >= 0 ? 'bg-success-100 group-hover:bg-success-200' : 'bg-error-100 group-hover:bg-error-200'}`}>
                                                     <IconoTipo/>
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-medium text-neutral-900">{cuenta.nombre}</h3>
+                                                    <h3 className="font-medium text-neutral-900 group-hover:text-aguazul transition-colors duration-200">
+                                                        {cuenta.nombre}
+                                                    </h3>
                                                     <p className="text-sm text-neutral-600">
                                                         {tipoInfo?.nombre} •
                                                         Actualizado: {formatearFecha(cuenta.last_update)}
@@ -167,6 +179,9 @@ const CuentasList = () => {
                                                 <p className={`font-semibold text-right ${cuenta.balance >= 0 ? 'text-success' : 'text-error'} mr-4`}>
                                                     {mostrarSaldos ? formatearMoneda(cuenta.balance) : '••••••'}
                                                 </p>
+                                                <div className="text-neutral-400 group-hover:text-aguazul transition-colors duration-200">
+                                                    →
+                                                </div>
                                             </div>
                                         </div>
                                     </Boton>

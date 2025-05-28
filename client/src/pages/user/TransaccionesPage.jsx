@@ -1,16 +1,12 @@
-import React, {useState, useMemo} from 'react';
-import {useInfiniteQuery, useQuery, useQueryClient} from '@tanstack/react-query';
-import {useSaldos} from "../../context/SaldosContext";
+import {useState} from 'react';
+import {useInfiniteQuery, useQueryClient} from '@tanstack/react-query';
 import {useCuentas} from '../../hooks/useCuentas';
 import TransaccionesList from "../../components/ui/TransaccionesList";
 import TransaccionesFilters from "../../components/ui/TransaccionesFilters";
 import Boton from "../../components/ui/Boton";
 import {getAllTransacciones} from '../../api/transaccionesApi';
-import ResumenMovimientos from "../../components/ui/stats/ResumenMovimientos";
-import {CATEGORIAS} from "../../utils/constants";
 
 const TransaccionesPage = () => {
-    const {mostrarSaldos} = useSaldos();
     const queryClient = useQueryClient();
 
     const {
@@ -26,13 +22,6 @@ const TransaccionesPage = () => {
         tipo: '',
         categoria_id: '',
         busqueda: ''
-    });
-
-    // Consulta separada para obtener TODAS las transacciones para estadísticas
-    const {data: todasTransacciones = [], isLoading: _isLoadingEstadisticas} = useQuery({
-        queryKey: ['estadisticas-transacciones'],
-        queryFn: () => getAllTransacciones({limit: 1000}).then(res => res.data),
-        staleTime: 5 * 60 * 1000, // 5 minutos
     });
 
     // Consulta infinita con React Query para el listado filtrado
@@ -68,47 +57,6 @@ const TransaccionesPage = () => {
     // Aplanar las páginas de transacciones para el listado
     const transacciones = data?.pages.flat() || [];
 
-// Calcular estadísticas de movimientos con TODAS las transacciones
-    // Calcular estadísticas de movimientos con TODAS las transacciones
-    const estadisticasMovimientos = useMemo(() => {
-        if (!todasTransacciones.length) {
-            return {
-                ingresosTotales: 0,
-                gastosTotales: 0,
-                ahorroNeto: 0,
-                totalTransacciones: 0
-            };
-        }
-
-        // Calcular ingresos y gastos totales
-        let ingresosTotales = 0;
-        let gastosTotales = 0;
-
-        todasTransacciones.forEach(transaccion => {
-            const monto = Math.abs(transaccion.monto);
-
-            if (transaccion.tipo === 'ingreso') {
-                ingresosTotales += monto;
-            } else if (transaccion.tipo === 'gasto') {
-                // Verificar si es un gasto real comprobando el tipo de la categoría
-                if (transaccion.categoria_id) {
-                    const categoriaEncontrada = CATEGORIAS.find(cat => cat.value === transaccion.categoria_id);
-                    if (categoriaEncontrada && categoriaEncontrada.tipo === 'gasto') {
-                        // Solo sumar a los gastos totales si es un gasto real
-                        gastosTotales += monto;
-                    }
-                }
-            }
-        });
-
-        return {
-            ingresosTotales,
-            gastosTotales,
-            ahorroNeto: ingresosTotales - gastosTotales,
-            totalTransacciones: todasTransacciones.length
-        };
-    }, [todasTransacciones]);
-
     // Actualizar filtros
     const handleFilterChange = (nuevosFiltros) => {
         setFiltros(prev => ({...prev, ...nuevosFiltros}));
@@ -129,7 +77,6 @@ const TransaccionesPage = () => {
     // Función para forzar actualización de datos
     const forceRefresh = () => {
         queryClient.invalidateQueries(['todas-transacciones']);
-        queryClient.invalidateQueries(['estadisticas-transacciones']);
     };
 
     if (error) {
@@ -151,18 +98,14 @@ const TransaccionesPage = () => {
 
     return (
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
-
-            <h1 className="text-2xl mb-6 font-bold text-aguazul">Mis movimientos</h1>
-
-           {/* Resumen de movimientos */}
-            <ResumenMovimientos
-                className="mb-6"
-                ingresosTotales={estadisticasMovimientos.ingresosTotales}
-                gastosTotales={estadisticasMovimientos.gastosTotales}
-                ahorroNeto={estadisticasMovimientos.ahorroNeto}
-                totalTransacciones={estadisticasMovimientos.totalTransacciones}
-                mostrarSaldos={mostrarSaldos}
-            />
+            
+            {/* Encabezado mejorado */}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-aguazul mb-2">Mis movimientos</h1>
+                <p className="text-neutral-600 text-sm">
+                    Consulta los movimientos de todas tus cuentas
+                </p>
+            </div>
 
             {/* Filtros */}
             <TransaccionesFilters

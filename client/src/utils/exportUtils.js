@@ -28,6 +28,7 @@ export const exportarTransaccionesAExcel = async (data, usuario) => {
         { concepto: 'Tipo de Cuenta', valor: cuenta.tipo },
         { concepto: 'Titular', valor: `${usuario.nombre} ${usuario.apellidos}` },
         { concepto: 'Balance Actual', valor: formatearMoneda(cuenta.balance) },
+        { concepto: 'Fecha de Creación', valor: formatearFecha(cuenta.created_at) },
         { concepto: 'Total Transacciones', valor: transacciones.length },
         { concepto: 'Fecha de Exportación', valor: formatearFecha(new Date()) }
     ];
@@ -116,12 +117,26 @@ export const exportarTransaccionesAExcel = async (data, usuario) => {
             estado = 'Rectificativa';
         }
         
+        // Helper para obtener el offset de zona horaria española
+        const obtenerOffsetEspañol = (fecha) => {
+            const año = fecha.getFullYear();
+            const inicioVerano = new Date(año, 2, 31);
+            inicioVerano.setDate(31 - inicioVerano.getDay());
+            const finVerano = new Date(año, 9, 31);
+            finVerano.setDate(31 - finVerano.getDay());
+            return (fecha >= inicioVerano && fecha < finVerano) ? 2 : 1;
+        };
+        
+        // Convertir fecha UTC a hora local española (mejorado)
+        const fechaUTC = new Date(transaccion.fecha);
+        const offset = obtenerOffsetEspañol(fechaUTC);
+        const fechaLocal = new Date(fechaUTC.getTime() + (offset * 60 * 60 * 1000));
+        
         return {
-            fecha: formatearFecha(transaccion.fecha),
-            hora: new Date(transaccion.fecha).toLocaleTimeString('es-ES', {
+            fecha: formatearFecha(fechaLocal),
+            hora: fechaLocal.toLocaleTimeString('es-ES', {
                 hour: '2-digit',
-                minute: '2-digit',
-                timeZone: 'UTC'
+                minute: '2-digit'
             }),
             descripcion: transaccion.descripcion,
             categoria: categoria?.label || 'Sin categoría',
@@ -129,7 +144,6 @@ export const exportarTransaccionesAExcel = async (data, usuario) => {
             estado: estado,
             monto: transaccion.monto,
             montoFormateado: formatearMoneda(transaccion.monto),
-            // balanceDespues: transaccion.balance_despues ? formatearMoneda(transaccion.balance_despues) : '',
             nota: transaccion.nota || '',
             cuentaDestino: transaccion.cuenta_destino?.nombre || '',
         };
@@ -169,7 +183,7 @@ export const exportarTransaccionesAExcel = async (data, usuario) => {
                 }
             }
             
-            // Estilizar según el tipo de transacción con colores de la app
+            // Estilizar según el tipo de transacción with colors de la app
             const tipoCell = row.getCell('tipo');
             const montoCell = row.getCell('montoFormateado');
             const estadoCell = row.getCell('estado');
@@ -177,7 +191,7 @@ export const exportarTransaccionesAExcel = async (data, usuario) => {
             // Alinear montos a la derecha
             montoCell.alignment = { horizontal: 'right' };
             
-            // Estilizar según el estado (rectificada/rectificativa)
+            // Estilizar según el estado (rectificadas/rectificativa)
             if (estadoCell.value === 'Rectificada') {
                 estadoCell.fill = {
                     type: 'pattern',

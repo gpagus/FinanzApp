@@ -145,6 +145,16 @@ const exportarTransaccionesCuenta = async (req, res) => {
             return res.status(404).json({ error: 'Cuenta no encontrada' });
         }
 
+        // Helper para obtener el offset de zona horaria española
+        const obtenerOffsetEspañol = (fecha) => {
+            const año = fecha.getFullYear();
+            const inicioVerano = new Date(año, 2, 31);
+            inicioVerano.setDate(31 - inicioVerano.getDay());
+            const finVerano = new Date(año, 9, 31);
+            finVerano.setDate(31 - finVerano.getDay());
+            return (fecha >= inicioVerano && fecha < finVerano) ? 2 : 1;
+        };
+
         // Construir query para obtener todas las transacciones
         let query = supabase
             .from('transacciones')
@@ -156,9 +166,22 @@ const exportarTransaccionesCuenta = async (req, res) => {
             .eq('cuenta_id', cuentaId)
             .order('fecha', { ascending: false });
 
-        // Aplicar filtros si existen
-        if (fecha_desde) query = query.gte('fecha', fecha_desde);
-        if (fecha_hasta) query = query.lte('fecha', fecha_hasta);
+        // Aplicar filtros de fecha
+        if (fecha_desde) {
+            const fechaDesdeLocal = new Date(fecha_desde + 'T00:00:00');
+            const offset = obtenerOffsetEspañol(fechaDesdeLocal);
+            fechaDesdeLocal.setHours(fechaDesdeLocal.getHours() - offset);
+            query = query.gte('fecha', fechaDesdeLocal.toISOString());
+        }
+        
+        if (fecha_hasta) {
+            const fechaHastaLocal = new Date(fecha_hasta + 'T23:59:59');
+            const offset = obtenerOffsetEspañol(fechaHastaLocal);
+            fechaHastaLocal.setHours(fechaHastaLocal.getHours() - offset);
+            query = query.lte('fecha', fechaHastaLocal.toISOString());
+        }
+
+        // Aplicar otros filtros
         if (categoria_id) query = query.eq('categoria_id', categoria_id);
         if (tipo) query = query.eq('tipo', tipo);
         if (busqueda) query = query.ilike('descripcion', `%${busqueda}%`);

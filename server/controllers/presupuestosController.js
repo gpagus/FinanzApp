@@ -1,5 +1,6 @@
 const supabase = require('../config/supabaseClient');
 const logService = require('../services/logService');
+const PresupuestosService = require('../services/presupuestosService'); // ✅ Nuevo import
 
 const obtenerPresupuestos = async (req, res) => {
     const userId = req.user.id;
@@ -183,9 +184,23 @@ const actualizarPresupuesto = async (req, res) => {
     }
 }
 
+// ✅ NUEVO ENDPOINT PARA RECALCULAR PRESUPUESTOS
+const recalcularPresupuestos = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        await PresupuestosService.recalcularTodosLosPresupuestos(userId);
+        res.json({ mensaje: 'Presupuestos recalculados correctamente' });
+    } catch (error) {
+        console.error('Error al recalcular presupuestos:', error);
+        res.status(500).json({ error: 'Error al recalcular presupuestos' });
+    }
+};
+
 module.exports = {
     obtenerPresupuestos,
     crearPresupuesto,
     eliminarPresupuesto,
     actualizarPresupuesto,
+    recalcularPresupuestos, // ✅ Exportar la nueva función
 };
