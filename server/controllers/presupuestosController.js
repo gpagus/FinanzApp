@@ -1,6 +1,6 @@
 const supabase = require('../config/supabaseClient');
 const logService = require('../services/logService');
-const PresupuestosService = require('../services/presupuestosService'); // ✅ Nuevo import
+const PresupuestosService = require('../services/presupuestosService'); 
 
 const obtenerPresupuestos = async (req, res) => {
     const userId = req.user.id;
@@ -21,6 +21,7 @@ const crearPresupuesto = async (req, res) => {
         const nuevoPresupuesto = {
             ...req.body,
             user_id: userId,
+            fecha_inicio: new Date().toISOString(),
         };
 
         // Comprobar si el presupuesto con la categoría ya existe
@@ -184,7 +185,6 @@ const actualizarPresupuesto = async (req, res) => {
     }
 }
 
-// ✅ NUEVO ENDPOINT PARA RECALCULAR PRESUPUESTOS
 const recalcularPresupuestos = async (req, res) => {
     const userId = req.user.id;
 
@@ -202,5 +202,5 @@ module.exports = {
     crearPresupuesto,
     eliminarPresupuesto,
     actualizarPresupuesto,
-    recalcularPresupuestos, // ✅ Exportar la nueva función
+    recalcularPresupuestos,
 };

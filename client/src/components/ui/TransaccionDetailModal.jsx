@@ -1,25 +1,25 @@
-import {useState} from 'react';
-import {X, EllipsisVertical} from 'lucide-react';
-import {toast} from "react-hot-toast";
+import { useState } from 'react';
+import { X, EllipsisVertical } from 'lucide-react';
+import { toast } from "react-hot-toast";
 import useTransacciones from "../../hooks/useTransacciones";
 import Boton from '../ui/Boton';
-import {formatearMoneda, formatearFecha} from "../../utils/formatters";
-import {CATEGORIAS} from "../../utils/constants";
+import { formatearMoneda, formatearFecha, formatearHoraLocal } from "../../utils/formatters";
+import { CATEGORIAS } from "../../utils/constants";
 import DropdownMenu from "./DropdownMenu";
 import EditarTransaccionForm from "./forms/EditarTransaccionForm";
 import ConfirmModal from "./ConfirmModal";
-import {useQueryClient} from "@tanstack/react-query";
-import {useCuentas} from "../../hooks/useCuentas";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCuentas } from "../../hooks/useCuentas";
 
-const TransaccionDetailModal = ({transaccion, onClose}) => {
+const TransaccionDetailModal = ({ transaccion, onClose }) => {
     const queryClient = useQueryClient();
 
-    const {cuentas} = useCuentas()
+    const { cuentas } = useCuentas()
 
     const {
         agregarTransaccion,
         isAddingTransaccion
-    } = useTransacciones({cuentaId: transaccion?.cuenta_id});
+    } = useTransacciones({ cuentaId: transaccion?.cuenta_id });
 
     const [isEditingMode, setIsEditingMode] = useState(false);
     const [isRectifyingMode, setIsRectifyingMode] = useState(false);
@@ -27,19 +27,16 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
     if (!transaccion) return null;
 
     const categoria = CATEGORIAS.find(cat => cat.value === transaccion.categoria_id);
+
     const fechaFormateada = new Date(transaccion.fecha).toLocaleDateString('es-ES', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        timeZone: 'UTC'
+        timeZone: 'Europe/Madrid'
     });
 
-    const horaFormateada = new Date(transaccion.fecha).toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'UTC'
-    });
+    const horaFormateada = formatearHoraLocal(transaccion.fecha);
 
     const acciones = [
         {
@@ -75,7 +72,7 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
 
         // Llamar sin parámetros extra
         agregarTransaccion(nuevaTransaccion);
-        
+
         // Cerrar modal inmediatamente después de lanzar la mutación
         setIsRectifyingMode(false);
         onClose();
@@ -99,14 +96,14 @@ const TransaccionDetailModal = ({transaccion, onClose}) => {
                                     transaccion.categoria_id !== 5 &&
                                     transaccion.categoria_id !== 6 && (
                                         <DropdownMenu
-                                            triggerIcon={<EllipsisVertical className="text-neutral-400"/>}
+                                            triggerIcon={<EllipsisVertical className="text-neutral-400" />}
                                             actions={acciones}
                                         />
                                     )}
                             </div>
 
                             <Boton tipo="icono" onClick={onClose} aria-label="Cerrar">
-                                <X size={20}/>
+                                <X size={20} />
                             </Boton>
                         </div>
 
