@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useSaldos } from "../../context/SaldosContext";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,16 @@ const UserDashboardPage = () => {
     const navigate = useNavigate();
     const { mostrarSaldos } = useSaldos();
     const [openNewOperation, setOpenNewOperation] = useState(false);
+    
+    // Ref para el componente de análisis
+    const analisisRef = useRef();
+
+    const handleOperationSuccess = () => {
+        // Refrescar el análisis cuando se complete una operación
+        if (analisisRef.current) {
+            analisisRef.current.refetch();
+        }
+    };
 
     return (
         <div className="container mx-auto p-6 min-h-[calc(100vh-4rem-2.5rem)]">
@@ -59,13 +69,14 @@ const UserDashboardPage = () => {
             </div>
 
             <div className="mb-6">
-                <AnalisisGastos />
+                <AnalisisGastos ref={analisisRef} />
             </div>
 
-            {/* Modal para nueva operación */}
+            {/* Modal para nueva operación con callback */}
             <NewOperationModal
                 open={openNewOperation}
                 onOpenChange={setOpenNewOperation}
+                onOperationSuccess={handleOperationSuccess}  // Nuevo prop
                 cuentaId={null}
             />
         </div>

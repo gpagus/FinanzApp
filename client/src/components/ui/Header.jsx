@@ -1,15 +1,15 @@
 import React from "react";
-import {useAuth} from "../../context/AuthContext";
-import {useSaldos} from "../../context/SaldosContext";
-import {useNavigate} from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useSaldos } from "../../context/SaldosContext";
+import { useNavigate } from "react-router-dom";
 import Boton from "./Boton";
-import {CircleDollarSign, UserRound, Eye, EyeClosed, DoorOpen, Settings} from "lucide-react";
+import { UserRound, Eye, EyeClosed, DoorOpen, Settings } from "lucide-react";
 
 const Header = () => {
-    const {user, logout} = useAuth();
+    const { user, logout } = useAuth();
     const baseUrl = import.meta.env.VITE_SUPABASE_AVATAR_BASE_URL;
     const avatarFullUrl = user ? `${baseUrl}${user.avatar}` : null;
-    const {toggleMostrarSaldos, mostrarSaldos} = useSaldos();
+    const { toggleMostrarSaldos, mostrarSaldos } = useSaldos();
     const navigate = useNavigate();
 
     return (
@@ -27,7 +27,7 @@ const Header = () => {
                     ) : (
                         <div
                             className="h-10 w-10 rounded-full border-2 border-neutral-300 flex items-center justify-center bg-neutral-100">
-                            <UserRound className="text-neutral-600"/>
+                            <UserRound className="text-neutral-600" />
                         </div>
                     )}
                     <span className="font-bold text-lg text-aguazul ml-2 truncate min-w-0 max-w-[120px] sm:max-w-[200px]" title={user?.nombre}>
@@ -46,12 +46,17 @@ const Header = () => {
                         )}
                     </span>
                 </div>
+
                 {/* Center section - Logo */}
                 <div className="hidden lg:flex items-center justify-center">
-                    <div className="flex items-center bg-white rounded-full p-1">
-                        <CircleDollarSign className="text-dollar-500"/>
+                    <div className="flex items-center bg-white rounded-full">
+                        <img
+                            src="/logo.webp"
+                            alt="FinanzApp Logo"
+                            className="h-11 w-11 border-neutral-300 object-contain contrast-125 saturate-150 brightness-110"
+                        />
                     </div>
-                    <span className="font-bold text-xl text-aguazul ml-2">
+                    <span className="font-bold text-xl text-aguazul">
                         FinanzApp
                     </span>
                 </div>
@@ -61,20 +66,20 @@ const Header = () => {
 
                     <Boton tipo="icono" aria-label="show numbers" onClick={toggleMostrarSaldos}>
                         {mostrarSaldos ? (
-                            <Eye className="text-neutral-600"/>
+                            <Eye className="text-neutral-600" />
                         ) : (
-                            <EyeClosed className="text-neutral-600"/>
+                            <EyeClosed className="text-neutral-600" />
                         )}
                     </Boton>
 
                     <Boton tipo="icono" aria-label="Settings" onClick={() => {
                         navigate("/ajustes");
                     }}>
-                        <Settings className="text-neutral-600"/>
+                        <Settings className="text-neutral-600" />
                     </Boton>
 
                     <Boton tipo="icono" aria-label="Logout" onClick={logout}>
-                        <DoorOpen className="text-neutral-600"/>
+                        <DoorOpen className="text-neutral-600" />
                     </Boton>
                 </div>
             </div>

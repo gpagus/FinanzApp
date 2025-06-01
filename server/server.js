@@ -17,7 +17,7 @@ const corsOptions = {
 
 // 🔎 === IMPORTACIÓN DEL CRON ===
 require('./crons/updatePresupuestos');
-require('./crons/cleanupJob');
+require('./crons/limpiezaUsuariosPendientes');
 require('./crons/limpiezaLogs');
 
 // 🔎 === IMPORTACIÓN DE RUTAS ===

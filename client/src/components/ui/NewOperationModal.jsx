@@ -8,7 +8,7 @@ import TransferenciaForm from "./forms/TransferenciaForm";
 import Boton from './Boton';
 import {useCuentas} from '../../hooks/useCuentas';
 
-export default function NewOperationModal({open, onOpenChange, cuentaId = null}) {
+export default function NewOperationModal({open, onOpenChange, cuentaId = null, onOperationSuccess}) {
     const [step, setStep] = useState(cuentaId ? 'select' : 'selectAccount');
     const [selectedAccountId, setSelectedAccountId] = useState(cuentaId);
     const {cuentas} = useCuentas();
@@ -22,6 +22,14 @@ export default function NewOperationModal({open, onOpenChange, cuentaId = null})
         setStep(cuentaId ? 'select' : 'selectAccount');
         setSelectedAccountId(cuentaId);
         onOpenChange(false);
+    };
+
+    const handleOperationSuccess = () => {
+        close();
+        // Ejecutar callback de éxito si existe
+        if (onOperationSuccess) {
+            onOperationSuccess();
+        }
     };
 
     const handleSelectAccount = (accountId) => {
@@ -151,18 +159,18 @@ export default function NewOperationModal({open, onOpenChange, cuentaId = null})
                         </div>
                     )}
 
-                    {/* Formularios */}
+                    {/* Formularios con el nuevo callback */}
                     {step === 'ingreso' && (
                         <IngresoForm 
                             cuentaId={selectedAccountId} 
-                            onSuccess={close} 
+                            onSuccess={handleOperationSuccess}  // Cambio aquí
                             onBack={() => setStep('select')}
                         />
                     )}
                     {step === 'gasto' && (
                         <GastoForm 
                             cuentaId={selectedAccountId} 
-                            onSuccess={close} 
+                            onSuccess={handleOperationSuccess}  // Cambio aquí
                             onBack={() => setStep('select')}
                         />
                     )}
@@ -170,7 +178,7 @@ export default function NewOperationModal({open, onOpenChange, cuentaId = null})
                         <TransferenciaForm 
                             cuentaId={selectedAccountId} 
                             cuentasDisponibles={cuentasDisponiblesParaTransferir}
-                            onSuccess={close} 
+                            onSuccess={handleOperationSuccess}  // Cambio aquí
                             onBack={() => setStep('select')}
                         />
                     )}

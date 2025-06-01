@@ -3,7 +3,8 @@ const supabase = require('../config/supabaseClient');
 
 // Cron job que se ejecuta cada día a las 00:00
 cron.schedule('0 0 * * *', async () => {
-    console.log('⏳ Comprobando presupuestos expirados...');
+    const timestamp = new Date().toISOString();
+    console.log(`⏳ [${timestamp}] Comprobando presupuestos expirados...`);
 
     try {
         // Consulta para obtener presupuestos que ya pasaron de fecha
@@ -14,16 +15,18 @@ cron.schedule('0 0 * * *', async () => {
 
         if (error) throw error;
 
+        console.log(`📋 Presupuestos activos encontrados: ${presupuestos?.length || 0}`);
+
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
         
-        const expirados = presupuestos.filter(p => {
+        const expirados = presupuestos?.filter(p => {
             const fechaFin = new Date(p.fecha_fin);
             fechaFin.setHours(0, 0, 0, 0); // Inicio del día de la fecha fin
             
             // Si hoy >= fecha_fin, entonces ya expiró
             return hoy >= fechaFin;
-        });
+        }) || [];
 
         if (expirados.length > 0) {
             // Actualizar el estado a 'false'
@@ -41,8 +44,10 @@ cron.schedule('0 0 * * *', async () => {
             console.log('🟢 No hay presupuestos expirados.');
         }
     } catch (err) {
-        console.error('❌ Error al actualizar los presupuestos:', err.message);
+        console.error(`❌ [${timestamp}] Error al actualizar los presupuestos:`, err.message);
     }
 });
+
+console.log('🧹 Cron de actualización de presupuestos iniciado (diariamente a las 00:00)');
 
 module.exports = cron;

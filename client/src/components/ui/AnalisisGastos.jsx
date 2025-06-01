@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { getAnalisisGastos } from "../../api/analisisApi";
 import {
   PieChart,
@@ -13,28 +13,34 @@ import InfoTooltip from "./InfoToolTip";
 import ProgressBar from "./ProgressBar";
 import { useSaldos } from "../../context/SaldosContext";
 
-const AnalisisGastos = () => {
+const AnalisisGastos = forwardRef((props, ref) => {
   const [analisis, setAnalisis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const { mostrarSaldos } = useSaldos();
 
-  useEffect(() => {
-    const cargarAnalisis = async () => {
-      try {
-        setError(null);
-        const data = await getAnalisisGastos();
-        setAnalisis(data);
-      } catch (error) {
-        console.error("Error cargando análisis:", error);
-        setError("No se pudo cargar el análisis");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const cargarAnalisis = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getAnalisisGastos();
+      setAnalisis(data);
+    } catch (error) {
+      console.error("Error cargando análisis:", error);
+      setError("No se pudo cargar el análisis");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     cargarAnalisis();
   }, []);
+
+  // Exponer la función de refetch al componente padre
+  useImperativeHandle(ref, () => ({
+    refetch: cargarAnalisis,
+  }));
 
   if (isLoading) {
     return (
@@ -86,19 +92,21 @@ const AnalisisGastos = () => {
           <div className="bg-white rounded-lg shadow-sm p-4">
             <h3 className="text-sm text-neutral-600 mb-1">Total gastado</h3>
             <p className="text-2xl font-bold text-error">
-              {mostrarSaldos ? `${analisis.totalGastos}€` : '••••••'}
+              {mostrarSaldos ? `${analisis.totalGastos}€` : "••••••"}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4">
-            <h3 className="text-sm text-neutral-600 mb-1">Gasto promedio diario</h3>
+            <h3 className="text-sm text-neutral-600 mb-1">
+              Gasto promedio diario
+            </h3>
             <p className="text-2xl font-bold text-aguazul">
-              {mostrarSaldos ? `${analisis.promedioGastosDiarios}€` : '••••••'}
+              {mostrarSaldos ? `${analisis.promedioGastosDiarios}€` : "••••••"}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4">
             <h3 className="text-sm text-neutral-600 mb-1">Número de gastos</h3>
             <p className="text-2xl font-bold text-aguazul">
-              {mostrarSaldos ? analisis.numeroTransacciones : '••••••'}
+              {mostrarSaldos ? analisis.numeroTransacciones : "••••••"}
             </p>
           </div>
         </div>
@@ -175,7 +183,7 @@ const AnalisisGastos = () => {
                       </div>
                       <div className="ml-4 text-right">
                         <span className="text-sm font-semibold text-neutral-900">
-                          {mostrarSaldos ? `${monto.toFixed(2)}€` : '••••••'}
+                          {mostrarSaldos ? `${monto.toFixed(2)}€` : "••••••"}
                         </span>
                       </div>
                     </div>
@@ -192,6 +200,8 @@ const AnalisisGastos = () => {
       </div>
     </div>
   );
-};
+});
+
+AnalisisGastos.displayName = "AnalisisGastos";
 
 export default AnalisisGastos;
