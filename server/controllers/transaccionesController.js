@@ -253,48 +253,61 @@ const actualizarTransaccion = async (req, res) => {
   try {
     const cambios = req.body;
 
-    // ✅ VERIFICAR RESTRICCIONES DE PRESUPUESTO MEJORADAS
+    // Solo verificar restricciones de presupuesto si se está intentando cambiar la categoría
     if (cambios.categoria_id) {
-      // Obtener la transacción actual completa
-      const { data: transaccionActual, error: errorTransaccion } =
-        await supabase
-          .from("transacciones")
-          .select("categoria_id, fecha, tipo")
-          .eq("id", transaccionId)
-          .eq("user_id", userId)
-          .single();
+      // Obtener la categoría actual de la transacción
+      const { data: transaccionActual, error: errorTransaccion } = await supabase
+        .from("transacciones")
+        .select("categoria_id")
+        .eq("id", transaccionId)
+        .eq("user_id", userId)
+        .single();
 
       if (errorTransaccion)
         return res.status(500).json({ error: errorTransaccion.message });
+      if (!transaccionActual)
+        return res.status(404).json({ error: "Transacción no encontrada" });
 
-      // Solo verificar si realmente se está cambiando la categoría
-      if (cambios.categoria_id !== transaccionActual.categoria_id) {
-        // Verificar si la transacción actual está vinculada a un presupuesto
-        const estaVinculada =
-          await PresupuestosService.transaccionVinculadaAPresupuesto(
-            transaccionId,
-            userId
-          );
+      // Verificar si la categoría actual está vinculada a un presupuesto activo
+      const { data: presupuestoActual, error: errorPresupuestoActual } =
+        await supabase
+          .from("presupuestos")
+          .select("id")
+          .eq("categoria_id", transaccionActual.categoria_id)
+          .eq("user_id", userId)
+          .eq("estado", true)
+          .limit(1);
 
-        if (estaVinculada) {
-          return res.status(403).json({
-            error:
-              "Esta transacción está vinculada a un presupuesto activo. No puedes cambiar la categoría.",
-          });
-        }
+      if (errorPresupuestoActual)
+        return res.status(500).json({ error: errorPresupuestoActual.message });
+
+      if (presupuestoActual.length > 0) {
+        return res.status(403).json({
+          error:
+            "Esta transacción está vinculada a un presupuesto activo. No puedes cambiar la categoría.",
+        });
+      }
+
+      // Verificar si la nueva categoría está vinculada a un presupuesto activo
+      const { data: presupuestoNuevo, error: errorPresupuestoNuevo } =
+        await supabase
+          .from("presupuestos")
+          .select("id")
+          .eq("categoria_id", cambios.categoria_id)
+          .eq("user_id", userId)
+          .eq("estado", true)
+          .limit(1);
+
+      if (errorPresupuestoNuevo)
+        return res.status(500).json({ error: errorPresupuestoNuevo.message });
+
+      if (presupuestoNuevo.length > 0) {
+        return res.status(403).json({
+          error:
+            "La nueva categoría seleccionada pertenece a un presupuesto activo. No puedes asignarla.",
+        });
       }
     }
-
-    // Obtener datos antes de actualizar para recalcular presupuestos
-    const { data: transaccionAnterior, error: errorAnterior } = await supabase
-      .from("transacciones")
-      .select("*")
-      .eq("id", transaccionId)
-      .eq("user_id", userId)
-      .single();
-
-    if (errorAnterior)
-      return res.status(500).json({ error: errorAnterior.message });
 
     // Si no hay conflictos, procedemos a actualizar
     const { data, error } = await supabase
@@ -309,24 +322,6 @@ const actualizarTransaccion = async (req, res) => {
       return res
         .status(404)
         .json({ error: "Transacción no encontrada o no autorizada" });
-
-    // ✅ ACTUALIZAR PRESUPUESTOS DESPUÉS DE LA MODIFICACIÓN
-    const transaccionActualizada = data[0];
-
-    // Recalcular presupuestos de la categoría anterior (si cambió)
-    if (
-      cambios.categoria_id &&
-      cambios.categoria_id !== transaccionAnterior.categoria_id
-    ) {
-      await PresupuestosService.actualizarProgresoPresupuestos(
-        transaccionAnterior
-      );
-    }
-
-    // Recalcular presupuestos de la nueva categoría
-    await PresupuestosService.actualizarProgresoPresupuestos(
-      transaccionActualizada
-    );
 
     res.json(data[0]);
   } catch (err) {

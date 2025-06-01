@@ -65,7 +65,7 @@ const obtenerAnalisisGastos = async (req, res) => {
             });
         }
 
-        if (transacciones?.length > 20) {
+        if (transacciones?.length > 15) {
             insights.push({
                 tipo: 'info',
                 mensaje: `Has registrado ${transacciones.length} gastos este mes. ¡Muy activo!`,

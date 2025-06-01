@@ -23,19 +23,34 @@ import {z} from "zod";
                 categoria_id: transaccion?.categoria_id,
                 descripcion: transaccion?.descripcion
             },
-            // En EditarTransaccionForm.jsx
             onSubmit: (data) => {
-                actualizarTransaccion(
-                    {
-                        id: transaccion.id,
-                        datos: {
-                            ...data,
-                            monto: transaccion.monto // Incluir el monto original
+                // Crear objeto solo con los campos que han cambiado
+                const cambios = {};
+                
+                // Solo incluir categoria_id si ha cambiado
+                if (data.categoria_id !== transaccion.categoria_id) {
+                    cambios.categoria_id = data.categoria_id;
+                }
+                
+                // Solo incluir descripcion si ha cambiado
+                if (data.descripcion !== transaccion.descripcion) {
+                    cambios.descripcion = data.descripcion;
+                }
+                
+                // Solo enviar si hay cambios
+                if (Object.keys(cambios).length > 0) {
+                    actualizarTransaccion(
+                        {
+                            id: transaccion.id,
+                            datos: cambios,
+                            montoAnterior: transaccion.monto
                         },
-                        montoAnterior: transaccion.monto
-                    },
-                    { onSuccess }
-                );
+                        { onSuccess }
+                    );
+                } else {
+                    // Si no hay cambios, simplemente cerrar
+                    onSuccess();
+                }
             }
         });
 
