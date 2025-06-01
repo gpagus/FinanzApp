@@ -18,7 +18,6 @@ export default function Redireccionador() {
         } else if (type === "recovery") {
             navigate("/restablecer-contrasena" + window.location.hash);
         } else if (user) {
-            console.log("Rol del usuario:", user.rol); // Para depuración
             if (user.rol === "admin") {
                 navigate("/admin");
             } else {
