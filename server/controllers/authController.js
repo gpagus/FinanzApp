@@ -258,6 +258,32 @@ const recuperarContrasena = async (req, res) => {
     try {
         const {email} = req.body;
 
+        // Verificar si el correo está pendiente de confirmación
+        const {data: usuarioPendiente} = await supabaseAdmin
+            .from('usuarios_pendientes')
+            .select('email')
+            .eq('email', email)
+            .single();
+
+        if (usuarioPendiente) {
+            return res.status(400).json({
+                error: "Primero debes confirmar tu registro. Revisa tu correo electrónico y confirma tu cuenta antes de poder recuperar la contraseña."
+            });
+        }
+
+        // Verificar si el usuario existe en la tabla de usuarios confirmados
+        const {data: usuarioExistente} = await supabaseAdmin
+            .from('usuarios')
+            .select('email')
+            .eq('email', email)
+            .single();
+
+        if (!usuarioExistente) {
+            return res.status(404).json({
+                error: "No existe ninguna cuenta asociada a este correo electrónico."
+            });
+        }
+
         // Tratamos de enviar el email de recuperación
         const {error} = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${process.env.FRONTEND_URL}/restablecer-contrasena`,
